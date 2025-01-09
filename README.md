@@ -16,3 +16,7 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 * **复制和粘贴图片宽高**：统一图片宽高
 * **图片自动对齐**：可以自动对齐图片，可以设置每列多少张图片、列间距多少、行间距多少（默认为空，为列间距大小）、图片宽高
 ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250110010006-2025-01-10.png)
+
+## 安装方法
+
+下载Release的Achuan.PPT.zip，解压，双击setup.exe安装即可
