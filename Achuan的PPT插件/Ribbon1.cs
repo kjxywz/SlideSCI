@@ -29,24 +29,26 @@ namespace Achuan的PPT插件
             {
                 foreach (PowerPoint.Shape shape in sel.ShapeRange)
                 {
-                        // MessageBox.Show($"Shape Type: {shape.Type}"); // Debug message
+                    // Create textbox below the image
+                    PowerPoint.Shape textbox = app.ActiveWindow.View.Slide.Shapes.AddTextbox(
+                        Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                        shape.Left,
+                        shape.Top + shape.Height,
+                        shape.Width,
+                        20);
 
-                        // Create textbox below the image
-                        PowerPoint.Shape textbox = app.ActiveWindow.View.Slide.Shapes.AddTextbox(
-                            Office.MsoTextOrientation.msoTextOrientationHorizontal,
-                            shape.Left,
-                            shape.Top + shape.Height,
-                            shape.Width,
-                            20);
+                    // Set text properties
+                    textbox.TextFrame.TextRange.Font.Name = "微软雅黑";
+                    textbox.TextFrame.TextRange.Font.Size = 14;
+                    textbox.TextFrame.TextRange.Text = "图片标题";
+                    
+                    // Center align the text
+                    textbox.TextFrame.TextRange.ParagraphFormat.Alignment = 
+                        PowerPoint.PpParagraphAlignment.ppAlignCenter;
 
-                        // Set text properties
-                        textbox.TextFrame.TextRange.Font.Name = "微软雅黑";
-                        textbox.TextFrame.TextRange.Font.Size = 14;
-                        textbox.TextFrame.TextRange.Text = "图片标题";
-                        
-                        // Center align the text
-                        textbox.TextFrame.TextRange.ParagraphFormat.Alignment = 
-                            PowerPoint.PpParagraphAlignment.ppAlignCenter;
+                    // Group the image and the title
+                    PowerPoint.ShapeRange shapeRange = app.ActiveWindow.Selection.SlideRange.Shapes.Range(new string[] { shape.Name, textbox.Name });
+                    shapeRange.Group();
                 }
             }
         }
