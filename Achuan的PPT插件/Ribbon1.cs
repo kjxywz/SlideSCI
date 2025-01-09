@@ -55,6 +55,12 @@ namespace Achuan的PPT插件
 
         private void pasteImgWidthHeight_Click(object sender, RibbonControlEventArgs e)
         {
+            if (copiedWidth <= 0 || copiedHeight <= 0)
+            {
+                MessageBox.Show("Invalid copied dimensions. Please copy the dimensions again.");
+                return;
+            }
+
             PowerPoint.Selection sel = app.ActiveWindow.Selection;
             if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
             {
@@ -83,6 +89,80 @@ namespace Achuan的PPT插件
             else
             {
                 MessageBox.Show("Please select an image to copy dimensions.");
+            }
+        }
+
+        private void copyImgWidth_Click(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                PowerPoint.Shape shape = sel.ShapeRange[1];
+                copiedWidth = shape.Width;
+                // MessageBox.Show("Image width copied!");
+            }
+            else
+            {
+                MessageBox.Show("Please select an image to copy width.");
+            }
+        }
+
+        private void pasteImgWidth_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (copiedWidth <= 0)
+            {
+                MessageBox.Show("Invalid copied width. Please copy the width again.");
+                return;
+            }
+
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    shape.Width = copiedWidth;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select an image to paste width.");
+            }
+        }
+
+        private void copyImgHeight_Click(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                PowerPoint.Shape shape = sel.ShapeRange[1];
+                copiedHeight = shape.Height;
+                // MessageBox.Show("Image height copied!");
+            }
+            else
+            {
+                MessageBox.Show("Please select an image to copy height.");
+            }
+        }
+
+        private void pasteImgHeight_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (copiedHeight <= 0)
+            {
+                MessageBox.Show("Invalid copied height. Please copy the height again.");
+                return;
+            }
+
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    shape.Height = copiedHeight;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select an image to paste height.");
             }
         }
 

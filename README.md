@@ -2,7 +2,7 @@
 
 Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Achuan-2/my_ppt_plugin)
 
-![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250110005917-2025-01-10.png)
+![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-10_02-45-17-2025-01-10.png)
 
 > 对PPT积怨已久😮‍💨：
 >

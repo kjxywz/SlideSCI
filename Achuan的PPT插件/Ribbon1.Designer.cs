@@ -47,13 +47,18 @@
             this.AddTitleButton = this.Factory.CreateRibbonButton();
             this.copyPosition = this.Factory.CreateRibbonButton();
             this.pastePosition = this.Factory.CreateRibbonButton();
-            this.copyImgWidthHeight = this.Factory.CreateRibbonButton();
-            this.pasteImgWidthHeight = this.Factory.CreateRibbonButton();
+            this.copyImgWidth = this.Factory.CreateRibbonButton();
+            this.pasteImgWidth = this.Factory.CreateRibbonButton();
+            this.copyImgHeight = this.Factory.CreateRibbonButton();
+            this.pasteImgHeight = this.Factory.CreateRibbonButton();
             this.imgAutoAlign = this.Factory.CreateRibbonButton();
+            this.复制图片宽高 = this.Factory.CreateRibbonGroup();
+            this.label1 = this.Factory.CreateRibbonLabel();
             this.tab1.SuspendLayout();
             this.图片处理.SuspendLayout();
             this.group1.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
+            this.复制图片宽高.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -61,6 +66,7 @@
             this.tab1.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office;
             this.tab1.Groups.Add(this.图片处理);
             this.tab1.Groups.Add(this.group1);
+            this.tab1.Groups.Add(this.复制图片宽高);
             this.tab1.Groups.Add(this.图片自动对齐);
             this.tab1.Label = "Achuan的插件";
             this.tab1.Name = "tab1";
@@ -74,9 +80,7 @@
             // 
             this.group1.Items.Add(this.copyPosition);
             this.group1.Items.Add(this.pastePosition);
-            this.group1.Items.Add(this.copyImgWidthHeight);
-            this.group1.Items.Add(this.pasteImgWidthHeight);
-            this.group1.Label = "样式统一";
+            this.group1.Label = "复制粘贴位置";
             this.group1.Name = "group1";
             // 
             // 图片自动对齐
@@ -146,21 +150,37 @@
             this.pastePosition.ShowImage = true;
             this.pastePosition.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pastePosition_Click);
             // 
-            // copyImgWidthHeight
+            // copyImgWidth
             // 
-            this.copyImgWidthHeight.Image = ((System.Drawing.Image)(resources.GetObject("copyImgWidthHeight.Image")));
-            this.copyImgWidthHeight.Label = "复制图片宽高";
-            this.copyImgWidthHeight.Name = "copyImgWidthHeight";
-            this.copyImgWidthHeight.ShowImage = true;
-            this.copyImgWidthHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyImgWidthHeight_Click);
+            this.copyImgWidth.Image = ((System.Drawing.Image)(resources.GetObject("copyImgWidth.Image")));
+            this.copyImgWidth.Label = "复制图片宽度";
+            this.copyImgWidth.Name = "copyImgWidth";
+            this.copyImgWidth.ShowImage = true;
+            this.copyImgWidth.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyImgWidth_Click);
             // 
-            // pasteImgWidthHeight
+            // pasteImgWidth
             // 
-            this.pasteImgWidthHeight.Image = ((System.Drawing.Image)(resources.GetObject("pasteImgWidthHeight.Image")));
-            this.pasteImgWidthHeight.Label = "粘贴图片宽高";
-            this.pasteImgWidthHeight.Name = "pasteImgWidthHeight";
-            this.pasteImgWidthHeight.ShowImage = true;
-            this.pasteImgWidthHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteImgWidthHeight_Click);
+            this.pasteImgWidth.Image = ((System.Drawing.Image)(resources.GetObject("pasteImgWidth.Image")));
+            this.pasteImgWidth.Label = "粘贴图片宽度";
+            this.pasteImgWidth.Name = "pasteImgWidth";
+            this.pasteImgWidth.ShowImage = true;
+            this.pasteImgWidth.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteImgWidth_Click);
+            // 
+            // copyImgHeight
+            // 
+            this.copyImgHeight.Image = ((System.Drawing.Image)(resources.GetObject("copyImgHeight.Image")));
+            this.copyImgHeight.Label = "复制图片高度";
+            this.copyImgHeight.Name = "copyImgHeight";
+            this.copyImgHeight.ShowImage = true;
+            this.copyImgHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyImgHeight_Click);
+            // 
+            // pasteImgHeight
+            // 
+            this.pasteImgHeight.Image = ((System.Drawing.Image)(resources.GetObject("pasteImgHeight.Image")));
+            this.pasteImgHeight.Label = "粘贴图片高度";
+            this.pasteImgHeight.Name = "pasteImgHeight";
+            this.pasteImgHeight.ShowImage = true;
+            this.pasteImgHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteImgHeight_Click);
             // 
             // imgAutoAlign
             // 
@@ -169,6 +189,21 @@
             this.imgAutoAlign.Name = "imgAutoAlign";
             this.imgAutoAlign.ShowImage = true;
             this.imgAutoAlign.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.imgAutoAlign_Click);
+            // 
+            // 复制图片宽高
+            // 
+            this.复制图片宽高.Items.Add(this.copyImgWidth);
+            this.复制图片宽高.Items.Add(this.pasteImgWidth);
+            this.复制图片宽高.Items.Add(this.label1);
+            this.复制图片宽高.Items.Add(this.copyImgHeight);
+            this.复制图片宽高.Items.Add(this.pasteImgHeight);
+            this.复制图片宽高.Label = "复制图片宽高";
+            this.复制图片宽高.Name = "复制图片宽高";
+            // 
+            // label1
+            // 
+            this.label1.Label = " ";
+            this.label1.Name = "label1";
             // 
             // Ribbon1
             // 
@@ -184,6 +219,8 @@
             this.group1.PerformLayout();
             this.图片自动对齐.ResumeLayout(false);
             this.图片自动对齐.PerformLayout();
+            this.复制图片宽高.ResumeLayout(false);
+            this.复制图片宽高.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -193,8 +230,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 图片处理;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton AddTitleButton;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton copyImgWidthHeight;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton pasteImgWidthHeight;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton copyPosition;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton pastePosition;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton imgAutoAlign;
@@ -205,6 +240,12 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox imgWidthEditBpx;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox imgHeightEditBox;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton copyImgWidth;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton pasteImgWidth;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton copyImgHeight;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton pasteImgHeight;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 复制图片宽高;
+        internal Microsoft.Office.Tools.Ribbon.RibbonLabel label1;
     }
 
     partial class ThisRibbonCollection
