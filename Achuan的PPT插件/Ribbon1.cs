@@ -1,0 +1,200 @@
+﻿using Microsoft.Office.Tools.Ribbon;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using PowerPoint = Microsoft.Office.Interop.PowerPoint;
+using Office = Microsoft.Office.Core;
+using System.Windows.Forms;
+
+namespace Achuan的PPT插件
+{
+    public partial class Ribbon1
+    {
+        PowerPoint.Application app;
+        private float copiedWidth;
+        private float copiedHeight;
+        private float copiedLeft;
+        private float copiedTop;
+
+        private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
+        {
+            app = Globals.ThisAddIn.Application;
+        }
+
+        private void AddTitleToImage(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                        // MessageBox.Show($"Shape Type: {shape.Type}"); // Debug message
+
+                        // Create textbox below the image
+                        PowerPoint.Shape textbox = app.ActiveWindow.View.Slide.Shapes.AddTextbox(
+                            Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                            shape.Left,
+                            shape.Top + shape.Height,
+                            shape.Width,
+                            20);
+
+                        // Set text properties
+                        textbox.TextFrame.TextRange.Font.Name = "微软雅黑";
+                        textbox.TextFrame.TextRange.Font.Size = 14;
+                        textbox.TextFrame.TextRange.Text = "图片标题";
+                        
+                        // Center align the text
+                        textbox.TextFrame.TextRange.ParagraphFormat.Alignment = 
+                            PowerPoint.PpParagraphAlignment.ppAlignCenter;
+                }
+            }
+        }
+
+        private void pasteImgWidthHeight_Click(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    shape.Width = copiedWidth;
+                    shape.Height = copiedHeight;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select an image to paste dimensions.");
+            }
+        }
+
+        private void copyImgWidthHeight_Click(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                PowerPoint.Shape shape = sel.ShapeRange[1];
+                copiedWidth = shape.Width;
+                copiedHeight = shape.Height;
+                // MessageBox.Show("Image dimensions copied!");
+            }
+            else
+            {
+                MessageBox.Show("Please select an image to copy dimensions.");
+            }
+        }
+
+        private void copyPosition_Click(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                PowerPoint.Shape shape = sel.ShapeRange[1];
+                copiedLeft = shape.Left;
+                copiedTop = shape.Top;
+                // MessageBox.Show("Position copied!");
+            }
+            else
+            {
+                MessageBox.Show("Please select a shape to copy position.");
+            }
+        }
+
+        private void pastePosition_Click(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    shape.Left = copiedLeft;
+                    shape.Top = copiedTop;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select a shape to paste position.");
+            }
+        }
+
+        private void imgAutoAlign_Click(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                int colNum;
+                float colSpace;
+                float rowSpace;
+                float imgWidth = 0;
+                float imgHeight = 0;
+
+                if (!int.TryParse(imgAutoAlign_colNum.Text, out colNum) || colNum <= 0)
+                {
+                    MessageBox.Show("请输入有效的列数量。");
+                    return;
+                }
+
+                if (!float.TryParse(imgAutoAlign_colSpace.Text, out colSpace) || colSpace < 0)
+                {
+                    MessageBox.Show("请输入有效的列间距。");
+                    return;
+                }
+
+                if (!float.TryParse(imgAutoAlign_rowSpace.Text, out rowSpace) || rowSpace < 0)
+                {
+                    rowSpace = colSpace; // Use column spacing if row spacing is not provided
+                }
+
+                bool useCustomWidth = float.TryParse(imgWidthEditBpx.Text, out imgWidth) && imgWidth > 0;
+                bool useCustomHeight = float.TryParse(imgHeightEditBox.Text, out imgHeight) && imgHeight > 0;
+
+                PowerPoint.Shape firstShape = sel.ShapeRange[1];
+                if (!useCustomWidth)
+                {
+                    imgWidth = firstShape.Width;
+                }
+
+
+                float currentX = 0;
+                float currentY = 0;
+                int currentCol = 0;
+
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    if (useCustomWidth)
+                    {
+                        shape.Width = imgWidth;
+                    }
+                    if (useCustomHeight)
+                    {
+                        shape.Height = imgHeight;
+                    }
+
+                    shape.Left = currentX;
+                    shape.Top = currentY;
+
+                    currentCol++;
+                    if (currentCol >= colNum)
+                    {
+                        currentCol = 0;
+                        currentX = 0; // Reset X position
+                        currentY += shape.Height + rowSpace;
+                    }
+                    else
+                    {
+                        currentX += shape.Width + colSpace;
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("请选择要对齐的图片。");
+            }
+        }
+
+        private void gallery1_Click(object sender, RibbonControlEventArgs e)
+        {
+
+        }
+    }
+}
