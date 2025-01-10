@@ -231,10 +231,6 @@ namespace Achuan的PPT插件
                 bool useCustomHeight = float.TryParse(imgHeightEditBox.Text, out imgHeight) && imgHeight > 0;
 
                 PowerPoint.Shape firstShape = sel.ShapeRange[1];
-                if (!useCustomWidth)
-                {
-                    imgWidth = firstShape.Width;
-                }
 
                 float startX = firstShape.Left;
                 float startY = firstShape.Top;
@@ -244,14 +240,22 @@ namespace Achuan的PPT插件
 
                 foreach (PowerPoint.Shape shape in sel.ShapeRange)
                 {
-                    if (useCustomWidth)
+                    if (!useCustomHeight && !useCustomWidth)
                     {
-                        shape.Width = imgWidth;
+                        shape.Height = firstShape.Height;
                     }
-                    if (useCustomHeight)
+                    else
                     {
-                        shape.Height = imgHeight;
+                        if (useCustomWidth)
+                        {
+                            shape.Width = imgWidth;
+                        }
+                        if (useCustomHeight)
+                        {
+                            shape.Height = imgHeight;
+                        }
                     }
+
 
                     shape.Left = currentX;
                     shape.Top = currentY;
