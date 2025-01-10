@@ -16,7 +16,7 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 >
 > 在AI的帮助下，我就花了一晚上时间，就把这些“梦寐以求”的功能都开发完了！开发完真的成就感满满！
 
-## 功能
+## ✨功能
 
 * **添加图片标题**：支持选中图片后，批量在图片下方添加居中图题
 
@@ -27,6 +27,13 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 * **图片自动对齐**：可以自动对齐图片，可以设置每列多少张图片、列间距多少、行间距多少（默认为空，为列间距大小）、图片宽高
 ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250110010006-2025-01-10.png)
 
-## 安装方法
+## 🖥️安装方法
 
 下载Release的Achuan.PPT.zip，解压，双击setup.exe安装即可
+
+
+## ❓常见问题
+
+* 添加图题的文本框只有文本宽度并且没有居中？
+
+  * 可能是设置了默认文本框导致的，需要将图题拉宽并设置居中后，设置居中图题为默认文本框
