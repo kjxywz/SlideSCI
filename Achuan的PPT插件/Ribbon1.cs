@@ -236,9 +236,10 @@ namespace Achuan的PPT插件
                     imgWidth = firstShape.Width;
                 }
 
-
-                float currentX = 0;
-                float currentY = 0;
+                float startX = firstShape.Left;
+                float startY = firstShape.Top;
+                float currentX = startX;
+                float currentY = startY;
                 int currentCol = 0;
 
                 foreach (PowerPoint.Shape shape in sel.ShapeRange)
@@ -259,7 +260,7 @@ namespace Achuan的PPT插件
                     if (currentCol >= colNum)
                     {
                         currentCol = 0;
-                        currentX = 0; // Reset X position
+                        currentX = startX; // Reset X position to startX
                         currentY += shape.Height + rowSpace;
                     }
                     else
