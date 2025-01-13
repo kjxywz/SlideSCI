@@ -561,14 +561,22 @@ namespace Achuan的PPT插件
                     // Process lists first
                     var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
                     var processedLines = new List<string>();
-                    bool isList = false;
+                    bool hasOrderedList = false;
+                    bool hasUnorderedList = false;
 
                     foreach (var line in lines)
                     {
                         string processedLine = line;
-                        if (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\s*[-*+]\s+"))
+                        // Check for ordered list (e.g., "1. ", "2. ")
+                        if (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\s*\d+\.\s+"))
                         {
-                            isList = true;
+                            hasOrderedList = true;
+                            processedLine = System.Text.RegularExpressions.Regex.Replace(line, @"^\s*\d+\.\s+", "");
+                        }
+                        // Check for unordered list
+                        else if (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\s*[-*+]\s+"))
+                        {
+                            hasUnorderedList = true;
                             processedLine = System.Text.RegularExpressions.Regex.Replace(line, @"^\s*[-*+]\s+", "");
                         }
                         processedLines.Add(processedLine);
@@ -635,7 +643,12 @@ namespace Achuan的PPT插件
                         }
                     }
 
-                    if (isList)
+                    // Apply list formatting
+                    if (hasOrderedList)
+                    {
+                        textBox.TextFrame.TextRange.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNumbered;
+                    }
+                    else if (hasUnorderedList)
                     {
                         textBox.TextFrame.TextRange.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletUnnumbered;
                     }
