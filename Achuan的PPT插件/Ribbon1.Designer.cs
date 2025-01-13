@@ -59,11 +59,14 @@
             this.imgAutoAlign_rowSpace = this.Factory.CreateRibbonEditBox();
             this.imgWidthEditBpx = this.Factory.CreateRibbonEditBox();
             this.imgHeightEditBox = this.Factory.CreateRibbonEditBox();
+            this.group2 = this.Factory.CreateRibbonGroup();
+            this.button1 = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.图片处理.SuspendLayout();
             this.group1.SuspendLayout();
             this.复制图片宽高.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
+            this.group2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -73,6 +76,7 @@
             this.tab1.Groups.Add(this.group1);
             this.tab1.Groups.Add(this.复制图片宽高);
             this.tab1.Groups.Add(this.图片自动对齐);
+            this.tab1.Groups.Add(this.group2);
             this.tab1.Label = "Achuan的插件";
             this.tab1.Name = "tab1";
             // 
@@ -245,6 +249,21 @@
             this.imgHeightEditBox.Name = "imgHeightEditBox";
             this.imgHeightEditBox.Text = null;
             // 
+            // group2
+            // 
+            this.group2.Items.Add(this.button1);
+            this.group2.Label = "关于";
+            this.group2.Name = "group2";
+            // 
+            // button1
+            // 
+            this.button1.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.button1.Image = ((System.Drawing.Image)(resources.GetObject("button1.Image")));
+            this.button1.Label = "开发者";
+            this.button1.Name = "button1";
+            this.button1.ShowImage = true;
+            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button1_Click);
+            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -261,6 +280,8 @@
             this.复制图片宽高.PerformLayout();
             this.图片自动对齐.ResumeLayout(false);
             this.图片自动对齐.PerformLayout();
+            this.group2.ResumeLayout(false);
+            this.group2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -291,6 +312,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox autoGroupCheckBox;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox fontNameEditBox;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox titleTextEditBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
     }
 
     partial class ThisRibbonCollection

@@ -287,5 +287,10 @@ namespace Achuan的PPT插件
         {
 
         }
+
+        private void button1_Click(object sender, RibbonControlEventArgs e)
+        {
+            MessageBox.Show("开发者: Achuan-2\n邮箱: achuan-2@outlook.com\nGithub地址：https://github.com/Achuan-2", "关于开发者");
+        }
     }
 }
