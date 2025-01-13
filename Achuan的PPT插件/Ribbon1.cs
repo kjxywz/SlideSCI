@@ -553,14 +553,32 @@ namespace Achuan的PPT插件
                         Office.MsoTextOrientation.msoTextOrientationHorizontal,
                         100, 100, 500, 300);
 
-                    string processedText = markdown;
+                    // Split the markdown into lines
+                    var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                    var processedLines = new List<string>();
+                    bool isList = false;
+
+                    // Process each line
+                    foreach (var line in lines)
+                    {
+                        string processedLine = line;
+                        // Check for list markers
+                        if (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\s*[-*+]\s+"))
+                        {
+                            isList = true;
+                            // Remove the list marker
+                            processedLine = System.Text.RegularExpressions.Regex.Replace(line, @"^\s*[-*+]\s+", "");
+                        }
+                        processedLines.Add(processedLine);
+                    }
+
+                    string processedText = string.Join("\n", processedLines);
 
                     // Define regex patterns and their replacements
                     var markdownPatterns = new Dictionary<string, (string replacement, Action<PowerPoint.TextRange> formatting)>
                     {
                         { @"\*\*(.+?)\*\*", ("$1", range => range.Font.Bold = Office.MsoTriState.msoTrue) },
                         { @"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", ("$1", range => range.Font.Italic = Office.MsoTriState.msoTrue) },
-                        //{ @"~~(.+?)~~", ("$1", range => range.Font.Strikethrough = Office.MsoTriState.msoTrue) },
                         { @"<u>(.+?)</u>", ("$1", range => range.Font.Underline = Office.MsoTriState.msoTrue) },
                         { @"==(.+?)==", ("$1", range => range.Font.Shadow = Office.MsoTriState.msoTrue) },
                         { @"<sub>(.+?)</sub>", ("$1", range => range.Font.Subscript = Office.MsoTriState.msoTrue) },
@@ -580,7 +598,6 @@ namespace Achuan的PPT插件
                         var regex = new System.Text.RegularExpressions.Regex(pattern.Key);
                         var matches = regex.Matches(processedText);
 
-                        // Store original positions before replacing
                         foreach (System.Text.RegularExpressions.Match match in matches)
                         {
                             var innerText = match.Groups[1].Value;
@@ -589,7 +606,6 @@ namespace Achuan的PPT插件
                             formattingInfo.Add((originalStart, replacementLength, pattern.Value.formatting));
                         }
 
-                        // Replace the pattern with its inner content
                         processedText = regex.Replace(processedText, pattern.Value.replacement);
                     }
 
@@ -603,14 +619,10 @@ namespace Achuan的PPT插件
                         info.formatting(range);
                     }
 
-                    // Handle lists
-                    if (processedText.Contains("\n- ") || processedText.Contains("\n* ") || processedText.Contains("\n+ "))
+                    // Apply bullet formatting if it's a list
+                    if (isList)
                     {
                         textBox.TextFrame.TextRange.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletUnnumbered;
-                    }
-                    else if (System.Text.RegularExpressions.Regex.IsMatch(processedText, @"\n\d+\. "))
-                    {
-                        textBox.TextFrame.TextRange.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNumbered;
                     }
 
                     textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
