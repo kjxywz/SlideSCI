@@ -24,30 +24,33 @@ namespace Achuan的PPT插件
 
         private void AddTitleToImage(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            PowerPoint.Application app = Globals.ThisAddIn.Application;
+            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+            PowerPoint.Shape selectedShape = app.ActiveWindow.Selection.ShapeRange[1];
+
+            if (selectedShape != null && selectedShape.Type == Office.MsoShapeType.msoPicture)
             {
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                float fontSize = float.Parse(fontSizeEditBox.Text);
+                float distanceFromBottom = float.Parse(distanceFromBottomEditBox.Text);
+                bool autoGroup = autoGroupCheckBox.Checked;
+                string fontName = fontNameEditBox.Text;
+                string titleText = titleTextEditBox.Text;
+
+                PowerPoint.Shape titleShape = slide.Shapes.AddTextbox(
+                    Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                    selectedShape.Left,
+                    selectedShape.Top + selectedShape.Height + distanceFromBottom,
+                    selectedShape.Width,
+                    fontSize * 2);
+
+                titleShape.TextFrame.TextRange.Text = titleText;
+                titleShape.TextFrame.TextRange.Font.Size = fontSize;
+                titleShape.TextFrame.TextRange.Font.Name = fontName;
+                titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignCenter;
+
+                if (autoGroup)
                 {
-                    // Create textbox below the image
-                    PowerPoint.Shape textbox = app.ActiveWindow.View.Slide.Shapes.AddTextbox(
-                        Office.MsoTextOrientation.msoTextOrientationHorizontal,
-                        shape.Left,
-                        shape.Top + shape.Height,
-                        shape.Width,
-                        20);
-
-                    // Set text properties
-                    textbox.TextFrame.TextRange.Font.Name = "微软雅黑";
-                    textbox.TextFrame.TextRange.Font.Size = 14;
-                    textbox.TextFrame.TextRange.Text = "图片标题";
-                    
-                    // Center align the text
-                    textbox.TextFrame.TextRange.ParagraphFormat.Alignment = 
-                        PowerPoint.PpParagraphAlignment.ppAlignCenter;
-
-                    // Group the image and the title
-                    PowerPoint.ShapeRange shapeRange = app.ActiveWindow.Selection.SlideRange.Shapes.Range(new string[] { shape.Name, textbox.Name });
+                    PowerPoint.ShapeRange shapeRange = slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name });
                     shapeRange.Group();
                 }
             }
