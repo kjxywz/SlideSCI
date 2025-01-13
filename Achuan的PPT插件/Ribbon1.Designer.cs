@@ -62,8 +62,8 @@
             this.codeGroup = this.Factory.CreateRibbonGroup();
             this.insertCodeBlockButton = this.Factory.CreateRibbonButton();
             this.toggleBackgroundButton = this.Factory.CreateRibbonToggleButton();
-            this.数学公式 = this.Factory.CreateRibbonGroup();
             this.insertEquationButton = this.Factory.CreateRibbonButton();
+            this.button2 = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.button1 = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
@@ -72,7 +72,6 @@
             this.复制图片宽高.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.codeGroup.SuspendLayout();
-            this.数学公式.SuspendLayout();
             this.group2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -84,7 +83,6 @@
             this.tab1.Groups.Add(this.复制图片宽高);
             this.tab1.Groups.Add(this.图片自动对齐);
             this.tab1.Groups.Add(this.codeGroup);
-            this.tab1.Groups.Add(this.数学公式);
             this.tab1.Groups.Add(this.group2);
             this.tab1.Label = "Achuan的插件";
             this.tab1.Name = "tab1";
@@ -262,7 +260,9 @@
             // 
             this.codeGroup.Items.Add(this.insertCodeBlockButton);
             this.codeGroup.Items.Add(this.toggleBackgroundButton);
-            this.codeGroup.Label = "代码工具";
+            this.codeGroup.Items.Add(this.insertEquationButton);
+            this.codeGroup.Items.Add(this.button2);
+            this.codeGroup.Label = "Markdown";
             this.codeGroup.Name = "codeGroup";
             // 
             // insertCodeBlockButton
@@ -281,12 +281,6 @@
             this.toggleBackgroundButton.Name = "toggleBackgroundButton";
             this.toggleBackgroundButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.toggleBackgroundButton_Click);
             // 
-            // 数学公式
-            // 
-            this.数学公式.Items.Add(this.insertEquationButton);
-            this.数学公式.Label = "数学公式";
-            this.数学公式.Name = "数学公式";
-            // 
             // insertEquationButton
             // 
             this.insertEquationButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -295,6 +289,12 @@
             this.insertEquationButton.Name = "insertEquationButton";
             this.insertEquationButton.ShowImage = true;
             this.insertEquationButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.insertEquationButton_Click);
+            // 
+            // button2
+            // 
+            this.button2.Label = "插入Markdown";
+            this.button2.Name = "button2";
+            this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.insertMarkdown_Click);
             // 
             // group2
             // 
@@ -329,8 +329,6 @@
             this.图片自动对齐.PerformLayout();
             this.codeGroup.ResumeLayout(false);
             this.codeGroup.PerformLayout();
-            this.数学公式.ResumeLayout(false);
-            this.数学公式.PerformLayout();
             this.group2.ResumeLayout(false);
             this.group2.PerformLayout();
             this.ResumeLayout(false);
@@ -369,7 +367,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup codeGroup;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleBackgroundButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton insertEquationButton; // Add this line
-        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 数学公式;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button2;
     }
 
     partial class ThisRibbonCollection
