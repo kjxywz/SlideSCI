@@ -558,12 +558,11 @@ namespace Achuan的PPT插件
                         Office.MsoTextOrientation.msoTextOrientationHorizontal,
                         100, 100, 500, 300);
 
-                    // Split the markdown into lines and process lists
+                    // Process lists first
                     var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
                     var processedLines = new List<string>();
                     bool isList = false;
 
-                    // Process each line
                     foreach (var line in lines)
                     {
                         string processedLine = line;
@@ -576,42 +575,63 @@ namespace Achuan的PPT插件
                     }
 
                     string processedText = string.Join("\n", processedLines);
-                    textBox.TextFrame.TextRange.Text = processedText;
 
-                    // Define regex patterns and their formatting actions
-                    var markdownPatterns = new Dictionary<string, (System.Text.RegularExpressions.Regex regex, Action<PowerPoint.TextRange> formatting)>
+                    // Define formatting patterns
+                    var markdownPatterns = new Dictionary<string, (System.Text.RegularExpressions.Regex regex, Action<PowerPoint.TextRange> formatting, int markerLength)>
                     {
-                        { @"\*\*(.+?)\*\*", (new System.Text.RegularExpressions.Regex(@"\*\*(.+?)\*\*"), range => range.Font.Bold = Office.MsoTriState.msoTrue) },
-                        { @"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", (new System.Text.RegularExpressions.Regex(@"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)"), range => range.Font.Italic = Office.MsoTriState.msoTrue) },
-                        { @"<u>(.+?)</u>", (new System.Text.RegularExpressions.Regex(@"<u>(.+?)</u>"), range => range.Font.Underline = Office.MsoTriState.msoTrue) },
-                        { @"==(.+?)==", (new System.Text.RegularExpressions.Regex(@"==(.+?)=="), range => range.Font.Shadow = Office.MsoTriState.msoTrue) },
-                        { @"<sub>(.+?)</sub>", (new System.Text.RegularExpressions.Regex(@"<sub>(.+?)</sub>"), range => range.Font.Subscript = Office.MsoTriState.msoTrue) },
-                        { @"<sup>(.+?)</sup>", (new System.Text.RegularExpressions.Regex(@"<sup>(.+?)</sup>"), range => range.Font.Superscript = Office.MsoTriState.msoTrue) },
+                        { @"\*\*(.+?)\*\*", (new System.Text.RegularExpressions.Regex(@"\*\*(.+?)\*\*"), range => range.Font.Bold = Office.MsoTriState.msoTrue, 4) },
+                        { @"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", (new System.Text.RegularExpressions.Regex(@"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)"), range => range.Font.Italic = Office.MsoTriState.msoTrue, 2) },
+                        { @"<u>(.+?)</u>", (new System.Text.RegularExpressions.Regex(@"<u>(.+?)</u>"), range => range.Font.Underline = Office.MsoTriState.msoTrue, 7) },
+                        { @"==(.+?)==", (new System.Text.RegularExpressions.Regex(@"==(.+?)=="), range => range.Font.Shadow = Office.MsoTriState.msoTrue, 4) },
+                        { @"<sub>(.+?)</sub>", (new System.Text.RegularExpressions.Regex(@"<sub>(.+?)</sub>"), range => range.Font.Subscript = Office.MsoTriState.msoTrue, 11) },
+                        { @"<sup>(.+?)</sup>", (new System.Text.RegularExpressions.Regex(@"<sup>(.+?)</sup>"), range => range.Font.Superscript = Office.MsoTriState.msoTrue, 11) },
                         { @"`(.+?)`", (new System.Text.RegularExpressions.Regex(@"`(.+?)`"), range => {
                             range.Font.Name = "Consolas";
                             range.Font.Color.RGB = ColorTranslator.ToOle(Color.DarkRed);
-                        })}
+                        }, 2) }
                     };
+
+                    // Collect formatting information with position adjustments
+                    var formattingInfo = new List<(int start, int length, string content, Action<PowerPoint.TextRange> formatting)>();
+                    int totalOffset = 0;
 
                     foreach (var pattern in markdownPatterns)
                     {
-                        var matches = pattern.Value.regex.Matches(markdown);
-                        for (int i = matches.Count - 1; i >= 0; i--)
+                        var matches = pattern.Value.regex.Matches(processedText);
+                        for (int i = 0; i < matches.Count; i++)
                         {
                             var match = matches[i];
                             var innerText = match.Groups[1].Value;
-                            var startPos = GetActualPosition(markdown, match.Index) + 1;
-                            var length = GetActualPosition(markdown, match.Index + match.Length) - GetActualPosition(markdown, match.Index);
+                            var startPos = match.Index - totalOffset;
+                            formattingInfo.Add((startPos, innerText.Length, innerText, pattern.Value.formatting));
+                            totalOffset += pattern.Value.markerLength;
+                        }
+                    }
 
-                            try
-                            {
-                                var range = textBox.TextFrame.TextRange.Characters(startPos, length);
-                                pattern.Value.formatting(range);
-                            }
-                            catch (Exception)
-                            {
-                                continue;
-                            }
+                    // Sort formatting info by start position in descending order
+                    formattingInfo.Sort((a, b) => b.start.CompareTo(a.start));
+
+                    // Remove all markdown markers
+                    foreach (var pattern in markdownPatterns)
+                    {
+                        processedText = pattern.Value.regex.Replace(processedText, "$1");
+                    }
+
+                    // Set the clean text
+                    textBox.TextFrame.TextRange.Text = processedText;
+
+                    // Apply formatting
+                    foreach (var info in formattingInfo)
+                    {
+                        try
+                        {
+                            var range = textBox.TextFrame.TextRange.Characters(info.start + 1, info.length);
+                            info.formatting(range);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Optional: Log error or show message
+                            continue;
                         }
                     }
 
