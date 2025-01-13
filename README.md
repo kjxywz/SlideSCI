@@ -50,3 +50,12 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 * 添加图题的文本框只有文本宽度并且没有居中？
 
   * 可能是设置了默认文本框导致的，需要将图题拉宽并设置居中后，设置居中图题为默认文本框
+
+
+## ❤️ 用爱发电
+
+如果喜欢我的插件，欢迎给GitHub仓库点star和捐赠，这会激励我继续完善此插件。
+
+![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20241118182532-2024-11-18.png)
+
+捐赠者列表见：https://www.yuque.com/achuan-2
