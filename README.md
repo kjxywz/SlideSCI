@@ -2,7 +2,9 @@
 
 Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Achuan-2/my_ppt_plugin)
 
-![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-13_15-00-38-2025-01-13.png)
+
+![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-13_17-43-10-2025-01-13.png)
+
 > 对PPT积怨已久😮‍💨：
 >
 > 💔**不能添加图片标题**：图片没法像word一样直接添加图片标题，只能手动插入文本框，对齐半天还歪七扭八！
@@ -44,6 +46,8 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
   * 支持代码语言高亮：matlab、python、js、html、css、csharp
   * 支持切换黑白背景色
    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-13_15-31-41-2025-01-13.png)
+
+- **支持插入latex数学公式**
 
 ## 🖥️安装方法
 
