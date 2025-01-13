@@ -45,7 +45,8 @@ namespace Achuan的PPT插件
 
                 titleShape.TextFrame.TextRange.Text = titleText;
                 titleShape.TextFrame.TextRange.Font.Size = fontSize;
-                titleShape.TextFrame.TextRange.Font.Name = fontName;
+                titleShape.TextFrame.TextRange.Font.NameFarEast = fontName;; // Ensure FarEast font is set
+                titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
                 titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignCenter;
 
                 if (autoGroup)
