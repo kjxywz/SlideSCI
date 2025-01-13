@@ -53,9 +53,9 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 
 ## 🖥️安装方法
 
-下载本插件Github页面[Release](https://github.com/Achuan-2/my_ppt_plugin/releases)中的Achuan.PPT.zip，解压，双击setup.exe安装即可
+下载本插件Github页面[Release](https://github.com/Achuan-2/my_ppt_plugin/releases)中的Achuan.PPT.msi，解压，双击安装即可
 
-
+注意：安装时需要先退出PPT，否则PPT不会加载该插件
 
 ## ❓常见问题
 
