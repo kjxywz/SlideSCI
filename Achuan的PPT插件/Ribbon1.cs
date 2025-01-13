@@ -302,7 +302,8 @@ namespace Achuan的PPT插件
             {
                 Width = 600,
                 Height = 400,
-                Text = "插入代码块"
+                Text = "插入代码块",
+                StartPosition = FormStartPosition.CenterScreen // Center the dialog on the screen
             };
 
             TextBox codeInput = new TextBox()
