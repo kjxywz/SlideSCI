@@ -49,7 +49,7 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-13_15-31-41-2025-01-13.png)
 
 - **支持插入latex数学公式**
-    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-13_17-56-59-2025-01-13.png)
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-13_18-32-12-2025-01-13.png)
 
 ## 🖥️安装方法
 
