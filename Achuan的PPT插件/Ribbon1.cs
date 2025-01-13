@@ -6,6 +6,7 @@ using System.Text;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using Office = Microsoft.Office.Core;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace Achuan的PPT插件
 {
@@ -16,6 +17,7 @@ namespace Achuan的PPT插件
         private float copiedHeight;
         private float copiedLeft;
         private float copiedTop;
+        private bool isDarkBackground = false;
 
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
@@ -291,6 +293,123 @@ namespace Achuan的PPT插件
         private void button1_Click(object sender, RibbonControlEventArgs e)
         {
             MessageBox.Show("开发者: Achuan-2\n邮箱: achuan-2@outlook.com\nGithub地址：https://github.com/Achuan-2", "关于开发者");
+        }
+
+        private void insertCodeBlockButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            // Create and configure input dialog
+            Form inputDialog = new Form()
+            {
+                Width = 600,
+                Height = 400,
+                Text = "插入代码块"
+            };
+
+            TextBox codeInput = new TextBox()
+            {
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                Dock = DockStyle.Fill,
+                Font = new Font("Consolas", 12)
+            };
+
+            ComboBox languageSelect = new ComboBox()
+            {
+                Dock = DockStyle.Top,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            
+            // Add common programming languages
+            languageSelect.Items.AddRange(new string[] { 
+                 "python", "matlab", "javascript",  "html", "css" 
+            });
+            languageSelect.SelectedIndex = 0;
+
+            Button okButton = new Button()
+            {
+                Text = "确定",
+                DialogResult = DialogResult.OK,
+                Dock = DockStyle.Bottom
+            };
+
+            // Add controls to form
+            inputDialog.Controls.AddRange(new Control[] { codeInput, languageSelect, okButton });
+
+            // Show dialog and process result
+            if (inputDialog.ShowDialog() == DialogResult.OK)
+            {
+                string code = codeInput.Text.Trim();
+                string language = languageSelect.SelectedItem.ToString();
+
+                if (!string.IsNullOrEmpty(code))
+                {
+                    PowerPoint.Application app = Globals.ThisAddIn.Application;
+                    PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+
+                    PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+                        Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                        100, 100, 500, 300);
+
+                    // Set code block style
+                    textBox.Fill.Solid();
+                    textBox.Fill.ForeColor.RGB = isDarkBackground ? 
+                        ColorTranslator.ToOle(Color.FromArgb(30, 30, 30)) : 
+                        ColorTranslator.ToOle(Color.White);
+                    textBox.Line.ForeColor.RGB = ColorTranslator.ToOle(Color.FromArgb(200, 200, 200));
+                    textBox.Line.Weight = 1;
+
+                    // Set the code without language markers
+                    textBox.TextFrame.TextRange.Text = code;
+
+                    // Apply base formatting
+                    textBox.TextFrame.TextRange.Font.Name = "Consolas";
+                    textBox.TextFrame.TextRange.Font.Size = 12;
+                    textBox.TextFrame.TextRange.Font.Color.RGB = isDarkBackground ? 
+                        ColorTranslator.ToOle(Color.White) : 
+                        ColorTranslator.ToOle(Color.Black);
+                    textBox.TextFrame.TextRange.ParagraphFormat.Alignment = 
+                        PowerPoint.PpParagraphAlignment.ppAlignLeft;
+
+                    // Set margins
+                    textBox.TextFrame.MarginLeft = 10;
+                    textBox.TextFrame.MarginRight = 10;
+                    textBox.TextFrame.MarginTop = 5;
+                    textBox.TextFrame.MarginBottom = 5;
+
+                    // Apply syntax highlighting
+                    var highlighter = new CodeHighlighter(isDarkBackground);
+                    highlighter.ApplyHighlighting(textBox, code, language);
+
+                    // Auto-size the textbox to fit content
+                    textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+                }
+            }
+        }
+
+        private void toggleBackgroundButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            isDarkBackground = toggleBackgroundButton.Checked;
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    if (shape.HasTextFrame == Office.MsoTriState.msoTrue)
+                    {
+                        // Update background color
+                        shape.Fill.Solid();
+                        shape.Fill.ForeColor.RGB = isDarkBackground ? 
+                            ColorTranslator.ToOle(Color.FromArgb(30, 30, 30)) : 
+                            ColorTranslator.ToOle(Color.White);
+                        
+                        // Update text color
+                        shape.TextFrame.TextRange.Font.Color.RGB = isDarkBackground ? 
+                            ColorTranslator.ToOle(Color.White) : 
+                            ColorTranslator.ToOle(Color.Black);
+                    }
+                }
+            }
         }
     }
 }
