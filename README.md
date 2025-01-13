@@ -43,6 +43,7 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 * **支持插入代码块**
   * 支持代码语言高亮：matlab、python、js、html、css、csharp
   * 支持切换黑白背景色
+   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-13_15-31-41-2025-01-13.png)
 
 ## 🖥️安装方法
 
