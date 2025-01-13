@@ -31,6 +31,8 @@ namespace Achuan的PPT插件
                     {"comment", Color.FromArgb(87, 166, 74)},     // 绿色
                     {"string", Color.FromArgb(214, 157, 133)},    // 棕色
                     {"number", Color.FromArgb(181, 206, 168)},    // 蓝绿色
+                    {"property", Color.FromArgb(156, 220, 254)},  // 浅蓝色
+                    {"selector", Color.FromArgb(215, 186, 125)},  // 金色
                 };
             }
             else
@@ -41,6 +43,8 @@ namespace Achuan的PPT插件
                     {"comment", Color.FromArgb(0, 128, 0)},       // 绿色
                     {"string", Color.FromArgb(163, 21, 21)},      // 棕色
                     {"number", Color.FromArgb(9, 134, 88)},       // 蓝绿色
+                    {"property", Color.FromArgb(0, 134, 209)},    // 浅蓝色
+                    {"selector", Color.FromArgb(168, 99, 0)},     // 褐色
                 };
             }
         }
@@ -94,6 +98,34 @@ namespace Achuan的PPT插件
                         
                         // 关键字
                         (@"\b(break|case|catch|classdef|continue|else|elseif|end|for|function|global|if|otherwise|parfor|persistent|return|switch|try|while|clear|close|load|save|figure|plot|xlabel|ylabel|title|grid|hold|zeros|ones|rand|eye|disp|input|fprintf|strcmp|length|size|max|min|sum|mean|std|find|sort|reshape)\b", RegexOptions.None, "keyword"),
+                    }
+                },
+                {"css", new List<(string, RegexOptions, string)>
+                    {
+                        // 注释
+                        (@"/\*[\s\S]*?\*/", RegexOptions.None, "comment"),
+                        // CSS选择器 - 在大括号前的任何非大括号内容
+                        (@"[^{}]+(?=\s*{)", RegexOptions.None, "selector"),
+                        // CSS属性
+                        (@"[\w-]+(?=\s*:)", RegexOptions.None, "property"),
+                        // 字符串
+                        (@"'[^']*'|""[^""]*""", RegexOptions.None, "string"),
+                        // 数字和单位
+                        (@"\b\d*\.?\d+(?:px|em|rem|vh|vw|%|s|ms|deg|rad|turn)?\b", RegexOptions.None, "number"),
+                        // 关键字
+                        (@"\b(important|inherit|initial|unset|none|auto|hidden|visible|block|inline|flex|grid|absolute|relative|fixed|static|left|right|top|bottom|center|justify|stretch|wrap|nowrap|solid|dashed|dotted)\b", RegexOptions.None, "keyword"),
+                    }
+                },
+                {"html", new List<(string, RegexOptions, string)>
+                    {
+                        // 注释
+                        (@"<!--[\s\S]*?-->", RegexOptions.None, "comment"),
+                        // 字符串
+                        (@"'[^']*'|""[^""]*""", RegexOptions.None, "string"),
+                        // HTML标签
+                        (@"</?\w+(?:\s+\w+(?:\s*=\s*(?:"".*?""|'.*?'|[\^'""\s]\S+))?)*\s*/?>", RegexOptions.None, "keyword"),
+                        // 数字
+                        (@"\b\d+\b", RegexOptions.None, "number"),
                     }
                 }
             };

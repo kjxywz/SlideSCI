@@ -39,7 +39,7 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 * **复制位置和粘贴位置**：可以复制某个元素的位置，粘贴给另一个元素，可以用来让不同页的PPT的某个元素位置一致，或者让同一页的不同元素都是一个位置
 * **复制和粘贴图片宽高**：统一图片宽高
 * **支持插入代码块**
-  * 支持代码语言：matlab、python、js、csharp
+  * 支持代码语言高亮：matlab、python、js、html、css、csharp
   * 支持切换黑白背景色
 
 ## 🖥️安装方法

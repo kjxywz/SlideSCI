@@ -17,7 +17,7 @@ namespace Achuan的PPT插件
         private float copiedHeight;
         private float copiedLeft;
         private float copiedTop;
-        private bool isDarkBackground = false;
+        private bool isDarkBackground = true;  // Changed from false to true
 
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {

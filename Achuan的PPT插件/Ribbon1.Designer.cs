@@ -80,8 +80,8 @@
             this.tab1.Groups.Add(this.group1);
             this.tab1.Groups.Add(this.复制图片宽高);
             this.tab1.Groups.Add(this.图片自动对齐);
-            this.tab1.Groups.Add(this.group2);
             this.tab1.Groups.Add(this.codeGroup);
+            this.tab1.Groups.Add(this.group2);
             this.tab1.Label = "Achuan的插件";
             this.tab1.Name = "tab1";
             // 
@@ -287,7 +287,8 @@
             // 
             // toggleBackgroundButton
             // 
-            this.toggleBackgroundButton.Label = "切换背景色";
+            this.toggleBackgroundButton.Checked = true;
+            this.toggleBackgroundButton.Label = "黑色背景色";
             this.toggleBackgroundButton.Name = "toggleBackgroundButton";
             this.toggleBackgroundButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.toggleBackgroundButton_Click);
             // 
