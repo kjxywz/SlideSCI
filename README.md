@@ -2,8 +2,7 @@
 
 Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Achuan-2/my_ppt_plugin)
 
-![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-10_02-45-17-2025-01-10.png)
-
+![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-13_10-31-09-2025-01-13.png)
 > 对PPT积怨已久😮‍💨：
 >
 > 💔**不能添加图片标题**：图片没法像word一样直接添加图片标题，只能手动插入文本框，对齐半天还歪七扭八！
