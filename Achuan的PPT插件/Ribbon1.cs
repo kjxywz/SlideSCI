@@ -414,18 +414,22 @@ namespace Achuan的PPT插件
 
         private void insertEquationButton_Click(object sender, RibbonControlEventArgs e)
         {
-            // Create and configure input dialog
+            PowerPoint.Application app = Globals.ThisAddIn.Application;
+            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+
+
+            // Prompt user for LaTeX input
             Form inputDialog = new Form()
             {
                 Width = 500,
-                Height = 300,
-                Text = "插入数学公式"
+                Height = 500,
+                Text = "输入LaTeX公式",
+                StartPosition = FormStartPosition.CenterScreen // Center the dialog on the screen
             };
 
-            TextBox latexInput = new TextBox()
+            TextBox latexInputBox = new TextBox()
             {
                 Multiline = true,
-                ScrollBars = ScrollBars.Vertical,
                 Dock = DockStyle.Fill,
                 Font = new Font("Consolas", 12)
             };
@@ -437,62 +441,67 @@ namespace Achuan的PPT插件
                 Dock = DockStyle.Bottom
             };
 
-            Label helpLabel = new Label()
-            {
-                Text = "输入KaTeX语法的数学公式（不需要添加$符号）",
-                Dock = DockStyle.Top,
-                Height = 30
-            };
+            inputDialog.Controls.Add(latexInputBox);
+            inputDialog.Controls.Add(okButton);
 
-            // Add controls to form
-            inputDialog.Controls.AddRange(new Control[] { latexInput, helpLabel, okButton });
-
-            // Show dialog and process result
             if (inputDialog.ShowDialog() == DialogResult.OK)
             {
-                string latex = latexInput.Text.Trim();
-                if (!string.IsNullOrEmpty(latex))
+            string latexInput = latexInputBox.Text.Trim();
+
+            // Remove surrounding $...$, $$...$$, \(...\), \[...\]
+            if (latexInput.StartsWith("$") && latexInput.EndsWith("$"))
+            {
+                latexInput = latexInput.Trim('$');
+            }
+            else if (latexInput.StartsWith("$$") && latexInput.EndsWith("$$"))
+            {
+                latexInput = latexInput.Trim('$');
+            }
+            else if (latexInput.StartsWith(@"\(") && latexInput.EndsWith(@"\)"))
+            {
+                latexInput = latexInput.Substring(2, latexInput.Length - 4);
+            }
+            else if (latexInput.StartsWith(@"\[") && latexInput.EndsWith(@"\]"))
+            {
+                latexInput = latexInput.Substring(2, latexInput.Length - 4);
+            }
+
+            latexInput = latexInput.Replace("\r", "").Replace("\n", ""); // Remove line breaks
+
+            if (!string.IsNullOrEmpty(latexInput))
+            {
+                try
                 {
-                    PowerPoint.Application app = Globals.ThisAddIn.Application;
-                    PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+                // Insert a new textbox in the center of the slide
+                PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+                Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                slide.Master.Width / 2 - 100, slide.Master.Height / 2 - 50, 500, 500);
 
-                    // First create a textbox in the middle of the slide
-                    PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
-                        Office.MsoTextOrientation.msoTextOrientationHorizontal,
-                        100, 100, 300, 50);
+                // Select the newly inserted textbox
+                textBox.Select();
+                app.ActiveWindow.Selection.TextRange.Select();
 
-                    // Insert new equation at the end of the textbox
-                    textBox.TextFrame.TextRange.Text = " "; // Add a space character
-                    textBox.Select();
-                    
-                    // Switch to equation mode (equivalent to SwitchLatex)
-                    app.CommandBars.ExecuteMso("EquationInsertNew");
+                // Run SwitchLatex
+                app.CommandBars.ExecuteMso("EquationInsertNew");
+                PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+                equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = "\u24C9";
 
-                    // Get the active selection after equation insertion
-                    PowerPoint.Selection sel = app.ActiveWindow.Selection;
-                    if (sel.Type == PowerPoint.PpSelectionType.ppSelectionText)
-                    {
-                        PowerPoint.TextRange textRange = sel.TextRange;
-                        if (textRange != null && textRange.Length > 0)
-                        {
-                            try
-                            {
-                                // Set the equation text at the correct position
-                                textRange.Characters(textRange.Length - 1).Text = latex;
-                                
-                                // Switch to professional mode
-                                app.CommandBars.ExecuteMso("EquationProfessional");
+                app.CommandBars.ExecuteMso("EquationInsertNew");
+                app.ActiveWindow.Selection.TextRange.Select();
+                PowerPoint.Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
+                // Set the LaTeX input to the equation shape
+                equationShape2.TextFrame.TextRange.Characters(1, equationShape2.TextFrame.TextRange.Text.Length - 1).Text = latexInput;
 
-                                // Auto-size the textbox
-                                textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show("插入公式时发生错误: " + ex.Message);
-                            }
-                        }
-                    }
+                // Convert to professional format
+                app.CommandBars.ExecuteMso("EquationProfessional");
+
+                textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
                 }
+                catch (Exception ex)
+                {
+                MessageBox.Show("An error occurred: " + ex.Message);
+                }
+            }
             }
         }
     }
