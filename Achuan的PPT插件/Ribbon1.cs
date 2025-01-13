@@ -516,6 +516,11 @@ namespace Achuan的PPT插件
             }
         }
 
+        private int GetActualPosition(string text, int position)
+        {
+            return position - text.Substring(0, position).Count(c => c == '\r');
+        }
+
         private void insertMarkdown_Click(object sender, RibbonControlEventArgs e)
         {
             Form inputDialog = new Form()
@@ -553,7 +558,7 @@ namespace Achuan的PPT插件
                         Office.MsoTextOrientation.msoTextOrientationHorizontal,
                         100, 100, 500, 300);
 
-                    // Split the markdown into lines
+                    // Split the markdown into lines and process lists
                     var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
                     var processedLines = new List<string>();
                     bool isList = false;
@@ -562,64 +567,54 @@ namespace Achuan的PPT插件
                     foreach (var line in lines)
                     {
                         string processedLine = line;
-                        // Check for list markers
                         if (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\s*[-*+]\s+"))
                         {
                             isList = true;
-                            // Remove the list marker
                             processedLine = System.Text.RegularExpressions.Regex.Replace(line, @"^\s*[-*+]\s+", "");
                         }
                         processedLines.Add(processedLine);
                     }
 
                     string processedText = string.Join("\n", processedLines);
+                    textBox.TextFrame.TextRange.Text = processedText;
 
-                    // Define regex patterns and their replacements
-                    var markdownPatterns = new Dictionary<string, (string replacement, Action<PowerPoint.TextRange> formatting)>
+                    // Define regex patterns and their formatting actions
+                    var markdownPatterns = new Dictionary<string, (System.Text.RegularExpressions.Regex regex, Action<PowerPoint.TextRange> formatting)>
                     {
-                        { @"\*\*(.+?)\*\*", ("$1", range => range.Font.Bold = Office.MsoTriState.msoTrue) },
-                        { @"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", ("$1", range => range.Font.Italic = Office.MsoTriState.msoTrue) },
-                        { @"<u>(.+?)</u>", ("$1", range => range.Font.Underline = Office.MsoTriState.msoTrue) },
-                        { @"==(.+?)==", ("$1", range => range.Font.Shadow = Office.MsoTriState.msoTrue) },
-                        { @"<sub>(.+?)</sub>", ("$1", range => range.Font.Subscript = Office.MsoTriState.msoTrue) },
-                        { @"<sup>(.+?)</sup>", ("$1", range => range.Font.Superscript = Office.MsoTriState.msoTrue) },
-                        { @"`(.+?)`", ("$1", range => {
+                        { @"\*\*(.+?)\*\*", (new System.Text.RegularExpressions.Regex(@"\*\*(.+?)\*\*"), range => range.Font.Bold = Office.MsoTriState.msoTrue) },
+                        { @"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", (new System.Text.RegularExpressions.Regex(@"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)"), range => range.Font.Italic = Office.MsoTriState.msoTrue) },
+                        { @"<u>(.+?)</u>", (new System.Text.RegularExpressions.Regex(@"<u>(.+?)</u>"), range => range.Font.Underline = Office.MsoTriState.msoTrue) },
+                        { @"==(.+?)==", (new System.Text.RegularExpressions.Regex(@"==(.+?)=="), range => range.Font.Shadow = Office.MsoTriState.msoTrue) },
+                        { @"<sub>(.+?)</sub>", (new System.Text.RegularExpressions.Regex(@"<sub>(.+?)</sub>"), range => range.Font.Subscript = Office.MsoTriState.msoTrue) },
+                        { @"<sup>(.+?)</sup>", (new System.Text.RegularExpressions.Regex(@"<sup>(.+?)</sup>"), range => range.Font.Superscript = Office.MsoTriState.msoTrue) },
+                        { @"`(.+?)`", (new System.Text.RegularExpressions.Regex(@"`(.+?)`"), range => {
                             range.Font.Name = "Consolas";
                             range.Font.Color.RGB = ColorTranslator.ToOle(Color.DarkRed);
                         })}
                     };
 
-                    // Store formatting information
-                    var formattingInfo = new List<(int start, int length, Action<PowerPoint.TextRange> formatting)>();
-
-                    // Process each pattern and collect formatting information
                     foreach (var pattern in markdownPatterns)
                     {
-                        var regex = new System.Text.RegularExpressions.Regex(pattern.Key);
-                        var matches = regex.Matches(processedText);
-
-                        foreach (System.Text.RegularExpressions.Match match in matches)
+                        var matches = pattern.Value.regex.Matches(markdown);
+                        for (int i = matches.Count - 1; i >= 0; i--)
                         {
+                            var match = matches[i];
                             var innerText = match.Groups[1].Value;
-                            var originalStart = match.Index;
-                            var replacementLength = innerText.Length;
-                            formattingInfo.Add((originalStart, replacementLength, pattern.Value.formatting));
+                            var startPos = GetActualPosition(markdown, match.Index) + 1;
+                            var length = GetActualPosition(markdown, match.Index + match.Length) - GetActualPosition(markdown, match.Index);
+
+                            try
+                            {
+                                var range = textBox.TextFrame.TextRange.Characters(startPos, length);
+                                pattern.Value.formatting(range);
+                            }
+                            catch (Exception)
+                            {
+                                continue;
+                            }
                         }
-
-                        processedText = regex.Replace(processedText, pattern.Value.replacement);
                     }
 
-                    // Set the processed text
-                    textBox.TextFrame.TextRange.Text = processedText;
-
-                    // Apply stored formatting
-                    foreach (var info in formattingInfo.OrderByDescending(x => x.start))
-                    {
-                        var range = textBox.TextFrame.TextRange.Characters(info.start + 1, info.length);
-                        info.formatting(range);
-                    }
-
-                    // Apply bullet formatting if it's a list
                     if (isList)
                     {
                         textBox.TextFrame.TextRange.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletUnnumbered;
