@@ -411,5 +411,89 @@ namespace Achuan的PPT插件
                 }
             }
         }
+
+        private void insertEquationButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            // Create and configure input dialog
+            Form inputDialog = new Form()
+            {
+                Width = 500,
+                Height = 300,
+                Text = "插入数学公式"
+            };
+
+            TextBox latexInput = new TextBox()
+            {
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                Dock = DockStyle.Fill,
+                Font = new Font("Consolas", 12)
+            };
+
+            Button okButton = new Button()
+            {
+                Text = "确定",
+                DialogResult = DialogResult.OK,
+                Dock = DockStyle.Bottom
+            };
+
+            Label helpLabel = new Label()
+            {
+                Text = "输入KaTeX语法的数学公式（不需要添加$符号）",
+                Dock = DockStyle.Top,
+                Height = 30
+            };
+
+            // Add controls to form
+            inputDialog.Controls.AddRange(new Control[] { latexInput, helpLabel, okButton });
+
+            // Show dialog and process result
+            if (inputDialog.ShowDialog() == DialogResult.OK)
+            {
+                string latex = latexInput.Text.Trim();
+                if (!string.IsNullOrEmpty(latex))
+                {
+                    PowerPoint.Application app = Globals.ThisAddIn.Application;
+                    PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+
+                    // First create a textbox in the middle of the slide
+                    PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+                        Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                        100, 100, 300, 50);
+
+                    // Insert new equation at the end of the textbox
+                    textBox.TextFrame.TextRange.Text = " "; // Add a space character
+                    textBox.Select();
+                    
+                    // Switch to equation mode (equivalent to SwitchLatex)
+                    app.CommandBars.ExecuteMso("EquationInsertNew");
+
+                    // Get the active selection after equation insertion
+                    PowerPoint.Selection sel = app.ActiveWindow.Selection;
+                    if (sel.Type == PowerPoint.PpSelectionType.ppSelectionText)
+                    {
+                        PowerPoint.TextRange textRange = sel.TextRange;
+                        if (textRange != null && textRange.Length > 0)
+                        {
+                            try
+                            {
+                                // Set the equation text at the correct position
+                                textRange.Characters(textRange.Length - 1).Text = latex;
+                                
+                                // Switch to professional mode
+                                app.CommandBars.ExecuteMso("EquationProfessional");
+
+                                // Auto-size the textbox
+                                textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("插入公式时发生错误: " + ex.Message);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

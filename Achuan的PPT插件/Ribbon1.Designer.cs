@@ -64,6 +64,7 @@
             this.button1 = this.Factory.CreateRibbonButton();
             this.insertCodeBlockButton = this.Factory.CreateRibbonButton();
             this.toggleBackgroundButton = this.Factory.CreateRibbonToggleButton();
+            this.insertEquationButton = this.Factory.CreateRibbonButton(); // Add this line
             this.tab1.SuspendLayout();
             this.图片处理.SuspendLayout();
             this.group1.SuspendLayout();
@@ -198,6 +199,7 @@
             // 
             this.codeGroup.Items.Add(this.insertCodeBlockButton);
             this.codeGroup.Items.Add(this.toggleBackgroundButton);
+            this.codeGroup.Items.Add(this.insertEquationButton); // Add this line
             this.codeGroup.Label = "代码工具";
             this.codeGroup.Name = "codeGroup";
             // 
@@ -292,6 +294,12 @@
             this.toggleBackgroundButton.Name = "toggleBackgroundButton";
             this.toggleBackgroundButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.toggleBackgroundButton_Click);
             // 
+            // insertEquationButton
+            // 
+            this.insertEquationButton.Label = "插入数学公式";
+            this.insertEquationButton.Name = "insertEquationButton";
+            this.insertEquationButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.insertEquationButton_Click);
+            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -347,6 +355,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton insertCodeBlockButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup codeGroup;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleBackgroundButton;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton insertEquationButton; // Add this line
     }
 
     partial class ThisRibbonCollection
