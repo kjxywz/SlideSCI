@@ -28,16 +28,20 @@ namespace Achuan的PPT插件
         {
             PowerPoint.Application app = Globals.ThisAddIn.Application;
             PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
-            PowerPoint.Shape selectedShape = app.ActiveWindow.Selection.ShapeRange[1];
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
 
-            if (selectedShape != null && selectedShape.Type == Office.MsoShapeType.msoPicture)
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
             {
-                float fontSize = float.Parse(fontSizeEditBox.Text);
-                float distanceFromBottom = float.Parse(distanceFromBottomEditBox.Text);
-                bool autoGroup = autoGroupCheckBox.Checked;
-                string fontName = fontNameEditBox.Text;
-                string titleText = titleTextEditBox.Text;
+            float fontSize = float.Parse(fontSizeEditBox.Text);
+            float distanceFromBottom = float.Parse(distanceFromBottomEditBox.Text);
+            bool autoGroup = autoGroupCheckBox.Checked;
+            string fontName = fontNameEditBox.Text;
+            string titleText = titleTextEditBox.Text;
 
+            foreach (PowerPoint.Shape selectedShape in sel.ShapeRange)
+            {
+                if (selectedShape.Type == Office.MsoShapeType.msoPicture)
+                {
                 PowerPoint.Shape titleShape = slide.Shapes.AddTextbox(
                     Office.MsoTextOrientation.msoTextOrientationHorizontal,
                     selectedShape.Left,
@@ -47,7 +51,7 @@ namespace Achuan的PPT插件
 
                 titleShape.TextFrame.TextRange.Text = titleText;
                 titleShape.TextFrame.TextRange.Font.Size = fontSize;
-                titleShape.TextFrame.TextRange.Font.NameFarEast = fontName;; // Ensure FarEast font is set
+                titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
                 titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
                 titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignCenter;
 
@@ -56,6 +60,12 @@ namespace Achuan的PPT插件
                     PowerPoint.ShapeRange shapeRange = slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name });
                     shapeRange.Group();
                 }
+                }
+            }
+            }
+            else
+            {
+            MessageBox.Show("Please select an image to add a title.");
             }
         }
 
@@ -481,7 +491,7 @@ namespace Achuan的PPT插件
                 // Select the newly inserted textbox
                 textBox.Select();
                 app.ActiveWindow.Selection.TextRange.Select();
-
+                
                 // Run SwitchLatex
                 app.CommandBars.ExecuteMso("EquationInsertNew");
                 PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
