@@ -29,14 +29,18 @@ namespace Achuan的PPT插件
                 {
                     {"keyword", Color.FromArgb(86, 156, 214)},    // 蓝色
                     {"comment", Color.FromArgb(87, 166, 74)},     // 绿色
+                    {"string", Color.FromArgb(214, 157, 133)},    // 棕色
+                    {"number", Color.FromArgb(181, 206, 168)},    // 蓝绿色
                 };
             }
             else
             {
                 themeColors = new Dictionary<string, Color>
                 {
-                    {"keyword", Color.FromArgb(0, 0, 255)},      // 蓝色
-                    {"comment", Color.FromArgb(0, 128, 0)},      // 绿色
+                    {"keyword", Color.FromArgb(0, 0, 255)},       // 蓝色
+                    {"comment", Color.FromArgb(0, 128, 0)},       // 绿色
+                    {"string", Color.FromArgb(163, 21, 21)},      // 棕色
+                    {"number", Color.FromArgb(9, 134, 88)},       // 蓝绿色
                 };
             }
         }
@@ -47,6 +51,10 @@ namespace Achuan的PPT插件
             {
                 {"csharp", new List<(string, RegexOptions, string)>
                     {
+                        // 字符串
+                        (@"@""([^""]|"""")*""|""([^""\n\\]|\\.)*""", RegexOptions.None, "string"),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?\b", RegexOptions.None, "number"),
                         // 注释
                         (@"/\*[\s\S]*?\*/", RegexOptions.None, "comment"),
                         (@"//[^\n]*", RegexOptions.None, "comment"),
@@ -57,18 +65,30 @@ namespace Achuan的PPT插件
                 },
                 {"python", new List<(string, RegexOptions, string)>
                     {
+                        // 字符串
+                        (@"(?:[ruf]|rf|fr)?(?:'''[\s\S]*?'''|\""""""[\s\S]*?\""""""|\x27[^\x27\n\\]*(?:\\.[^\x27\n\\]*)*\x27|\""[^\""\n\\]*(?:\\.[^\""\n\\]*)*\"")", RegexOptions.None, "string"),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?\b", RegexOptions.None, "number"),
                         (@"#.*?$", RegexOptions.Multiline, "comment"),
                         (@"\b(and|as|assert|async|await|break|class|continue|def|del|elif|else|except|False|finally|for|from|global|if|import|in|is|lambda|None|nonlocal|not|or|pass|raise|return|True|try|while|with|yield)\b", RegexOptions.None, "keyword"),
                     }
                 },
                 {"javascript", new List<(string, RegexOptions, string)>
                     {
+                        // 字符串
+                        (@"`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|""(?:[^""\\]|\\.)*""", RegexOptions.None, "string"),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?\b", RegexOptions.None, "number"),
                         (@"/\*[\s\S]*?\*/|//.*?$", RegexOptions.Multiline, "comment"),
                         (@"\b(async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|new|return|super|switch|this|throw|try|typeof|var|void|while|with|yield|let)\b", RegexOptions.None, "keyword"),
                     }
                 },
                 {"matlab", new List<(string, RegexOptions, string)>
                     {
+                        // 字符串 (支持单引号和双引号)
+                        (@"(?:""[^""\n]*""|'[^'\n]*')", RegexOptions.None, "string"),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?\b", RegexOptions.None, "number"),
                         // 注释
                         (@"%.*?$", RegexOptions.Multiline, "comment"),
                         
