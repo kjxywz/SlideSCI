@@ -553,106 +553,67 @@ namespace Achuan的PPT插件
                         Office.MsoTextOrientation.msoTextOrientationHorizontal,
                         100, 100, 500, 300);
 
-                    // Convert markdown to formatted text
-                    string[] lines = markdown.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-                    StringBuilder formattedText = new StringBuilder();
-                    int listLevel = 0;
+                    string processedText = markdown;
 
-                    foreach (string line in lines)
+                    // Define regex patterns and their replacements
+                    var markdownPatterns = new Dictionary<string, (string replacement, Action<PowerPoint.TextRange> formatting)>
                     {
-                        string trimmedLine = line.TrimStart();
-                        int currentLevel = line.Length - trimmedLine.Length;
+                        { @"\*\*(.+?)\*\*", ("$1", range => range.Font.Bold = Office.MsoTriState.msoTrue) },
+                        { @"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", ("$1", range => range.Font.Italic = Office.MsoTriState.msoTrue) },
+                        //{ @"~~(.+?)~~", ("$1", range => range.Font.Strikethrough = Office.MsoTriState.msoTrue) },
+                        { @"<u>(.+?)</u>", ("$1", range => range.Font.Underline = Office.MsoTriState.msoTrue) },
+                        { @"==(.+?)==", ("$1", range => range.Font.Shadow = Office.MsoTriState.msoTrue) },
+                        { @"<sub>(.+?)</sub>", ("$1", range => range.Font.Subscript = Office.MsoTriState.msoTrue) },
+                        { @"<sup>(.+?)</sup>", ("$1", range => range.Font.Superscript = Office.MsoTriState.msoTrue) },
+                        { @"`(.+?)`", ("$1", range => {
+                            range.Font.Name = "Consolas";
+                            range.Font.Color.RGB = ColorTranslator.ToOle(Color.DarkRed);
+                        })}
+                    };
 
-                        // Handle unordered lists
-                        if (trimmedLine.StartsWith("- ") || trimmedLine.StartsWith("* ") || trimmedLine.StartsWith("+ "))
+                    // Store formatting information
+                    var formattingInfo = new List<(int start, int length, Action<PowerPoint.TextRange> formatting)>();
+
+                    // Process each pattern and collect formatting information
+                    foreach (var pattern in markdownPatterns)
+                    {
+                        var regex = new System.Text.RegularExpressions.Regex(pattern.Key);
+                        var matches = regex.Matches(processedText);
+
+                        // Store original positions before replacing
+                        foreach (System.Text.RegularExpressions.Match match in matches)
                         {
-                            formattedText.AppendLine(new string('\t', currentLevel) + trimmedLine.Substring(2));
-                            listLevel = 1;
+                            var innerText = match.Groups[1].Value;
+                            var originalStart = match.Index;
+                            var replacementLength = innerText.Length;
+                            formattingInfo.Add((originalStart, replacementLength, pattern.Value.formatting));
                         }
-                        // Handle ordered lists
-                        else if (System.Text.RegularExpressions.Regex.IsMatch(trimmedLine, @"^\d+\. "))
-                        {
-                            formattedText.AppendLine(new string('\t', currentLevel) + trimmedLine.Substring(trimmedLine.IndexOf(' ') + 1));
-                            listLevel = 2;
-                        }
-                        else
-                        {
-                            formattedText.AppendLine(trimmedLine);
-                            listLevel = 0;
-                        }
+
+                        // Replace the pattern with its inner content
+                        processedText = regex.Replace(processedText, pattern.Value.replacement);
                     }
 
-                    textBox.TextFrame.TextRange.Text = formattedText.ToString();
+                    // Set the processed text
+                    textBox.TextFrame.TextRange.Text = processedText;
 
-                    // Apply formatting
-                    var textRange = textBox.TextFrame.TextRange;
-                    string text = textRange.Text;
+                    // Apply stored formatting
+                    foreach (var info in formattingInfo.OrderByDescending(x => x.start))
+                    {
+                        var range = textBox.TextFrame.TextRange.Characters(info.start + 1, info.length);
+                        info.formatting(range);
+                    }
 
-                    // Bold
-                    ApplyMarkdownStyle(textRange, @"\*\*(.+?)\*\*", PowerPoint.PpParagraphAlignment.ppAlignLeft, bold: true);
-                    
-                    // Italic
-                    ApplyMarkdownStyle(textRange, @"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", PowerPoint.PpParagraphAlignment.ppAlignLeft, italic: true);
-                    
-                    // Strikethrough
-                    ApplyMarkdownStyle(textRange, @"~~(.+?)~~", PowerPoint.PpParagraphAlignment.ppAlignLeft, strikethrough: true);
-                    
-                    // Underline
-                    ApplyMarkdownStyle(textRange, @"<u>(.+?)</u>", PowerPoint.PpParagraphAlignment.ppAlignLeft, underline: true);
-                    
-                    // Highlight
-                    ApplyMarkdownStyle(textRange, @"==(.+?)==", PowerPoint.PpParagraphAlignment.ppAlignLeft, highlight: true);
-                    
-                    // Subscript
-                    ApplyMarkdownStyle(textRange, @"<sub>(.+?)</sub>", PowerPoint.PpParagraphAlignment.ppAlignLeft, subscript: true);
-                    
-                    // Superscript
-                    ApplyMarkdownStyle(textRange, @"<sup>(.+?)</sup>", PowerPoint.PpParagraphAlignment.ppAlignLeft, superscript: true);
-                    
-                    // Inline code
-                    ApplyMarkdownStyle(textRange, @"`(.+?)`", PowerPoint.PpParagraphAlignment.ppAlignLeft, code: true);
-
-                    // Apply list formatting if needed
-                    if (listLevel == 1)
+                    // Handle lists
+                    if (processedText.Contains("\n- ") || processedText.Contains("\n* ") || processedText.Contains("\n+ "))
                     {
                         textBox.TextFrame.TextRange.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletUnnumbered;
                     }
-                    else if (listLevel == 2)
+                    else if (System.Text.RegularExpressions.Regex.IsMatch(processedText, @"\n\d+\. "))
                     {
                         textBox.TextFrame.TextRange.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNumbered;
                     }
 
                     textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
-                }
-            }
-        }
-
-        private void ApplyMarkdownStyle(PowerPoint.TextRange textRange, string pattern, 
-            PowerPoint.PpParagraphAlignment alignment, bool bold = false, bool italic = false, 
-            bool strikethrough = false, bool underline = false, bool highlight = false,
-            bool subscript = false, bool superscript = false, bool code = false)
-        {
-            var regex = new System.Text.RegularExpressions.Regex(pattern);
-            string text = textRange.Text;
-            var matches = regex.Matches(text);
-
-            foreach (System.Text.RegularExpressions.Match match in matches)
-            {
-                int start = match.Index;
-                int length = match.Length;
-                var range = textRange.Characters(start + 1, length);
-                
-                if (bold) range.Font.Bold = Office.MsoTriState.msoTrue;
-                if (italic) range.Font.Italic = Office.MsoTriState.msoTrue;
-                //if (strikethrough) range.Font.Strikethrough = Office.MsoTriState.msoTrue;
-                if (underline) range.Font.Underline = Office.MsoTriState.msoTrue;
-                if (highlight) range.Font.Shadow = Office.MsoTriState.msoTrue;
-                if (subscript) range.Font.Subscript = Office.MsoTriState.msoTrue;
-                if (superscript) range.Font.Superscript = Office.MsoTriState.msoTrue;
-                if (code)
-                {
-                    range.Font.Name = "Consolas";
-                    range.Font.Color.RGB = ColorTranslator.ToOle(Color.DarkRed);
                 }
             }
         }
