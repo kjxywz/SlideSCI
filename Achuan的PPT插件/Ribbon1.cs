@@ -23,6 +23,7 @@ namespace Achuan的PPT插件
         private float cropTop;
         private float cropBottom;
         private bool hasCopiedCrop = false;
+        private float originalHeight; // 添加变量存储原始图片高度
 
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
@@ -668,10 +669,17 @@ namespace Achuan的PPT插件
                 PowerPoint.Shape shape = sel.ShapeRange[1];
                 if (shape.Type == Office.MsoShapeType.msoPicture)
                 {
+                    // 保存裁剪设置
                     cropLeft = shape.PictureFormat.CropLeft;
                     cropRight = shape.PictureFormat.CropRight;
                     cropTop = shape.PictureFormat.CropTop;
                     cropBottom = shape.PictureFormat.CropBottom;
+                    
+                    // 保存原始高度
+                    float currentHeight = shape.Height;
+                    float croppedPixels = cropTop + cropBottom;
+                    originalHeight = currentHeight + croppedPixels;
+                    
                     hasCopiedCrop = true;
                     MessageBox.Show("已复制图片裁剪设置");
                 }
@@ -701,10 +709,26 @@ namespace Achuan的PPT插件
                 {
                     if (shape.Type == Office.MsoShapeType.msoPicture)
                     {
-                        shape.PictureFormat.CropLeft = cropLeft;
-                        shape.PictureFormat.CropRight = cropRight;
-                        shape.PictureFormat.CropTop = cropTop;
-                        shape.PictureFormat.CropBottom = cropBottom;
+                        try
+                        {
+                            // 保持宽高比
+                            float aspectRatio = shape.Width / shape.Height;
+                            
+                            // 先调整为原始高度
+                            shape.Height = originalHeight;
+                            // 保持宽高比例调整宽度
+                            shape.Width = originalHeight * aspectRatio;
+                            
+                            // 应用裁剪设置
+                            shape.PictureFormat.CropLeft = cropLeft;
+                            shape.PictureFormat.CropRight = cropRight;
+                            shape.PictureFormat.CropTop = cropTop;
+                            shape.PictureFormat.CropBottom = cropBottom;
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"应用裁剪设置时出错: {ex.Message}");
+                        }
                     }
                 }
             }
