@@ -696,43 +696,43 @@ namespace Achuan的PPT插件
                 MessageBox.Show("请先复制图片裁剪设置");
                 return;
             }
-
             PowerPoint.Selection sel = app.ActiveWindow.Selection;
             if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
             {
                 foreach (PowerPoint.Shape shape in sel.ShapeRange)
                 {
+                    try
+                    {
+                        // Store original position
+                        float originalLeft = shape.Left;
+                        float originalTop = shape.Top;
 
-                        try
-                        {
-                            // 保持宽高比
-                            float aspectRatio = shape.Width / shape.Height;
+                        // Clear existing crop settings
+                        shape.PictureFormat.CropLeft = 0;
+                        shape.PictureFormat.CropRight = 0;
+                        shape.PictureFormat.CropTop = 0;
+                        shape.PictureFormat.CropBottom = 0;
 
-                            // 先调整为原始高度
-                            shape.PictureFormat.CropLeft = 0;
-                            shape.PictureFormat.CropRight = 0;
-                            shape.PictureFormat.CropTop = 0;
-                            shape.PictureFormat.CropBottom = 0;
+                        // Restore to original height
+                        shape.Height = originalHeight;
 
-                            shape.Height = originalHeight;
-                            // 保持宽高比例调整宽度
-                            //shape.Width = originalHeight * aspectRatio;
+                        // Apply crop settings
+                        shape.PictureFormat.CropLeft = cropLeft;
+                        shape.PictureFormat.CropRight = cropRight;
+                        shape.PictureFormat.CropTop = cropTop;
+                        shape.PictureFormat.CropBottom = cropBottom;
 
-                            // 应用裁剪设置
-                            shape.PictureFormat.CropLeft = cropLeft;
-                            shape.PictureFormat.CropRight = cropRight;
-                            shape.PictureFormat.CropTop = cropTop;
-                            shape.PictureFormat.CropBottom = cropBottom;
+                        shape.Height = currentCropedHeight;
 
-                            shape.Height = currentCropedHeight;
-                            //shape.Width = currentCropedHeight * aspectRatio;
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"应用裁剪设置时出错: {ex.Message}");
-                        }
-                    
-                }
+                        // Restore original position
+                        shape.Left = originalLeft;
+                        shape.Top = originalTop;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"应用裁剪设置时出错: {ex.Message}");
+                    }
+            }
             }
             else
             {
