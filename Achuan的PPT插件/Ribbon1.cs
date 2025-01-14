@@ -24,7 +24,7 @@ namespace Achuan的PPT插件
         private float cropBottom;
         private bool hasCopiedCrop = false;
         private float originalHeight; // 添加变量存储原始图片高度
-
+        private float currentCropedHeight;
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
             app = Globals.ThisAddIn.Application;
@@ -667,31 +667,26 @@ namespace Achuan的PPT插件
             if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
             {
                 PowerPoint.Shape shape = sel.ShapeRange[1];
-                if (shape.Type == Office.MsoShapeType.msoPicture)
-                {
+
                     // 保存裁剪设置
                     cropLeft = shape.PictureFormat.CropLeft;
                     cropRight = shape.PictureFormat.CropRight;
                     cropTop = shape.PictureFormat.CropTop;
                     cropBottom = shape.PictureFormat.CropBottom;
-                    
+
                     // 保存原始高度
-                    float currentHeight = shape.Height;
+                    currentCropedHeight = shape.Height;
                     float croppedPixels = cropTop + cropBottom;
-                    originalHeight = currentHeight + croppedPixels;
-                    
+                    originalHeight = currentCropedHeight + croppedPixels;
+
                     hasCopiedCrop = true;
-                    MessageBox.Show("已复制图片裁剪设置");
+                    //MessageBox.Show("已复制图片裁剪设置");
                 }
                 else
                 {
                     MessageBox.Show("请选择一个图片对象");
                 }
-            }
-            else
-            {
-                MessageBox.Show("请选择一个图片对象");
-            }
+
         }
 
         private void pasteCrop_Click(object sender, RibbonControlEventArgs e)
@@ -707,29 +702,36 @@ namespace Achuan的PPT插件
             {
                 foreach (PowerPoint.Shape shape in sel.ShapeRange)
                 {
-                    if (shape.Type == Office.MsoShapeType.msoPicture)
-                    {
+
                         try
                         {
                             // 保持宽高比
                             float aspectRatio = shape.Width / shape.Height;
-                            
+
                             // 先调整为原始高度
+                            shape.PictureFormat.CropLeft = 0;
+                            shape.PictureFormat.CropRight = 0;
+                            shape.PictureFormat.CropTop = 0;
+                            shape.PictureFormat.CropBottom = 0;
+
                             shape.Height = originalHeight;
                             // 保持宽高比例调整宽度
                             shape.Width = originalHeight * aspectRatio;
-                            
+
                             // 应用裁剪设置
                             shape.PictureFormat.CropLeft = cropLeft;
                             shape.PictureFormat.CropRight = cropRight;
                             shape.PictureFormat.CropTop = cropTop;
                             shape.PictureFormat.CropBottom = cropBottom;
+
+                            shape.Height = currentCropedHeight;
+                            shape.Width = currentCropedHeight * aspectRatio;
                         }
                         catch (Exception ex)
                         {
                             MessageBox.Show($"应用裁剪设置时出错: {ex.Message}");
                         }
-                    }
+                    
                 }
             }
             else
