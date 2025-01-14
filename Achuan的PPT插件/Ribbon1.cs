@@ -558,31 +558,33 @@ namespace Achuan的PPT插件
                         Office.MsoTextOrientation.msoTextOrientationHorizontal,
                         100, 100, 500, 300);
 
-                    // Process lists first
+                    // Split lines and detect list patterns per line
                     var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
                     var processedLines = new List<string>();
-                    bool hasOrderedList = false;
-                    bool hasUnorderedList = false;
+                    var lineListTypes = new List<int>(); // 0 = normal, 1 = ordered, 2 = unordered
 
                     foreach (var line in lines)
                     {
-                        string processedLine = line;
-                        // Check for ordered list (e.g., "1. ", "2. ")
                         if (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\s*\d+\.\s+"))
                         {
-                            hasOrderedList = true;
-                            processedLine = System.Text.RegularExpressions.Regex.Replace(line, @"^\s*\d+\.\s+", "");
+                            lineListTypes.Add(1);
+                            processedLines.Add(System.Text.RegularExpressions.Regex
+                                .Replace(line, @"^\s*\d+\.\s+", ""));
                         }
-                        // Check for unordered list
                         else if (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\s*[-*+]\s+"))
                         {
-                            hasUnorderedList = true;
-                            processedLine = System.Text.RegularExpressions.Regex.Replace(line, @"^\s*[-*+]\s+", "");
+                            lineListTypes.Add(2);
+                            processedLines.Add(System.Text.RegularExpressions.Regex
+                                .Replace(line, @"^\s*[-*+]\s+", ""));
                         }
-                        processedLines.Add(processedLine);
+                        else
+                        {
+                            lineListTypes.Add(0);
+                            processedLines.Add(line);
+                        }
                     }
 
-                    string processedText = string.Join("\n", processedLines);
+                    string processedText = string.Join("\r", processedLines); // Use carriage returns
 
                     // Define formatting patterns
                     var markdownPatterns = new Dictionary<string, (System.Text.RegularExpressions.Regex regex, Action<PowerPoint.TextRange> formatting, int markerLength)>
@@ -643,14 +645,22 @@ namespace Achuan的PPT插件
                         }
                     }
 
-                    // Apply list formatting
-                    if (hasOrderedList)
+                    // Apply bullet formatting only to paragraphs that matched list patterns
+                    for (int i = 0; i < processedLines.Count; i++)
                     {
-                        textBox.TextFrame.TextRange.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNumbered;
-                    }
-                    else if (hasUnorderedList)
-                    {
-                        textBox.TextFrame.TextRange.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletUnnumbered;
+                        var paragraph = textBox.TextFrame.TextRange.Paragraphs(i + 1);
+                        switch (lineListTypes[i])
+                        {
+                            case 1:
+                                paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNumbered;
+                                break;
+                            case 2:
+                                paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletUnnumbered;
+                                break;
+                            default:
+                                paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNone;
+                                break;
+                        }
                     }
 
                     textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
