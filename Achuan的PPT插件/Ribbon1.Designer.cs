@@ -46,12 +46,14 @@
             this.group1 = this.Factory.CreateRibbonGroup();
             this.copyPosition = this.Factory.CreateRibbonButton();
             this.pastePosition = this.Factory.CreateRibbonButton();
-            this.复制图片宽高 = this.Factory.CreateRibbonGroup();
+            this.复制图片格式 = this.Factory.CreateRibbonGroup();
             this.copyImgWidth = this.Factory.CreateRibbonButton();
             this.pasteImgWidth = this.Factory.CreateRibbonButton();
             this.label1 = this.Factory.CreateRibbonLabel();
             this.copyImgHeight = this.Factory.CreateRibbonButton();
             this.pasteImgHeight = this.Factory.CreateRibbonButton();
+            this.copyCrop = this.Factory.CreateRibbonButton();
+            this.pasteCrop = this.Factory.CreateRibbonButton();
             this.图片自动对齐 = this.Factory.CreateRibbonGroup();
             this.imgAutoAlign = this.Factory.CreateRibbonButton();
             this.imgAutoAlign_colNum = this.Factory.CreateRibbonEditBox();
@@ -64,13 +66,14 @@
             this.toggleBackgroundButton = this.Factory.CreateRibbonToggleButton();
             this.insertEquationButton = this.Factory.CreateRibbonButton();
             this.button2 = this.Factory.CreateRibbonButton();
+            this.button3 = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.button1 = this.Factory.CreateRibbonButton();
-            this.button3 = this.Factory.CreateRibbonButton();
+            this.label2 = this.Factory.CreateRibbonLabel();
             this.tab1.SuspendLayout();
             this.图片处理.SuspendLayout();
             this.group1.SuspendLayout();
-            this.复制图片宽高.SuspendLayout();
+            this.复制图片格式.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.codeGroup.SuspendLayout();
             this.group2.SuspendLayout();
@@ -81,7 +84,7 @@
             this.tab1.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office;
             this.tab1.Groups.Add(this.图片处理);
             this.tab1.Groups.Add(this.group1);
-            this.tab1.Groups.Add(this.复制图片宽高);
+            this.tab1.Groups.Add(this.复制图片格式);
             this.tab1.Groups.Add(this.图片自动对齐);
             this.tab1.Groups.Add(this.codeGroup);
             this.tab1.Groups.Add(this.group2);
@@ -161,15 +164,18 @@
             this.pastePosition.ShowImage = true;
             this.pastePosition.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pastePosition_Click);
             // 
-            // 复制图片宽高
+            // 复制图片格式
             // 
-            this.复制图片宽高.Items.Add(this.copyImgWidth);
-            this.复制图片宽高.Items.Add(this.pasteImgWidth);
-            this.复制图片宽高.Items.Add(this.label1);
-            this.复制图片宽高.Items.Add(this.copyImgHeight);
-            this.复制图片宽高.Items.Add(this.pasteImgHeight);
-            this.复制图片宽高.Label = "复制图片宽高";
-            this.复制图片宽高.Name = "复制图片宽高";
+            this.复制图片格式.Items.Add(this.copyImgWidth);
+            this.复制图片格式.Items.Add(this.pasteImgWidth);
+            this.复制图片格式.Items.Add(this.label1);
+            this.复制图片格式.Items.Add(this.copyImgHeight);
+            this.复制图片格式.Items.Add(this.pasteImgHeight);
+            this.复制图片格式.Items.Add(this.label2);
+            this.复制图片格式.Items.Add(this.copyCrop);
+            this.复制图片格式.Items.Add(this.pasteCrop);
+            this.复制图片格式.Label = "复制图片格式";
+            this.复制图片格式.Name = "复制图片格式";
             // 
             // copyImgWidth
             // 
@@ -207,6 +213,18 @@
             this.pasteImgHeight.Name = "pasteImgHeight";
             this.pasteImgHeight.ShowImage = true;
             this.pasteImgHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteImgHeight_Click);
+            // 
+            // copyCrop
+            // 
+            this.copyCrop.Label = "复制裁剪";
+            this.copyCrop.Name = "copyCrop";
+            this.copyCrop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyCrop_Click);
+            // 
+            // pasteCrop
+            // 
+            this.pasteCrop.Label = "粘贴裁剪";
+            this.pasteCrop.Name = "pasteCrop";
+            this.pasteCrop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteCrop_Click);
             // 
             // 图片自动对齐
             // 
@@ -298,6 +316,12 @@
             this.button2.Name = "button2";
             this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.insertMarkdown_Click);
             // 
+            // button3
+            // 
+            this.button3.Label = "Markdown转富文本网站";
+            this.button3.Name = "button3";
+            this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button3_Click);
+            // 
             // group2
             // 
             this.group2.Items.Add(this.button1);
@@ -313,11 +337,10 @@
             this.button1.ShowImage = true;
             this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button1_Click);
             // 
-            // button3
+            // label2
             // 
-            this.button3.Label = "Markdown转富文本网站";
-            this.button3.Name = "button3";
-            this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button3_Click);
+            this.label2.Label = " ";
+            this.label2.Name = "label2";
             // 
             // Ribbon1
             // 
@@ -331,8 +354,8 @@
             this.图片处理.PerformLayout();
             this.group1.ResumeLayout(false);
             this.group1.PerformLayout();
-            this.复制图片宽高.ResumeLayout(false);
-            this.复制图片宽高.PerformLayout();
+            this.复制图片格式.ResumeLayout(false);
+            this.复制图片格式.PerformLayout();
             this.图片自动对齐.ResumeLayout(false);
             this.图片自动对齐.PerformLayout();
             this.codeGroup.ResumeLayout(false);
@@ -362,7 +385,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton pasteImgWidth;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton copyImgHeight;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton pasteImgHeight;
-        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 复制图片宽高;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 复制图片格式;
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel label1;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox fontSizeEditBox;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox distanceFromBottomEditBox;
@@ -377,6 +400,9 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton insertEquationButton; // Add this line
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button2;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton copyCrop;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton pasteCrop;
+        internal Microsoft.Office.Tools.Ribbon.RibbonLabel label2;
     }
 
     partial class ThisRibbonCollection

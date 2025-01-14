@@ -18,6 +18,11 @@ namespace Achuan的PPT插件
         private float copiedLeft;
         private float copiedTop;
         private bool isDarkBackground = true;  // Changed from false to true
+        private float cropLeft;
+        private float cropRight;
+        private float cropTop;
+        private float cropBottom;
+        private bool hasCopiedCrop = false;
 
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
@@ -653,6 +658,60 @@ namespace Achuan的PPT插件
         private void button3_Click(object sender, RibbonControlEventArgs e)
         {
             System.Diagnostics.Process.Start("https://markdown.com.cn/editor");
+        }
+
+        private void copyCrop_Click(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                PowerPoint.Shape shape = sel.ShapeRange[1];
+                if (shape.Type == Office.MsoShapeType.msoPicture)
+                {
+                    cropLeft = shape.PictureFormat.CropLeft;
+                    cropRight = shape.PictureFormat.CropRight;
+                    cropTop = shape.PictureFormat.CropTop;
+                    cropBottom = shape.PictureFormat.CropBottom;
+                    hasCopiedCrop = true;
+                    MessageBox.Show("已复制图片裁剪设置");
+                }
+                else
+                {
+                    MessageBox.Show("请选择一个图片对象");
+                }
+            }
+            else
+            {
+                MessageBox.Show("请选择一个图片对象");
+            }
+        }
+
+        private void pasteCrop_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (!hasCopiedCrop)
+            {
+                MessageBox.Show("请先复制图片裁剪设置");
+                return;
+            }
+
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    if (shape.Type == Office.MsoShapeType.msoPicture)
+                    {
+                        shape.PictureFormat.CropLeft = cropLeft;
+                        shape.PictureFormat.CropRight = cropRight;
+                        shape.PictureFormat.CropTop = cropTop;
+                        shape.PictureFormat.CropBottom = cropBottom;
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("请选择要应用裁剪设置的图片");
+            }
         }
     }
 
