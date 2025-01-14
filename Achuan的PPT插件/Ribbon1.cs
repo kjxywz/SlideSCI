@@ -716,7 +716,7 @@ namespace Achuan的PPT插件
 
                             shape.Height = originalHeight;
                             // 保持宽高比例调整宽度
-                            shape.Width = originalHeight * aspectRatio;
+                            //shape.Width = originalHeight * aspectRatio;
 
                             // 应用裁剪设置
                             shape.PictureFormat.CropLeft = cropLeft;
@@ -725,7 +725,7 @@ namespace Achuan的PPT插件
                             shape.PictureFormat.CropBottom = cropBottom;
 
                             shape.Height = currentCropedHeight;
-                            shape.Width = currentCropedHeight * aspectRatio;
+                            //shape.Width = currentCropedHeight * aspectRatio;
                         }
                         catch (Exception ex)
                         {
