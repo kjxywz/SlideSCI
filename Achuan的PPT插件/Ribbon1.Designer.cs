@@ -66,6 +66,7 @@
             this.button2 = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.button1 = this.Factory.CreateRibbonButton();
+            this.button3 = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.图片处理.SuspendLayout();
             this.group1.SuspendLayout();
@@ -262,6 +263,7 @@
             this.codeGroup.Items.Add(this.toggleBackgroundButton);
             this.codeGroup.Items.Add(this.insertEquationButton);
             this.codeGroup.Items.Add(this.button2);
+            this.codeGroup.Items.Add(this.button3);
             this.codeGroup.Label = "Markdown";
             this.codeGroup.Name = "codeGroup";
             // 
@@ -310,6 +312,12 @@
             this.button1.Name = "button1";
             this.button1.ShowImage = true;
             this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button1_Click);
+            // 
+            // button3
+            // 
+            this.button3.Label = "Markdown转富文本网站";
+            this.button3.Name = "button3";
+            this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button3_Click);
             // 
             // Ribbon1
             // 
@@ -368,6 +376,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleBackgroundButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton insertEquationButton; // Add this line
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button3;
     }
 
     partial class ThisRibbonCollection
