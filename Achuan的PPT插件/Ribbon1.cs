@@ -586,51 +586,38 @@ namespace Achuan的PPT插件
 
                     string processedText = string.Join("\r", processedLines); // Use carriage returns
 
-                    // Define formatting patterns
-                    var markdownPatterns = new Dictionary<string, (System.Text.RegularExpressions.Regex regex, Action<PowerPoint.TextRange> formatting, int markerLength)>
+                    // Define formatting patterns with updated regex
+                    var markdownPatterns = new Dictionary<string, (System.Text.RegularExpressions.Regex regex, Action<PowerPoint.TextRange> formatting)>
                     {
-                        { @"\*\*(.+?)\*\*", (new System.Text.RegularExpressions.Regex(@"\*\*(.+?)\*\*"), range => range.Font.Bold = Office.MsoTriState.msoTrue, 4) },
-                        { @"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", (new System.Text.RegularExpressions.Regex(@"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)"), range => range.Font.Italic = Office.MsoTriState.msoTrue, 2) },
-                        { @"<u>(.+?)</u>", (new System.Text.RegularExpressions.Regex(@"<u>(.+?)</u>"), range => range.Font.Underline = Office.MsoTriState.msoTrue, 7) },
-                        { @"==(.+?)==", (new System.Text.RegularExpressions.Regex(@"==(.+?)=="), range => range.Font.Shadow = Office.MsoTriState.msoTrue, 4) },
-                        { @"<sub>(.+?)</sub>", (new System.Text.RegularExpressions.Regex(@"<sub>(.+?)</sub>"), range => range.Font.Subscript = Office.MsoTriState.msoTrue, 11) },
-                        { @"<sup>(.+?)</sup>", (new System.Text.RegularExpressions.Regex(@"<sup>(.+?)</sup>"), range => range.Font.Superscript = Office.MsoTriState.msoTrue, 11) },
-                        { @"`(.+?)`", (new System.Text.RegularExpressions.Regex(@"`(.+?)`"), range => {
+                        { @"\*\*(?![^<]*>)([^*]+?)\*\*", (new System.Text.RegularExpressions.Regex(@"\*\*(?![^<]*>)([^*]+?)\*\*"), range => range.Font.Bold = Office.MsoTriState.msoTrue) },
+                        { @"(?<!\*)\*(?!\*)(?![^<]*>)([^*]+?)(?<!\*)\*(?!\*)", (new System.Text.RegularExpressions.Regex(@"(?<!\*)\*(?!\*)(?![^<]*>)([^*]+?)(?<!\*)\*(?!\*)"), range => range.Font.Italic = Office.MsoTriState.msoTrue) },
+                        { @"<u>([^<>]+?)</u>", (new System.Text.RegularExpressions.Regex(@"<u>([^<>]+?)</u>"), range => range.Font.Underline = Office.MsoTriState.msoTrue) },
+                        { @"==(?![^<]*>)([^=]+?)==", (new System.Text.RegularExpressions.Regex(@"==(?![^<]*>)([^=]+?)=="), range => range.Font.Shadow = Office.MsoTriState.msoTrue) },
+                        { @"<sub>([^<>]+?)</sub>", (new System.Text.RegularExpressions.Regex(@"<sub>([^<>]+?)</sub>"), range => range.Font.Subscript = Office.MsoTriState.msoTrue) },
+                        { @"<sup>([^<>]+?)</sup>", (new System.Text.RegularExpressions.Regex(@"<sup>([^<>]+?)</sup>"), range => range.Font.Superscript = Office.MsoTriState.msoTrue) },
+                        { @"`(?![^<]*>)([^`]+?)`", (new System.Text.RegularExpressions.Regex(@"`(?![^<]*>)([^`]+?)`"), range => {
                             range.Font.Name = "Consolas";
                             range.Font.Color.RGB = ColorTranslator.ToOle(Color.DarkRed);
-                        }, 2) }
+                        }) }
                     };
 
-                    // Collect formatting information with position adjustments
-                    var formattingInfo = new List<(int start, int length, string content, Action<PowerPoint.TextRange> formatting)>();
-                    int totalOffset = 0;
-
+                    var formattingInfo = new List<(int start, int length, Action<PowerPoint.TextRange> formatting)>();
                     foreach (var pattern in markdownPatterns)
                     {
+                        int shift = 0;
                         var matches = pattern.Value.regex.Matches(processedText);
-                        for (int i = 0; i < matches.Count; i++)
+                        foreach (System.Text.RegularExpressions.Match match in matches)
                         {
-                            var match = matches[i];
                             var innerText = match.Groups[1].Value;
-                            var startPos = match.Index - totalOffset;
-                            formattingInfo.Add((startPos, innerText.Length, innerText, pattern.Value.formatting));
-                            totalOffset += pattern.Value.markerLength;
+                            int adjustedIndex = match.Index - shift;
+                            formattingInfo.Add((adjustedIndex, innerText.Length, pattern.Value.formatting));
+                            processedText = processedText.Remove(adjustedIndex, match.Length).Insert(adjustedIndex, innerText);
+                            shift += match.Length - innerText.Length;
                         }
                     }
 
-                    // Sort formatting info by start position in descending order
-                    formattingInfo.Sort((a, b) => b.start.CompareTo(a.start));
-
-                    // Remove all markdown markers
-                    foreach (var pattern in markdownPatterns)
-                    {
-                        processedText = pattern.Value.regex.Replace(processedText, "$1");
-                    }
-
-                    // Set the clean text
                     textBox.TextFrame.TextRange.Text = processedText;
-
-                    // Apply formatting
+                    formattingInfo.Sort((a, b) => a.start.CompareTo(b.start));
                     foreach (var info in formattingInfo)
                     {
                         try
@@ -638,11 +625,7 @@ namespace Achuan的PPT插件
                             var range = textBox.TextFrame.TextRange.Characters(info.start + 1, info.length);
                             info.formatting(range);
                         }
-                        catch (Exception ex)
-                        {
-                            // Optional: Log error or show message
-                            continue;
-                        }
+                        catch { /* ignore index errors */ }
                     }
 
                     // Apply bullet formatting only to paragraphs that matched list patterns
