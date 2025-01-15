@@ -645,7 +645,20 @@ namespace Achuan的PPT插件
                                                                 paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNone;
                                                                 paragraph.ParagraphFormat.Bullet.Type = ppBulletType;
 
-
+                                                                // Handle task list items
+                                                                string text = paragraph.Text.Trim();
+                                                                if (text.StartsWith("- [x]"))
+                                                                {
+                                                                    char myCharacter = (char)9745; // ☑
+                                                                    paragraph.ParagraphFormat.Bullet.Character = myCharacter;
+                                                                    paragraph.Text = text.Substring(5).Trim(); // Remove "- [x]"
+                                                                }
+                                                                else if (text.StartsWith("- [ ]"))
+                                                                {
+                                                                    char myCharacter = (char)9744; // ☐
+                                                                    paragraph.ParagraphFormat.Bullet.Character = myCharacter;
+                                                                    paragraph.Text = text.Substring(5).Trim(); // Remove "- [ ]"
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -938,7 +951,7 @@ namespace Achuan的PPT插件
 
             // Configure Markdown pipeline
             var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-            
+
             // Convert to HTML and remove blockquote tags
             string html = Markdown.ToHtml(content, pipeline)
                 .Replace("<blockquote>", "")
@@ -972,14 +985,6 @@ namespace Achuan的PPT插件
 
         private string ProcessMarkdown(string markdown)
         {
-            // // Process tables - add newline before tables and set styling
-            // markdown = System.Text.RegularExpressions.Regex.Replace(
-            //     markdown,
-            //     @"(^|\n)(\|.*?\|.*?\|)",
-            //     m => m.Value.StartsWith("\n") ? m.Value : "\n" + m.Value
-            // );
-
-            // Remove code blocks
             var codeBlockRegex = new System.Text.RegularExpressions.Regex(
                 @"```.*?\r?\n(.*?)\r?\n```",
                 System.Text.RegularExpressions.RegexOptions.Singleline
@@ -991,18 +996,18 @@ namespace Achuan的PPT插件
             var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
             string html = Markdown.ToHtml(markdown, pipeline);
 
+            // Add checkbox markers after the checkboxes
+            html = html.Replace("<input disabled=\"disabled\" type=\"checkbox\" checked=\"checked\" />", "- [x]");
+            html = html.Replace("<input disabled=\"disabled\" type=\"checkbox\" />", "- [ ]");
             // Add table styling
-            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse;border:1pt solid black;'>");
+            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse;border:1pt solid黑色;'>");
             html = html.Replace("<td>", "<td style='border:1pt solid black;'>");
             html = html.Replace("<th>", "<th style='border:1pt solid black;'>");
 
             html = html.Replace("<li>", "<li style='margin-left: 10px;'>");
-            // 优化行内代码粘贴
-            // <code>...</code> -> <span style='color: #C00000; font-family: Consolas;'>...</span>
             html = html.Replace("<code>", "<span style='color: #C00000; font-family: Consolas;'>");
             html = html.Replace("</code>", "</span>");
 
-            // 设置
             html = $"<div style='font-family: 微软雅黑;'>{html}</div>";
             return html;
         }
