@@ -606,8 +606,11 @@ namespace Achuan的PPT插件
                                 }
                                 else if (segment.IsMathBlock)
                                 {
-                                    ///MessageBox.Show(segment.Content);
                                     shape = InsertMathBlock(segment.Content, left, currentTop);
+                                }
+                                else if (segment.IsBlockQuote)
+                                {
+                                    shape = InsertBlockQuote(segment.Content, left, currentTop);
                                 }
                                 else
                                 {
@@ -730,6 +733,7 @@ namespace Achuan的PPT插件
             public bool IsCodeBlock { get; set; }
             public bool IsTable { get; set; }
             public bool IsMathBlock { get; set; }
+            public bool IsBlockQuote { get; set; }  // Add this line
             public string Language { get; set; }
         }
 
@@ -744,7 +748,8 @@ namespace Achuan的PPT插件
             // 3. Then one or more data lines
             var pattern = @"(?:```(\w*)\r?\n(.*?)\r?\n```)|" +  // Code blocks
                          @"(?:\|[^\n]*\|\r?\n\|[-|\s]*\|\r?\n(?:\|[^\n]*\|\r?\n)*\|[^\n]*\|?)|" +  // Tables
-                         @"(\$\$[\s\S]*?\$\$)";                 // Math blocks
+                         @"(\$\$[\s\S]*?\$\$)|" +               // Math blocks
+                         @"(?:(?:^|\n)>[ ].+(?:\r?\n>[ ].+)*)";  // Block quotes
 
             var regex = new System.Text.RegularExpressions.Regex(pattern,
                 System.Text.RegularExpressions.RegexOptions.Multiline |
@@ -765,7 +770,8 @@ namespace Achuan的PPT插件
                             Content = textBefore.Trim(),
                             IsCodeBlock = false,
                             IsTable = false,
-                            IsMathBlock = false
+                            IsMathBlock = false,
+                            IsBlockQuote = false
                         });
                     }
                 }
@@ -785,7 +791,8 @@ namespace Achuan的PPT插件
                         Language = string.IsNullOrEmpty(language) ? "text" : language,
                         IsCodeBlock = true,
                         IsTable = false,
-                        IsMathBlock = false
+                        IsMathBlock = false,
+                        IsBlockQuote = false
                     });
                 }
                 else if (content.StartsWith("|"))
@@ -801,7 +808,8 @@ namespace Achuan的PPT插件
                         Content = content,
                         IsCodeBlock = false,
                         IsTable = true,
-                        IsMathBlock = false
+                        IsMathBlock = false,
+                        IsBlockQuote = false
                     });
                 }
                 else if (content.StartsWith("$$"))
@@ -811,7 +819,24 @@ namespace Achuan的PPT插件
                         Content = content.Substring(2, content.Length - 4).Trim(),
                         IsCodeBlock = false,
                         IsTable = false,
-                        IsMathBlock = true
+                        IsMathBlock = true,
+                        IsBlockQuote = false
+                    });
+                }
+                else if (content.TrimStart('\r', '\n').StartsWith(">"))
+                {
+                    // Clean up block quote content
+                    content = string.Join("\n",
+                        content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(line => line.TrimStart('>', ' ')));
+
+                    segments.Add(new MarkdownSegment
+                    {
+                        Content = content,
+                        IsCodeBlock = false,
+                        IsTable = false,
+                        IsMathBlock = false,
+                        IsBlockQuote = true
                     });
                 }
 
@@ -829,7 +854,8 @@ namespace Achuan的PPT插件
                         Content = remainingText.Trim(),
                         IsCodeBlock = false,
                         IsTable = false,
-                        IsMathBlock = false
+                        IsMathBlock = false,
+                        IsBlockQuote = false
                     });
                 }
             }
@@ -901,6 +927,47 @@ namespace Achuan的PPT插件
 
 
             return equationShape;
+        }
+
+        private PowerPoint.Shape InsertBlockQuote(string content, float left, float top)
+        {
+            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+            PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+                Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                left, top, 500, 300);
+
+            // Configure Markdown pipeline
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            
+            // Convert to HTML and remove blockquote tags
+            string html = Markdown.ToHtml(content, pipeline)
+                .Replace("<blockquote>", "")
+                .Replace("</blockquote>", "");
+
+            // Add custom styling
+            html = $"<div style='font-family: 微软雅黑; padding: 10px;'>{html}</div>";
+
+            // Copy to clipboard and paste
+            CopyHtmlToClipBoard(content, html);
+            System.Threading.Thread.Sleep(100);
+
+            PowerPoint.ShapeRange quoteShape = slide.Shapes.Paste();
+            if (quoteShape != null && quoteShape.Count > 0)
+            {
+                PowerPoint.Shape shape = quoteShape[1];
+                shape.Left = left;
+                shape.Top = top;
+
+                // Add black border
+                shape.Line.Visible = Office.MsoTriState.msoTrue;
+                shape.Line.ForeColor.RGB = ColorTranslator.ToOle(Color.Black);
+                shape.Line.Weight = 1;
+
+                textBox.Delete();
+                return shape;
+            }
+
+            return textBox;
         }
 
         private string ProcessMarkdown(string markdown)
