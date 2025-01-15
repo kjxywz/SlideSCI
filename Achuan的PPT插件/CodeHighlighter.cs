@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text.RegularExpressions;
 using System.Linq;  // Add this line
+using System.Text.RegularExpressions;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
-using Office = Microsoft.Office.Core;
 
 namespace Achuan的PPT插件
 {

@@ -71,7 +71,6 @@
             this.button3 = this.Factory.CreateRibbonButton();
             this.button1 = this.Factory.CreateRibbonButton();
             this.button4 = this.Factory.CreateRibbonButton();
-            this.button5 = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.图片处理.SuspendLayout();
             this.group1.SuspendLayout();
@@ -218,7 +217,6 @@
             // 
             this.group2.Items.Add(this.button1);
             this.group2.Items.Add(this.button4);
-            this.group2.Items.Add(this.button5);
             this.group2.Label = "关于";
             this.group2.Name = "group2";
             // 
@@ -352,12 +350,6 @@
             this.button4.Name = "button4";
             this.button4.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.openGithub_Click);
             // 
-            // button5
-            // 
-            this.button5.Label = "检查更新";
-            this.button5.Name = "button5";
-            this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.checkUpdate_Click);
-            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -420,7 +412,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton pasteCrop;
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel label2;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button4;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton button5;
     }
 
     partial class ThisRibbonCollection

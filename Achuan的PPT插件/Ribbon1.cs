@@ -1,16 +1,13 @@
-﻿using Microsoft.Office.Tools.Ribbon;
+﻿using Markdig;  // 修改为使用签名版本的命名空间
+using Microsoft.Office.Tools.Ribbon;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Net.Http;  // Keep only one instance
-using PowerPoint = Microsoft.Office.Interop.PowerPoint;
-using Office = Microsoft.Office.Core;
-using System.Windows.Forms;
 using System.Drawing;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-
+using System.Linq;
+using System.Windows.Forms;
+using Office = Microsoft.Office.Core;
+using PowerPoint = Microsoft.Office.Interop.PowerPoint;
+using System.IO;
 namespace Achuan的PPT插件
 {
     public partial class Ribbon1
@@ -531,135 +528,130 @@ namespace Achuan的PPT插件
             return position - text.Substring(0, position).Count(c => c == '\r');
         }
 
-        private void insertMarkdown_Click(object sender, RibbonControlEventArgs e)
+        private string ConvertMarkdownToHtml(string markdown)
         {
-            Form inputDialog = new Form()
+            try
             {
-                Width = 600,
-                Height = 400,
-                Text = "插入Markdown",
-                StartPosition = FormStartPosition.CenterScreen
-            };
-
-            TextBox markdownInput = new TextBox()
+                var html = Markdown.ToHtml(markdown);
+                MessageBox.Show($"Markdown转换: {html}");
+                return html;
+            }
+            catch (Exception ex)
             {
-                Multiline = true,
-                ScrollBars = ScrollBars.Vertical,
-                Dock = DockStyle.Fill,
-                Font = new Font("Consolas", 12)
-            };
-
-            Button okButton = new Button()
-            {
-                Text = "确定",
-                DialogResult = DialogResult.OK,
-                Dock = DockStyle.Bottom
-            };
-
-            inputDialog.Controls.AddRange(new Control[] { markdownInput, okButton });
-
-            if (inputDialog.ShowDialog() == DialogResult.OK)
-            {
-                string markdown = markdownInput.Text.Trim();
-                if (!string.IsNullOrEmpty(markdown))
-                {
-                    PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
-                    PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
-                        Office.MsoTextOrientation.msoTextOrientationHorizontal,
-                        100, 100, 500, 300);
-
-                    // Split lines and detect list patterns per line
-                    var lines = markdown.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-                    var processedLines = new List<string>();
-                    var lineListTypes = new List<int>(); // 0 = normal, 1 = ordered, 2 = unordered
-
-                    foreach (var line in lines)
-                    {
-                        if (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\s*\d+\.\s+"))
-                        {
-                            lineListTypes.Add(1);
-                            processedLines.Add(System.Text.RegularExpressions.Regex
-                                .Replace(line, @"^\s*\d+\.\s+", ""));
-                        }
-                        else if (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\s*[-*+]\s+"))
-                        {
-                            lineListTypes.Add(2);
-                            processedLines.Add(System.Text.RegularExpressions.Regex
-                                .Replace(line, @"^\s*[-*+]\s+", ""));
-                        }
-                        else
-                        {
-                            lineListTypes.Add(0);
-                            processedLines.Add(line);
-                        }
-                    }
-
-                    string processedText = string.Join("\r", processedLines); // Use carriage returns
-
-                    // Define formatting patterns with updated regex
-                    var markdownPatterns = new Dictionary<string, (System.Text.RegularExpressions.Regex regex, Action<PowerPoint.TextRange> formatting)>
-                    {
-                        { @"\*\*(?![^<]*>)([^*]+?)\*\*", (new System.Text.RegularExpressions.Regex(@"\*\*(?![^<]*>)([^*]+?)\*\*"), range => range.Font.Bold = Office.MsoTriState.msoTrue) },
-                        { @"(?<!\*)\*(?!\*)(?![^<]*>)([^*]+?)(?<!\*)\*(?!\*)", (new System.Text.RegularExpressions.Regex(@"(?<!\*)\*(?!\*)(?![^<]*>)([^*]+?)(?<!\*)\*(?!\*)"), range => range.Font.Italic = Office.MsoTriState.msoTrue) },
-                        { @"<u>([^<>]+?)</u>", (new System.Text.RegularExpressions.Regex(@"<u>([^<>]+?)</u>"), range => range.Font.Underline = Office.MsoTriState.msoTrue) },
-                        { @"==(?![^<]*>)([^=]+?)==", (new System.Text.RegularExpressions.Regex(@"==(?![^<]*>)([^=]+?)=="), range => range.Font.Shadow = Office.MsoTriState.msoTrue) },
-                        { @"<sub>([^<>]+?)</sub>", (new System.Text.RegularExpressions.Regex(@"<sub>([^<>]+?)</sub>"), range => range.Font.Subscript = Office.MsoTriState.msoTrue) },
-                        { @"<sup>([^<>]+?)</sup>", (new System.Text.RegularExpressions.Regex(@"<sup>([^<>]+?)</sup>"), range => range.Font.Superscript = Office.MsoTriState.msoTrue) },
-                        { @"`(?![^<]*>)([^`]+?)`", (new System.Text.RegularExpressions.Regex(@"`(?![^<]*>)([^`]+?)`"), range => {
-                            range.Font.Name = "Consolas";
-                            range.Font.Color.RGB = ColorTranslator.ToOle(Color.DarkRed);
-                        }) }
-                    };
-
-                    var formattingInfo = new List<(int start, int length, Action<PowerPoint.TextRange> formatting)>();
-                    foreach (var pattern in markdownPatterns)
-                    {
-                        int shift = 0;
-                        var matches = pattern.Value.regex.Matches(processedText);
-                        foreach (System.Text.RegularExpressions.Match match in matches)
-                        {
-                            var innerText = match.Groups[1].Value;
-                            int adjustedIndex = match.Index - shift;
-                            formattingInfo.Add((adjustedIndex, innerText.Length, pattern.Value.formatting));
-                            processedText = processedText.Remove(adjustedIndex, match.Length).Insert(adjustedIndex, innerText);
-                            shift += match.Length - innerText.Length;
-                        }
-                    }
-
-                    textBox.TextFrame.TextRange.Text = processedText;
-                    formattingInfo.Sort((a, b) => a.start.CompareTo(b.start));
-                    foreach (var info in formattingInfo)
-                    {
-                        try
-                        {
-                            var range = textBox.TextFrame.TextRange.Characters(info.start + 1, info.length);
-                            info.formatting(range);
-                        }
-                        catch { /* ignore index errors */ }
-                    }
-
-                    // Apply bullet formatting only to paragraphs that matched list patterns
-                    for (int i = 0; i < processedLines.Count; i++)
-                    {
-                        var paragraph = textBox.TextFrame.TextRange.Paragraphs(i + 1);
-                        switch (lineListTypes[i])
-                        {
-                            case 1:
-                                paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNumbered;
-                                break;
-                            case 2:
-                                paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletUnnumbered;
-                                break;
-                            default:
-                                paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNone;
-                                break;
-                        }
-                    }
-
-                    textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
-                }
+                MessageBox.Show($"Markdown转换错误: {ex.Message}");
+                return markdown; // 转换失败时返回原文本
             }
         }
+
+        private void insertMarkdown_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                Form inputDialog = new Form
+                {
+                    Width = 600,
+                    Height = 400,
+                    Text = "插入Markdown",
+                    StartPosition = FormStartPosition.CenterScreen
+                };
+
+                TextBox markdownInput = new TextBox
+                {
+                    Multiline = true,
+                    ScrollBars = ScrollBars.Vertical,
+                    Dock = DockStyle.Fill,
+                    Font = new Font("Consolas", 12)
+                };
+
+                Button okButton = new Button
+                {
+                    Text = "确定",
+                    DialogResult = DialogResult.OK,
+                    Dock = DockStyle.Bottom
+                };
+
+                inputDialog.Controls.Add(markdownInput);
+                inputDialog.Controls.Add(okButton);
+
+                DialogResult result = inputDialog.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    string markdown = markdownInput.Text?.Trim() ?? "";
+                    if (!string.IsNullOrEmpty(markdown))
+                    {
+                        PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+                        string html = ConvertMarkdownToHtml(markdown);
+
+                        if (!string.IsNullOrEmpty(html))
+                        {
+                            SetHtmlToClipboard(html);
+
+                            PowerPoint.ShapeRange shapeRange = slide.Shapes.Paste();
+                            if (shapeRange != null && shapeRange.Count > 0)
+                            {
+                                PowerPoint.Shape shape = shapeRange[1];
+                                // 屏幕居中
+                                shape.Left = (slide.Master.Width - shape.Width) / 2;
+                                shape.Top = (slide.Master.Height - shape.Height) / 2;
+                            }
+                        }
+                    }
+                }
+
+                inputDialog.Dispose();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"操作过程中出错: {ex.Message}\n\n{ex.StackTrace}");
+            }
+        }
+        public void SetHtmlToClipboard(string html)
+        {
+            // 使用 UTF-8 编码构造 HTML 剪贴板数据
+            string htmlClipboardData = $@"Version:0.9
+StartHTML:00000097
+EndHTML:00000181
+StartFragment:00000115
+EndFragment:00000163
+<html>
+<head>
+<meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">
+</head>
+<body>
+<!--StartFragment-->
+{html}
+<!--EndFragment-->
+</body>
+</html>";
+
+            // 计算起始和结束位置
+            int startHtml = htmlClipboardData.IndexOf("<html>");
+            int endHtml = htmlClipboardData.LastIndexOf("</html>") + "</html>".Length;
+            int startFragment = htmlClipboardData.IndexOf("<!--StartFragment-->") + "<!--StartFragment-->".Length;
+            int endFragment = htmlClipboardData.IndexOf("<!--EndFragment-->");
+
+            // 更新头部信息
+            htmlClipboardData = htmlClipboardData.Replace("00000097", startHtml.ToString("D8"));
+            htmlClipboardData = htmlClipboardData.Replace("00000181", endHtml.ToString("D8"));
+            htmlClipboardData = htmlClipboardData.Replace("00000115", startFragment.ToString("D8"));
+            htmlClipboardData = htmlClipboardData.Replace("00000163", endFragment.ToString("D8"));
+
+            // 创建数据对象并设置到剪贴板
+            DataObject dataObject = new DataObject();
+
+            // 使用 UTF-8 编码将字符串转换为字节数组
+            byte[] htmlBytes = Encoding.UTF8.GetBytes(htmlClipboardData);
+
+            // 创建 MemoryStream 并写入字节数组
+            using (MemoryStream ms = new MemoryStream(htmlBytes))
+            {
+                dataObject.SetData(DataFormats.Html, ms);
+                Clipboard.SetDataObject(dataObject, true);
+            }
+        }
+
+
         private void button3_Click(object sender, RibbonControlEventArgs e)
         {
             System.Diagnostics.Process.Start("https://markdown.com.cn/editor");
