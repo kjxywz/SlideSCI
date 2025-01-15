@@ -316,6 +316,7 @@ namespace Achuan的PPT插件
 
         private void insertCodeBlockButton_Click(object sender, RibbonControlEventArgs e)
         {
+
             // Create and configure input dialog
             Form inputDialog = new Form()
             {
@@ -583,46 +584,38 @@ namespace Achuan的PPT插件
                     if (!string.IsNullOrEmpty(markdown))
                     {
                         PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
-                        
-                        // Extract code blocks before converting markdown
-                        var codeBlocks = new List<(string code, string lang, int position)>();
-                        var codeBlockRegex = new System.Text.RegularExpressions.Regex(
-                            @"```(\w*)\r?\n(.*?)\r?\n```",
-                            System.Text.RegularExpressions.RegexOptions.Singleline
-                        );
 
-                        var matches = codeBlockRegex.Matches(markdown);
-                        for (int i = matches.Count - 1; i >= 0; i--)
+                        // Split markdown into segments
+                        var segments = SplitMarkdownIntoSegments(markdown);
+
+                        float currentTop = slide.Master.Height / 3;  // Starting position
+                        float left = (slide.Master.Width - 500) / 2; // Center horizontally
+
+                        foreach (var segment in segments)
                         {
-                            var match = matches[i];
-                            var lang = string.IsNullOrEmpty(match.Groups[1].Value) ? " " : match.Groups[1].Value;
-                            var code = match.Groups[2].Value;
-                            codeBlocks.Add((code, lang, match.Index));
-                            markdown = markdown.Remove(match.Index, match.Length);
-                        }
-
-                        // Process remaining markdown
-                        string html = ProcessMarkdown(markdown);
-
-                        // Insert main content
-                        if (!string.IsNullOrEmpty(html))
-                        {
-                            CopyHtmlToClipBoard(markdown, html);
-                            PowerPoint.ShapeRange mainContent = slide.Shapes.Paste();
-                            
-                            if (mainContent != null && mainContent.Count > 0)
+                            //MessageBox.Show($"Markdown分段: {segment.Content}");
+                            if (segment.IsCodeBlock)
                             {
-                                PowerPoint.Shape mainShape = mainContent[1];
-                                mainShape.Width = 500;
-                                mainShape.Left = (slide.Master.Width - mainShape.Width) / 2;
-                                mainShape.Top = (slide.Master.Height - mainShape.Height) / 2;
-
-                                // Insert code blocks below main content
-                                float currentTop = mainShape.Top + mainShape.Height + 20;
-                                foreach (var (code, lang, _) in codeBlocks)
+                                // Insert code block
+                                PowerPoint.Shape codeShape = InsertCodeBlock(segment.Content, segment.Language, left, currentTop);
+                                currentTop += codeShape.Height + 10;
+                            }
+                            else
+                            {
+                                // Process regular markdown text
+                                string html = ProcessMarkdown(segment.Content);
+                                if (!string.IsNullOrEmpty(html))
                                 {
-                                    PowerPoint.Shape codeShape = InsertCodeBlock(code, lang, mainShape.Left, currentTop);
-                                    currentTop += codeShape.Height + 20;
+                                    CopyHtmlToClipBoard(segment.Content, html);
+                                    PowerPoint.ShapeRange textContent = slide.Shapes.Paste();
+                                    if (textContent != null && textContent.Count > 0)
+                                    {
+                                        PowerPoint.Shape textShape = textContent[1];
+                                        textShape.Width = 500;
+                                        textShape.Left = left;
+                                        textShape.Top = currentTop;
+                                        currentTop += textShape.Height + 10;
+                                    }
                                 }
                             }
                         }
@@ -635,6 +628,68 @@ namespace Achuan的PPT插件
             {
                 MessageBox.Show($"操作过程中出错: {ex.Message}\n\n{ex.StackTrace}");
             }
+        }
+
+        private class MarkdownSegment
+        {
+            public string Content { get; set; }
+            public bool IsCodeBlock { get; set; }
+            public string Language { get; set; }
+        }
+
+        private List<MarkdownSegment> SplitMarkdownIntoSegments(string markdown)
+        {
+            var segments = new List<MarkdownSegment>();
+            var codeBlockRegex = new System.Text.RegularExpressions.Regex(
+                @"```(\w*)\r?\n(.*?)\r?\n```",
+                System.Text.RegularExpressions.RegexOptions.Singleline
+            );
+
+            int currentPosition = 0;
+            var matches = codeBlockRegex.Matches(markdown);
+
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                // Add text before code block if exists
+                if (match.Index > currentPosition)
+                {
+                    string textBefore = markdown.Substring(currentPosition, match.Index - currentPosition);
+                    if (!string.IsNullOrWhiteSpace(textBefore))
+                    {
+                        segments.Add(new MarkdownSegment
+                        {
+                            Content = textBefore.Trim(),
+                            IsCodeBlock = false
+                        });
+                    }
+                }
+
+                // Add code block
+                segments.Add(new MarkdownSegment
+                {
+                    Content = match.Groups[2].Value,
+                    Language = string.IsNullOrEmpty(match.Groups[1].Value) ? "text" : match.Groups[1].Value,
+                    IsCodeBlock = true
+                });
+
+                currentPosition = match.Index + match.Length;
+            }
+
+            // Add remaining text if exists
+            if (currentPosition < markdown.Length)
+            {
+                string remainingText = markdown.Substring(currentPosition);
+                if (!string.IsNullOrWhiteSpace(remainingText))
+                {
+                    segments.Add(new MarkdownSegment
+                    {
+                        Content = remainingText.Trim(),
+                        IsCodeBlock = false
+                    });
+                }
+            }
+
+            return segments;
         }
 
         // Add this helper method for inserting code blocks
