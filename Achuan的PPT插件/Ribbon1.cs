@@ -739,6 +739,17 @@ namespace Achuan的PPT插件
                 MessageBox.Show("请选择要应用裁剪设置的图片");
             }
         }
+
+        private void openGithub_Click(object sender, RibbonControlEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/Achuan-2/my_ppt_plugin/");
+        }
+
+
+        private void checkUpdate_Click(object sender, RibbonControlEventArgs e)
+        {
+
+        }
     }
 
 }
