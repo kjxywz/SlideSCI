@@ -93,17 +93,20 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 
 ## 🖥️安装方法
 
+插件为Office Powerpoint设计，兼容安装到WPS（WPS版本不支持插入latex数学公式）
+
 下载本插件Github页面[Release](https://github.com/Achuan-2/my_ppt_plugin/releases)中的Achuan.PPT.msi，解压，双击安装即可
 
 注意：安装时需要先退出PPT，否则PPT不会即时加载该插件
+
+
 
 ## ❓常见问题
 
 * 添加图题的文本框只有文本宽度并且没有居中？
 
   * 可能是设置了默认文本框导致的，需要将图题拉宽并设置居中后，设置居中图题为默认文本框
-* 插件支持安装到WPS吗
-  * 支持，但是WPS不支持插入数学公式，因为WPS没有对应的API
+
 
 
 ## ❤️ 用爱发电
