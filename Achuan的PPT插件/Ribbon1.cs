@@ -585,7 +585,9 @@ namespace Achuan的PPT插件
 
                         if (!string.IsNullOrEmpty(html))
                         {
-                            SetHtmlToClipboard(html);
+                            var dataObject = new DataObject();
+                            dataObject.SetData(DataFormats.Html, ClipboardFormats.ConvertHtmlToClipboardData(html));
+                            Clipboard.SetDataObject(dataObject, true);
 
                             PowerPoint.ShapeRange shapeRange = slide.Shapes.Paste();
                             if (shapeRange != null && shapeRange.Count > 0)
@@ -606,52 +608,54 @@ namespace Achuan的PPT插件
                 MessageBox.Show($"操作过程中出错: {ex.Message}\n\n{ex.StackTrace}");
             }
         }
-        public void SetHtmlToClipboard(string html)
+        internal static class ClipboardFormats
         {
-            // 使用 UTF-8 编码构造 HTML 剪贴板数据
-            string htmlClipboardData = $@"Version:0.9
-StartHTML:00000097
-EndHTML:00000181
-StartFragment:00000115
-EndFragment:00000163
-<html>
-<head>
-<meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8"">
-</head>
-<body>
-<!--StartFragment-->
-{html}
-<!--EndFragment-->
-</body>
-</html>";
+            static readonly string HEADER =
+                "Version:0.9\r\n" +
+                "StartHTML:{0:0000000000}\r\n" +
+                "EndHTML:{1:0000000000}\r\n" +
+                "StartFragment:{2:0000000000}\r\n" +
+                "EndFragment:{3:0000000000}\r\n";
 
-            // 计算起始和结束位置
-            int startHtml = htmlClipboardData.IndexOf("<html>");
-            int endHtml = htmlClipboardData.LastIndexOf("</html>") + "</html>".Length;
-            int startFragment = htmlClipboardData.IndexOf("<!--StartFragment-->") + "<!--StartFragment-->".Length;
-            int endFragment = htmlClipboardData.IndexOf("<!--EndFragment-->");
+            static readonly string HTML_START =
+                "<html>\r\n" +
+                "<body>\r\n" +
+                "<!--StartFragment-->";
 
-            // 更新头部信息
-            htmlClipboardData = htmlClipboardData.Replace("00000097", startHtml.ToString("D8"));
-            htmlClipboardData = htmlClipboardData.Replace("00000181", endHtml.ToString("D8"));
-            htmlClipboardData = htmlClipboardData.Replace("00000115", startFragment.ToString("D8"));
-            htmlClipboardData = htmlClipboardData.Replace("00000163", endFragment.ToString("D8"));
+            static readonly string HTML_END =
+                "<!--EndFragment-->\r\n" +
+                "</body>\r\n" +
+                "</html>";
+                public static string ConvertHtmlToClipboardData(string html)
+                {
+                    var encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+                    var data = Array.Empty<byte>();
 
-            // 创建数据对象并设置到剪贴板
-            DataObject dataObject = new DataObject();
+                    var header = encoding.GetBytes(String.Format(HEADER, 0, 1, 2, 3));
+                    data = data.Concat(header).ToArray();
 
-            // 使用 UTF-8 编码将字符串转换为字节数组
-            byte[] htmlBytes = Encoding.UTF8.GetBytes(htmlClipboardData);
+                    var startHtml = data.Length;
+                    data = data.Concat(encoding.GetBytes(HTML_START)).ToArray();
 
-            // 创建 MemoryStream 并写入字节数组
-            using (MemoryStream ms = new MemoryStream(htmlBytes))
-            {
-                dataObject.SetData(DataFormats.Html, ms);
-                Clipboard.SetDataObject(dataObject, true);
-            }
+                    var startFragment = data.Length;
+                    data = data.Concat(encoding.GetBytes(html)).ToArray();
+
+                    var endFragment = data.Length;
+                    data = data.Concat(encoding.GetBytes(HTML_END)).ToArray();
+
+                    var endHtml = data.Length;
+
+                    var newHeader = encoding.GetBytes(
+                        String.Format(HEADER, startHtml, endHtml, startFragment, endFragment));
+                    if (newHeader.Length != startHtml)
+                    {
+                        throw new InvalidOperationException(nameof(ConvertHtmlToClipboardData));
+                    }
+
+                    Array.Copy(newHeader, data, length: startHtml);
+                    return encoding.GetString(data);
+                }
         }
-
-
         private void button3_Click(object sender, RibbonControlEventArgs e)
         {
             System.Diagnostics.Process.Start("https://markdown.com.cn/editor");
