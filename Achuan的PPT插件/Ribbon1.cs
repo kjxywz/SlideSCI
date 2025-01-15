@@ -533,7 +533,7 @@ namespace Achuan的PPT插件
             try
             {
                 var html = Markdown.ToHtml(markdown);
-                MessageBox.Show($"Markdown转换: {html}");
+                //MessageBox.Show($"Markdown转换: {html}");
                 return html;
             }
             catch (Exception ex)
@@ -585,24 +585,36 @@ namespace Achuan的PPT插件
 
                         if (!string.IsNullOrEmpty(html))
                         {
-                            var htmlClipboardData = ClipboardFormats.ConvertHtmlToClipboardData(html);
-                            var bytes = Encoding.UTF8.GetBytes(htmlClipboardData);
-                            var data = Encoding.Default.GetString(bytes);
+                            // 优化html中的列表项，添加缩进
+                            html = html.Replace("<li>", "<li style='margin-left: 10px;'>");
 
-                            var dataObject = new DataObject();
-                            dataObject.SetData(DataFormats.Html, data);
-                            Clipboard.SetDataObject(dataObject, true);
+                            // Use new clipboard utility
+                            CopyHtmlToClipBoard(html);
 
                             PowerPoint.ShapeRange shapeRange = slide.Shapes.Paste();
                             if (shapeRange != null && shapeRange.Count > 0)
                             {
                                 PowerPoint.Shape shape = shapeRange[1];
                                 shape.Width = 500;
-                                // 屏幕居中
                                 shape.Left = (slide.Master.Width - shape.Width) / 2;
                                 shape.Top = (slide.Master.Height - shape.Height) / 2;
-                                
+                                if (shape.TextFrame.HasText == Office.MsoTriState.msoTrue)
+                                {
+                                    PowerPoint.TextRange textRange = shape.TextFrame.TextRange;
+                                    foreach (PowerPoint.TextRange paragraph in textRange.Paragraphs(-1))  // Changed this line
+                                    {
+                                        if (paragraph.ParagraphFormat.Bullet.Type != PowerPoint.PpBulletType.ppBulletNone)
+                                        {
+                                            PowerPoint.PpBulletType ppBulletType = paragraph.ParagraphFormat.Bullet.Type;
+                                            paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNone;
+                                            paragraph.ParagraphFormat.Bullet.Type = ppBulletType;
+
+
+                                        }
+                                    }
+                                }
                             }
+
                         }
                     }
                 }
@@ -614,53 +626,21 @@ namespace Achuan的PPT插件
                 MessageBox.Show($"操作过程中出错: {ex.Message}\n\n{ex.StackTrace}");
             }
         }
-        internal static class ClipboardFormats
+        public void CopyHtmlToClipBoard(string html)
         {
-            static readonly string HEADER =
-                "Version:0.9\r\n" +
-                "StartHTML:{0:0000000000}\r\n" +
-                "EndHTML:{1:0000000000}\r\n" +
-                "StartFragment:{2:0000000000}\r\n" +
-                "EndFragment:{3:0000000000}\r\n";
-
-            static readonly string HTML_START =
-                "<html>\r\n" +
-                "<body>\r\n" +
-                "<!--StartFragment-->";
-
-            static readonly string HTML_END =
-                "<!--EndFragment-->\r\n" +
-                "</body>\r\n" +
-                "</html>";
-                public static string ConvertHtmlToClipboardData(string html)
-                {
-                    var encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier:false);
-                    var data = Array.Empty<byte>();
-
-                    var header = encoding.GetBytes(String.Format(HEADER, 0, 1, 2, 3));
-                    data = data.Concat(header).ToArray();
-
-                    var startHtml = data.Length;
-                    data = data.Concat(encoding.GetBytes(HTML_START)).ToArray();
-
-                    var startFragment = data.Length;
-                    data = data.Concat(encoding.GetBytes(html)).ToArray();
-
-                    var endFragment = data.Length;
-                    data = data.Concat(encoding.GetBytes(HTML_END)).ToArray();
-
-                    var endHtml = data.Length;
-
-                    var newHeader = encoding.GetBytes(
-                        String.Format(HEADER, startHtml, endHtml, startFragment, endFragment));
-                    if (newHeader.Length != startHtml)
-                    {
-                        throw new InvalidOperationException(nameof(ConvertHtmlToClipboardData));
-                    }
-
-                    Array.Copy(newHeader, data, length: startHtml);
-                    return encoding.GetString(data);
-                }
+            var utf = Encoding.UTF8;
+            var format = "Version:0.9\r\nStartHTML:{0:000000}\r\nEndHTML:{1:000000}\r\nStartFragment:{2:000000}\r\nEndFragment:{3:000000}\r\n";
+            var text = "<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + utf.WebName + "\">\r\n<title>HTML clipboard</title>\r\n</head>\r\n<body>\r\n<!--StartFragment-->";
+            var text2 = "<!--EndFragment-->\r\n</body>\r\n</html>\r\n";
+            var s = string.Format(format, 0, 0, 0, 0);
+            var byteCount = utf.GetByteCount(s);
+            var byteCount2 = utf.GetByteCount(text);
+            var byteCount3 = utf.GetByteCount(html);
+            var byteCount4 = utf.GetByteCount(text2);
+            var s2 = string.Format(format, byteCount, byteCount + byteCount2 + byteCount3 + byteCount4, byteCount + byteCount2, byteCount + byteCount2 + byteCount3) + text + html + text2;
+            var dataObject = new DataObject();
+            dataObject.SetData(DataFormats.Html, new MemoryStream(utf.GetBytes(s2)));
+            Clipboard.SetDataObject(dataObject);
         }
         private void button3_Click(object sender, RibbonControlEventArgs e)
         {
