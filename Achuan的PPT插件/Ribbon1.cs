@@ -593,30 +593,55 @@ namespace Achuan的PPT插件
 
                         foreach (var segment in segments)
                         {
-                            //MessageBox.Show($"Markdown分段: {segment.Content}");
-                            if (segment.IsCodeBlock)
+                            try
                             {
-                                // Insert code block
-                                PowerPoint.Shape codeShape = InsertCodeBlock(segment.Content, segment.Language, left, currentTop);
-                                currentTop += codeShape.Height + 10;
-                            }
-                            else
-                            {
-                                // Process regular markdown text
-                                string html = ProcessMarkdown(segment.Content);
-                                if (!string.IsNullOrEmpty(html))
+                                if (segment.IsCodeBlock)
                                 {
-                                    CopyHtmlToClipBoard(segment.Content, html);
-                                    PowerPoint.ShapeRange textContent = slide.Shapes.Paste();
-                                    if (textContent != null && textContent.Count > 0)
+                                    PowerPoint.Shape codeShape = InsertCodeBlock(segment.Content, segment.Language, left, currentTop);
+                                    currentTop += codeShape.Height + 10;
+                                }
+                                else
+                                {
+                                    string html = ProcessMarkdown(segment.Content);
+                                    if (!string.IsNullOrEmpty(html))
                                     {
-                                        PowerPoint.Shape textShape = textContent[1];
-                                        textShape.Width = 500;
-                                        textShape.Left = left;
-                                        textShape.Top = currentTop;
-                                        currentTop += textShape.Height + 10;
+                                        // Add retry mechanism for clipboard operations
+                                        int retryCount = 3;
+                                        while (retryCount > 0)
+                                        {
+                                            try
+                                            {
+                                                CopyHtmlToClipBoard(segment.Content, html);
+                                                System.Threading.Thread.Sleep(100); // Add 100ms delay
+                                                PowerPoint.ShapeRange textContent = slide.Shapes.Paste();
+                                                
+                                                if (textContent != null && textContent.Count > 0)
+                                                {
+                                                    PowerPoint.Shape textShape = textContent[1];
+                                                    textShape.Width = 500;
+                                                    textShape.Left = left;
+                                                    textShape.Top = currentTop;
+                                                    currentTop += textShape.Height + 10;
+                                                    break; // Success, exit retry loop
+                                                }
+                                            }
+                                            catch (System.Runtime.InteropServices.COMException)
+                                            {
+                                                retryCount--;
+                                                if (retryCount <= 0)
+                                                {
+                                                    MessageBox.Show($"无法粘贴内容: {segment.Content.Substring(0, Math.Min(30, segment.Content.Length))}...");
+                                                }
+                                                System.Threading.Thread.Sleep(200); // Wait longer before retry
+                                            }
+                                        }
                                     }
                                 }
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"处理段落时出错: {ex.Message}");
+                                continue; // Continue with next segment
                             }
                         }
                     }
@@ -773,21 +798,46 @@ namespace Achuan的PPT插件
 
         public void CopyHtmlToClipBoard(string markdown, string html)
         {
-            var utf = Encoding.UTF8;
-            var format = "Version:0.9\r\nStartHTML:{0:000000}\r\nEndHTML:{1:000000}\r\nStartFragment:{2:000000}\r\nEndFragment:{3:000000}\r\n";
-            var text = "<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + utf.WebName + "\">\r\n<title>HTML clipboard</title>\r\n</head>\r\n<body>\r\n<!--StartFragment-->";
-            var text2 = "<!--EndFragment-->\r\n</body>\r\n</html>\r\n";
-            var s = string.Format(format, 0, 0, 0, 0);
-            var byteCount = utf.GetByteCount(s);
-            var byteCount2 = utf.GetByteCount(text);
-            var byteCount3 = utf.GetByteCount(html);
-            var byteCount4 = utf.GetByteCount(text2);
-            var s2 = string.Format(format, byteCount, byteCount + byteCount2 + byteCount3 + byteCount4, byteCount + byteCount2, byteCount + byteCount2 + byteCount3) + text + html + text2;
-            var dataObject = new DataObject();
-            dataObject.SetData(DataFormats.Html, new MemoryStream(utf.GetBytes(s2)));
-            dataObject.SetData(DataFormats.UnicodeText, markdown);
-            Clipboard.SetDataObject(dataObject);
+            try
+            {
+                var utf = Encoding.UTF8;
+                var format = "Version:0.9\r\nStartHTML:{0:000000}\r\nEndHTML:{1:000000}\r\nStartFragment:{2:000000}\r\nEndFragment:{3:000000}\r\n";
+                var text = "<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + utf.WebName + "\">\r\n<title>HTML clipboard</title>\r\n</head>\r\n<body>\r\n<!--StartFragment-->";
+                var text2 = "<!--EndFragment-->\r\n</body>\r\n</html>\r\n";
+                var s = string.Format(format, 0, 0, 0, 0);
+                var byteCount = utf.GetByteCount(s);
+                var byteCount2 = utf.GetByteCount(text);
+                var byteCount3 = utf.GetByteCount(html);
+                var byteCount4 = utf.GetByteCount(text2);
+                var s2 = string.Format(format, byteCount, byteCount + byteCount2 + byteCount3 + byteCount4, byteCount + byteCount2, byteCount + byteCount2 + byteCount3) + text + html + text2;
+                
+                var dataObject = new DataObject();
+                dataObject.SetData(DataFormats.Html, new MemoryStream(utf.GetBytes(s2)));
+                dataObject.SetData(DataFormats.UnicodeText, markdown);
+                
+                int retryCount = 3;
+                while (retryCount > 0)
+                {
+                    try
+                    {
+                        Clipboard.SetDataObject(dataObject, true, 3, 100); // Add retry and timeout parameters
+                        break;
+                    }
+                    catch (Exception)
+                    {
+                        retryCount--;
+                        if (retryCount <= 0) throw;
+                        System.Threading.Thread.Sleep(100);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"复制到剪贴板时出错: {ex.Message}");
+                throw;
+            }
         }
+
         private void button3_Click(object sender, RibbonControlEventArgs e)
         {
             System.Diagnostics.Process.Start("https://markdown.com.cn/editor");
