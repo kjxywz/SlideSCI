@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using Office = Microsoft.Office.Core;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using System.IO;
+using System.Collections.Generic; // Add this line
+
 namespace Achuan的PPT插件
 {
     public partial class Ribbon1
@@ -581,47 +583,48 @@ namespace Achuan的PPT插件
                     if (!string.IsNullOrEmpty(markdown))
                     {
                         PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
-                        string html = ConvertMarkdownToHtml(markdown);
+                        
+                        // Extract code blocks before converting markdown
+                        var codeBlocks = new List<(string code, string lang, int position)>();
+                        var codeBlockRegex = new System.Text.RegularExpressions.Regex(
+                            @"```(\w*)\r?\n(.*?)\r?\n```",
+                            System.Text.RegularExpressions.RegexOptions.Singleline
+                        );
 
+                        var matches = codeBlockRegex.Matches(markdown);
+                        for (int i = matches.Count - 1; i >= 0; i--)
+                        {
+                            var match = matches[i];
+                            var lang = string.IsNullOrEmpty(match.Groups[1].Value) ? " " : match.Groups[1].Value;
+                            var code = match.Groups[2].Value;
+                            codeBlocks.Add((code, lang, match.Index));
+                            markdown = markdown.Remove(match.Index, match.Length);
+                        }
+
+                        // Process remaining markdown
+                        string html = ProcessMarkdown(markdown);
+
+                        // Insert main content
                         if (!string.IsNullOrEmpty(html))
                         {
-                            // 优化html中的列表项，添加缩进
-                            html = html.Replace("<li>", "<li style='margin-left: 10px;'>");
-                            // 优化行内代码粘贴
-                            // <code>...</code> -> <span style='color: #C00000; font-family: Consolas;'>...</span>
-                            html = html.Replace("<code>", "<span style='color: #C00000; font-family: Consolas;'>");
-                            html = html.Replace("</code>", "</span>");
-
-                            // html放进<div style='font-family: 微软雅黑;'><div>，来设置默认字体
-                            html = $"<div style='font-family: 微软雅黑;'>{html}</div>";
-                            // Use new clipboard utility
                             CopyHtmlToClipBoard(markdown, html);
-
-                            PowerPoint.ShapeRange shapeRange = slide.Shapes.Paste();
-                            if (shapeRange != null && shapeRange.Count > 0)
+                            PowerPoint.ShapeRange mainContent = slide.Shapes.Paste();
+                            
+                            if (mainContent != null && mainContent.Count > 0)
                             {
-                                PowerPoint.Shape shape = shapeRange[1];
-                                shape.Width = 500;
-                                shape.Left = (slide.Master.Width - shape.Width) / 2;
-                                shape.Top = (slide.Master.Height - shape.Height) / 2;
+                                PowerPoint.Shape mainShape = mainContent[1];
+                                mainShape.Width = 500;
+                                mainShape.Left = (slide.Master.Width - mainShape.Width) / 2;
+                                mainShape.Top = (slide.Master.Height - mainShape.Height) / 2;
 
-                                if (shape.TextFrame.HasText == Office.MsoTriState.msoTrue)
+                                // Insert code blocks below main content
+                                float currentTop = mainShape.Top + mainShape.Height + 20;
+                                foreach (var (code, lang, _) in codeBlocks)
                                 {
-                                    PowerPoint.TextRange textRange = shape.TextFrame.TextRange;
-                                    foreach (PowerPoint.TextRange paragraph in textRange.Paragraphs(-1))  // Changed this line
-                                    {
-                                        textRange.Font.Name = "微软雅黑"; // 设置文本框内容为微软雅黑
-                                        if (paragraph.ParagraphFormat.Bullet.Type != PowerPoint.PpBulletType.ppBulletNone)
-                                        {
-                                            PowerPoint.PpBulletType ppBulletType = paragraph.ParagraphFormat.Bullet.Type;
-                                            paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNone;
-                                            paragraph.ParagraphFormat.Bullet.Type = ppBulletType;
-
-                                        }
-                                    }
+                                    PowerPoint.Shape codeShape = InsertCodeBlock(code, lang, mainShape.Left, currentTop);
+                                    currentTop += codeShape.Height + 20;
                                 }
                             }
-
                         }
                     }
                 }
@@ -633,6 +636,83 @@ namespace Achuan的PPT插件
                 MessageBox.Show($"操作过程中出错: {ex.Message}\n\n{ex.StackTrace}");
             }
         }
+
+        // Add this helper method for inserting code blocks
+        private PowerPoint.Shape InsertCodeBlock(string code, string language, float left, float top)
+        {
+            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+            PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+                Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                left, top, 500, 300);
+
+            // Set code block style
+            textBox.Fill.Solid();
+            textBox.Fill.ForeColor.RGB = isDarkBackground ?
+                ColorTranslator.ToOle(Color.FromArgb(30, 30, 30)) :
+                ColorTranslator.ToOle(Color.White);
+            textBox.Line.ForeColor.RGB = ColorTranslator.ToOle(Color.FromArgb(200, 200, 200));
+            textBox.Line.Weight = 1;
+
+            textBox.TextFrame.TextRange.Text = code;
+
+            // Apply base formatting
+            textBox.TextFrame.TextRange.Font.Name = "Consolas";
+            textBox.TextFrame.TextRange.Font.Size = 12;
+            textBox.TextFrame.TextRange.Font.Color.RGB = isDarkBackground ?
+                ColorTranslator.ToOle(Color.White) :
+                ColorTranslator.ToOle(Color.Black);
+            textBox.TextFrame.TextRange.ParagraphFormat.Alignment =
+                PowerPoint.PpParagraphAlignment.ppAlignLeft;
+
+            // Set margins
+            textBox.TextFrame.MarginLeft = 10;
+            textBox.TextFrame.MarginRight = 10;
+            textBox.TextFrame.MarginTop = 5;
+            textBox.TextFrame.MarginBottom = 5;
+
+            // Apply syntax highlighting
+            var highlighter = new CodeHighlighter(isDarkBackground);
+            highlighter.ApplyHighlighting(textBox, code, language);
+
+            // Auto-size the textbox to fit content
+            textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+
+            return textBox;
+        }
+
+        private string ProcessMarkdown(string markdown)
+        {
+            // Process tables - add newline before tables and set styling
+            markdown = System.Text.RegularExpressions.Regex.Replace(
+                markdown,
+                @"(^\||[^\\n]\|)",
+                m => m.Value.StartsWith("\n") ? m.Value : "\n" + m.Value
+            );
+
+            // Remove code blocks
+            var codeBlockRegex = new System.Text.RegularExpressions.Regex(
+                @"```.*?\r?\n(.*?)\r?\n```",
+                System.Text.RegularExpressions.RegexOptions.Singleline
+            );
+
+            markdown = codeBlockRegex.Replace(markdown, string.Empty);
+
+            // Convert remaining markdown to HTML
+            string html = Markdown.ToHtml(markdown);
+
+            // Add table styling
+            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse; border:1px solid black;'>");
+            html = html.Replace("<td>", "<td style='border:1px solid black; padding:5px;'>");
+            html = html.Replace("<th>", "<th style='border:1px solid black; padding:5px;'>");
+
+            html = html.Replace("<li>", "<li style='margin-left: 10px;'>");
+            // 优化行内代码粘贴
+            // <code>...</code> -> <span style='color: #C00000; font-family: Consolas;'>...</span>
+            html = html.Replace("<code>", "<span style='color: #C00000; font-family: Consolas;'>");
+            html = html.Replace("</code>", "</span>");
+            return html;
+        }
+
         public void CopyHtmlToClipBoard(string markdown, string html)
         {
             var utf = Encoding.UTF8;
