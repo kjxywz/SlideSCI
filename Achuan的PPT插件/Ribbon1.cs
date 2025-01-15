@@ -606,6 +606,7 @@ namespace Achuan的PPT插件
                                 }
                                 else if (segment.IsMathBlock)
                                 {
+                                    ///MessageBox.Show(segment.Content);
                                     shape = InsertMathBlock(segment.Content, left, currentTop);
                                 }
                                 else
@@ -820,7 +821,7 @@ namespace Achuan的PPT插件
             // Configure the pipeline with all advanced extensions active
             var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
             string html = Markdown.ToHtml(tableContent, pipeline);
-            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse;border:1pt solid black;'>");
+            html = html.Replace("<table>", "<table style='width:200px; border-collapse:collapse;border:1pt solid black;'>");
             html = html.Replace("<td>", "<td style='border:1pt solid black;'>");
             html = html.Replace("<th>", "<th style='border:1pt solid black;'>");
 
@@ -854,21 +855,23 @@ namespace Achuan的PPT插件
             textBox.Select();
             app.ActiveWindow.Selection.TextRange.Select();
 
-            // Insert equation
+            // Run SwitchLatex
             app.CommandBars.ExecuteMso("EquationInsertNew");
             PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
-            equationShape.TextFrame.TextRange.Text = mathContent;
+            equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = "\u24C9";
 
-            // Convert to professional format
-            app.CommandBars.ExecuteMso("EquationProfessional");
+            app.CommandBars.ExecuteMso("EquationInsertNew");
+            app.ActiveWindow.Selection.TextRange.Select();
+            PowerPoint.Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
+            // Set the LaTeX input to the equation shape
+            equationShape2.TextFrame.TextRange.Characters(1, equationShape2.TextFrame.TextRange.Text.Length - 1).Text = mathContent;
 
             // Auto-size and position
             equationShape.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
             equationShape.Left = left;
             equationShape.Top = top;
 
-            // Delete the original textbox
-            textBox.Delete();
+
 
             return equationShape;
         }
@@ -895,7 +898,7 @@ namespace Achuan的PPT插件
             string html = Markdown.ToHtml(markdown, pipeline);
 
             // Add table styling
-            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse;border:1pt solid black;'>");
+            html = html.Replace("<table>", "<table style='width:200px; border-collapse:collapse;border:1pt solid black;'>");
             html = html.Replace("<td>", "<td style='border:1pt solid black;'>");
             html = html.Replace("<th>", "<th style='border:1pt solid black;'>");
 
