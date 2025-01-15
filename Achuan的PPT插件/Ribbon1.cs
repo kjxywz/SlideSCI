@@ -826,9 +826,11 @@ namespace Achuan的PPT插件
                 }
                 else if (content.StartsWith("$$"))
                 {
+                    content = string.Join("\n",
+                        content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
                     segments.Add(new MarkdownSegment
                     {
-                        Content = content.Substring(2, content.Length - 4).Trim(),
+                        Content = content.Replace("\n", ""), // Remove line breaks
                         IsCodeBlock = false,
                         IsTable = false,
                         IsMathBlock = true,
@@ -931,6 +933,8 @@ namespace Achuan的PPT插件
             // Set the LaTeX input to the equation shape
             equationShape2.TextFrame.TextRange.Characters(1, equationShape2.TextFrame.TextRange.Text.Length - 1).Text = mathContent;
 
+            // Convert to professional format
+            app.CommandBars.ExecuteMso("EquationProfessional");
             // Auto-size and position
             equationShape.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
             equationShape.Left = left;
