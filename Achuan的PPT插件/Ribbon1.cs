@@ -591,6 +591,9 @@ namespace Achuan的PPT插件
                             // <code>...</code> -> <span style='color: #C00000; font-family: Consolas;'>...</span>
                             html = html.Replace("<code>", "<span style='color: #C00000; font-family: Consolas;'>");
                             html = html.Replace("</code>", "</span>");
+
+                            // html放进<div style='font-family: 微软雅黑;'><div>，来设置默认字体
+                            html = $"<div style='font-family: 微软雅黑;'>{html}</div>";
                             // Use new clipboard utility
                             CopyHtmlToClipBoard(markdown, html);
 
@@ -601,11 +604,13 @@ namespace Achuan的PPT插件
                                 shape.Width = 500;
                                 shape.Left = (slide.Master.Width - shape.Width) / 2;
                                 shape.Top = (slide.Master.Height - shape.Height) / 2;
+
                                 if (shape.TextFrame.HasText == Office.MsoTriState.msoTrue)
                                 {
                                     PowerPoint.TextRange textRange = shape.TextFrame.TextRange;
                                     foreach (PowerPoint.TextRange paragraph in textRange.Paragraphs(-1))  // Changed this line
                                     {
+                                        textRange.Font.Name = "微软雅黑"; // 设置文本框内容为微软雅黑
                                         if (paragraph.ParagraphFormat.Bullet.Type != PowerPoint.PpBulletType.ppBulletNone)
                                         {
                                             PowerPoint.PpBulletType ppBulletType = paragraph.ParagraphFormat.Bullet.Type;
