@@ -738,11 +738,12 @@ namespace Achuan的PPT插件
             var segments = new List<MarkdownSegment>();
             var currentPosition = 0;
 
-            // Updated pattern with improved table detection
-            // (?m) enables multiline mode
-            // Tables are identified as consecutive lines starting and ending with |
+            // Updated pattern to better handle tables
+            // 1. Tables must start with a header line
+            // 2. Followed by a separator line
+            // 3. Then one or more data lines
             var pattern = @"(?:```(\w*)\r?\n(.*?)\r?\n```)|" +  // Code blocks
-                         @"(?m:(?:^\|.*\|\r?\n){2,})|" +        // Tables (2 or more lines starting/ending with |)
+                         @"(?:\|[^\n]*\|\r?\n\|[-|\s]*\|\r?\n(?:\|[^\n]*\|\r?\n)*\|[^\n]*\|?)|" +  // Tables
                          @"(\$\$[\s\S]*?\$\$)";                 // Math blocks
 
             var regex = new System.Text.RegularExpressions.Regex(pattern,
