@@ -11,6 +11,7 @@ namespace Achuan的PPT插件
     {
         private Dictionary<string, Color> themeColors;
         private Dictionary<string, List<(string pattern, RegexOptions options, string type)>> languagePatterns;
+        private Dictionary<string, string> languageAliases;
         private HashSet<string> processedRanges;
 
         public CodeHighlighter(bool isDarkTheme)
@@ -18,6 +19,7 @@ namespace Achuan的PPT插件
             processedRanges = new HashSet<string>();
             InitializeColors(isDarkTheme);
             InitializePatterns();
+            InitializeAliases();
         }
 
         private void InitializeColors(bool isDarkTheme)
@@ -130,6 +132,20 @@ namespace Achuan的PPT插件
             };
         }
 
+        private void InitializeAliases()
+        {
+            languageAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                {"js", "javascript"},
+                {"c#", "csharp"},
+                {"cs", "csharp"},
+                {"py", "python"},
+                {"m", "matlab"},
+                {"css", "css"},
+                {"htm", "html"}
+            };
+        }
+
         private int GetActualPosition(string text, int position)
         {
             // 计算到指定位置前的换行符数量
@@ -141,11 +157,18 @@ namespace Achuan的PPT插件
 
         public void ApplyHighlighting(PowerPoint.Shape textBox, string code, string language)
         {
-            if (!languagePatterns.ContainsKey(language))
+            // Normalize language name
+            string normalizedLanguage = language.ToLower();
+            if (languageAliases.ContainsKey(normalizedLanguage))
+            {
+                normalizedLanguage = languageAliases[normalizedLanguage];
+            }
+
+            if (!languagePatterns.ContainsKey(normalizedLanguage))
                 return;
 
             processedRanges.Clear();
-            var patterns = languagePatterns[language];
+            var patterns = languagePatterns[normalizedLanguage];
 
             foreach (var (pattern, options, type) in patterns)
             {
