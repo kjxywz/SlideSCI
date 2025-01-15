@@ -3,10 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Net.Http;  // Keep only one instance
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using Office = Microsoft.Office.Core;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Achuan的PPT插件
 {
@@ -25,6 +28,7 @@ namespace Achuan的PPT插件
         private bool hasCopiedCrop = false;
         private float originalHeight; // 添加变量存储原始图片高度
         private float currentCropedHeight;
+        private const string CURRENT_VERSION = "1.0.0"; // Change this to match your current version
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
             app = Globals.ThisAddIn.Application;
@@ -668,24 +672,24 @@ namespace Achuan的PPT插件
             {
                 PowerPoint.Shape shape = sel.ShapeRange[1];
 
-                    // 保存裁剪设置
-                    cropLeft = shape.PictureFormat.CropLeft;
-                    cropRight = shape.PictureFormat.CropRight;
-                    cropTop = shape.PictureFormat.CropTop;
-                    cropBottom = shape.PictureFormat.CropBottom;
+                // 保存裁剪设置
+                cropLeft = shape.PictureFormat.CropLeft;
+                cropRight = shape.PictureFormat.CropRight;
+                cropTop = shape.PictureFormat.CropTop;
+                cropBottom = shape.PictureFormat.CropBottom;
 
-                    // 保存原始高度
-                    currentCropedHeight = shape.Height;
-                    float croppedPixels = cropTop + cropBottom;
-                    originalHeight = currentCropedHeight + croppedPixels;
+                // 保存原始高度
+                currentCropedHeight = shape.Height;
+                float croppedPixels = cropTop + cropBottom;
+                originalHeight = currentCropedHeight + croppedPixels;
 
-                    hasCopiedCrop = true;
-                    //MessageBox.Show("已复制图片裁剪设置");
-                }
-                else
-                {
-                    MessageBox.Show("请选择一个图片对象");
-                }
+                hasCopiedCrop = true;
+                //MessageBox.Show("已复制图片裁剪设置");
+            }
+            else
+            {
+                MessageBox.Show("请选择一个图片对象");
+            }
 
         }
 
@@ -732,7 +736,7 @@ namespace Achuan的PPT插件
                     {
                         MessageBox.Show($"应用裁剪设置时出错: {ex.Message}");
                     }
-            }
+                }
             }
             else
             {
@@ -745,11 +749,6 @@ namespace Achuan的PPT插件
             System.Diagnostics.Process.Start("https://github.com/Achuan-2/my_ppt_plugin/");
         }
 
-
-        private void checkUpdate_Click(object sender, RibbonControlEventArgs e)
-        {
-
-        }
     }
 
 }
