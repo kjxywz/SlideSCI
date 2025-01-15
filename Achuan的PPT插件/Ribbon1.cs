@@ -595,10 +595,18 @@ namespace Achuan的PPT插件
                         {
                             try
                             {
+                                PowerPoint.Shape shape = null;
                                 if (segment.IsCodeBlock)
                                 {
-                                    PowerPoint.Shape codeShape = InsertCodeBlock(segment.Content, segment.Language, left, currentTop);
-                                    currentTop += codeShape.Height + 10;
+                                    shape = InsertCodeBlock(segment.Content, segment.Language, left, currentTop);
+                                }
+                                else if (segment.IsTable)
+                                {
+                                    shape = InsertTable(segment.Content, left, currentTop);
+                                }
+                                else if (segment.IsMathBlock)
+                                {
+                                    shape = InsertMathBlock(segment.Content, left, currentTop);
                                 }
                                 else
                                 {
@@ -614,7 +622,7 @@ namespace Achuan的PPT插件
                                                 CopyHtmlToClipBoard(segment.Content, html);
                                                 System.Threading.Thread.Sleep(100); // Add 100ms delay
                                                 PowerPoint.ShapeRange textContent = slide.Shapes.Paste();
-                                                
+
                                                 if (textContent != null && textContent.Count > 0)
                                                 {
                                                     PowerPoint.Shape textShape = textContent[1];
@@ -637,6 +645,11 @@ namespace Achuan的PPT插件
                                         }
                                     }
                                 }
+
+                                if (shape != null)
+                                {
+                                    currentTop += shape.Height + 10;
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -654,70 +667,6 @@ namespace Achuan的PPT插件
                 MessageBox.Show($"操作过程中出错: {ex.Message}\n\n{ex.StackTrace}");
             }
         }
-
-        private class MarkdownSegment
-        {
-            public string Content { get; set; }
-            public bool IsCodeBlock { get; set; }
-            public string Language { get; set; }
-        }
-
-        private List<MarkdownSegment> SplitMarkdownIntoSegments(string markdown)
-        {
-            var segments = new List<MarkdownSegment>();
-            var codeBlockRegex = new System.Text.RegularExpressions.Regex(
-                @"```(\w*)\r?\n(.*?)\r?\n```",
-                System.Text.RegularExpressions.RegexOptions.Singleline
-            );
-
-            int currentPosition = 0;
-            var matches = codeBlockRegex.Matches(markdown);
-
-            foreach (System.Text.RegularExpressions.Match match in matches)
-            {
-                // Add text before code block if exists
-                if (match.Index > currentPosition)
-                {
-                    string textBefore = markdown.Substring(currentPosition, match.Index - currentPosition);
-                    if (!string.IsNullOrWhiteSpace(textBefore))
-                    {
-                        segments.Add(new MarkdownSegment
-                        {
-                            Content = textBefore.Trim(),
-                            IsCodeBlock = false
-                        });
-                    }
-                }
-
-                // Add code block
-                segments.Add(new MarkdownSegment
-                {
-                    Content = match.Groups[2].Value,
-                    Language = string.IsNullOrEmpty(match.Groups[1].Value) ? "text" : match.Groups[1].Value,
-                    IsCodeBlock = true
-                });
-
-                currentPosition = match.Index + match.Length;
-            }
-
-            // Add remaining text if exists
-            if (currentPosition < markdown.Length)
-            {
-                string remainingText = markdown.Substring(currentPosition);
-                if (!string.IsNullOrWhiteSpace(remainingText))
-                {
-                    segments.Add(new MarkdownSegment
-                    {
-                        Content = remainingText.Trim(),
-                        IsCodeBlock = false
-                    });
-                }
-            }
-
-            return segments;
-        }
-
-        // Add this helper method for inserting code blocks
         private PowerPoint.Shape InsertCodeBlock(string code, string language, float left, float top)
         {
             PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
@@ -759,15 +708,179 @@ namespace Achuan的PPT插件
 
             return textBox;
         }
+        private class MarkdownSegment
+        {
+            public string Content { get; set; }
+            public bool IsCodeBlock { get; set; }
+            public bool IsTable { get; set; }
+            public bool IsMathBlock { get; set; }
+            public string Language { get; set; }
+        }
+
+        private List<MarkdownSegment> SplitMarkdownIntoSegments(string markdown)
+        {
+            var segments = new List<MarkdownSegment>();
+            var currentPosition = 0;
+
+            // Updated pattern to better match code blocks and tables
+            var pattern = @"(?:```(\w*)\r?\n(.*?)\r?\n```)|(?:(?:^\|(?:[^|]*\|)+\r?\n\|(?:[-:]+\|)+\r?\n(?:\|(?:[^|]*\|)+\r?\n)+))|(\$\$[\s\S]*?\$\$)";
+            var regex = new System.Text.RegularExpressions.Regex(pattern,
+                System.Text.RegularExpressions.RegexOptions.Multiline |
+                System.Text.RegularExpressions.RegexOptions.Singleline);
+
+            var matches = regex.Matches(markdown);
+
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                // Add text before special block if exists
+                if (match.Index > currentPosition)
+                {
+                    string textBefore = markdown.Substring(currentPosition, match.Index - currentPosition);
+                    if (!string.IsNullOrWhiteSpace(textBefore))
+                    {
+                        segments.Add(new MarkdownSegment
+                        {
+                            Content = textBefore.Trim(),
+                            IsCodeBlock = false,
+                            IsTable = false,
+                            IsMathBlock = false
+                        });
+                    }
+                }
+
+                string content = match.Value;
+
+                // Determine block type and add segment
+                if (content.StartsWith("```"))
+                {
+                    var lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    var language = lines[0].Substring(3).Trim();
+                    var codeContent = string.Join("\n", lines.Skip(1).Take(lines.Length - 2));
+
+                    segments.Add(new MarkdownSegment
+                    {
+                        Content = codeContent,
+                        Language = string.IsNullOrEmpty(language) ? "text" : language,
+                        IsCodeBlock = true,
+                        IsTable = false,
+                        IsMathBlock = false
+                    });
+                }
+                else if (content.StartsWith("|"))
+                {
+                    segments.Add(new MarkdownSegment
+                    {
+                        Content = content.TrimEnd(),
+                        IsCodeBlock = false,
+                        IsTable = true,
+                        IsMathBlock = false
+                    });
+                }
+                else if (content.StartsWith("$$"))
+                {
+                    segments.Add(new MarkdownSegment
+                    {
+                        Content = content.Substring(2, content.Length - 4).Trim(),
+                        IsCodeBlock = false,
+                        IsTable = false,
+                        IsMathBlock = true
+                    });
+                }
+
+                currentPosition = match.Index + match.Length;
+            }
+
+            // Add remaining text if exists
+            if (currentPosition < markdown.Length)
+            {
+                string remainingText = markdown.Substring(currentPosition);
+                if (!string.IsNullOrWhiteSpace(remainingText))
+                {
+                    segments.Add(new MarkdownSegment
+                    {
+                        Content = remainingText.Trim(),
+                        IsCodeBlock = false,
+                        IsTable = false,
+                        IsMathBlock = false
+                    });
+                }
+            }
+
+            return segments;
+        }
+
+        private PowerPoint.Shape InsertTable(string tableContent, float left, float top)
+        {
+            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+            PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+                Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                left, top, 500, 300);
+
+            // Convert markdown table to HTML
+            // Configure the pipeline with all advanced extensions active
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            string html = Markdown.ToHtml(tableContent, pipeline);
+            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse;border:1pt solid black;'>");
+            html = html.Replace("<td>", "<td style='border:1pt solid black;'>");
+            html = html.Replace("<th>", "<th style='border:1pt solid black;'>");
+
+            // Create a temporary DataObject for the table content
+
+            CopyHtmlToClipBoard(tableContent, html);
+            System.Threading.Thread.Sleep(100);
+
+            PowerPoint.ShapeRange tableShape = slide.Shapes.Paste();
+            if (tableShape != null && tableShape.Count > 0)
+            {
+                tableShape[1].Left = left;
+                tableShape[1].Top = top;
+                textBox.Delete();
+                return tableShape[1];
+            }
+
+            return textBox;
+        }
+
+        private PowerPoint.Shape InsertMathBlock(string mathContent, float left, float top)
+        {
+            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+
+            // Insert a new textbox
+            PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+                Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                left, top, 500, 500);
+
+            // Select the newly inserted textbox
+            textBox.Select();
+            app.ActiveWindow.Selection.TextRange.Select();
+
+            // Insert equation
+            app.CommandBars.ExecuteMso("EquationInsertNew");
+            PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+            equationShape.TextFrame.TextRange.Text = mathContent;
+
+            // Convert to professional format
+            app.CommandBars.ExecuteMso("EquationProfessional");
+
+            // Auto-size and position
+            equationShape.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+            equationShape.Left = left;
+            equationShape.Top = top;
+
+            // Delete the original textbox
+            textBox.Delete();
+
+            return equationShape;
+        }
 
         private string ProcessMarkdown(string markdown)
         {
-            // Process tables - add newline before tables and set styling
-            markdown = System.Text.RegularExpressions.Regex.Replace(
-                markdown,
-                @"(^\||[^\\n]\|)",
-                m => m.Value.StartsWith("\n") ? m.Value : "\n" + m.Value
-            );
+            // // Process tables - add newline before tables and set styling
+            // markdown = System.Text.RegularExpressions.Regex.Replace(
+            //     markdown,
+            //     @"(^|\n)(\|.*?\|.*?\|)",
+            //     m => m.Value.StartsWith("\n") ? m.Value : "\n" + m.Value
+            // );
 
             // Remove code blocks
             var codeBlockRegex = new System.Text.RegularExpressions.Regex(
@@ -778,12 +891,13 @@ namespace Achuan的PPT插件
             markdown = codeBlockRegex.Replace(markdown, string.Empty);
 
             // Convert remaining markdown to HTML
-            string html = Markdown.ToHtml(markdown);
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            string html = Markdown.ToHtml(markdown, pipeline);
 
             // Add table styling
-            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse; border:1px solid black;'>");
-            html = html.Replace("<td>", "<td style='border:1px solid black; padding:5px;'>");
-            html = html.Replace("<th>", "<th style='border:1px solid black; padding:5px;'>");
+            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse;border:1pt solid black;'>");
+            html = html.Replace("<td>", "<td style='border:1pt solid black;'>");
+            html = html.Replace("<th>", "<th style='border:1pt solid black;'>");
 
             html = html.Replace("<li>", "<li style='margin-left: 10px;'>");
             // 优化行内代码粘贴
@@ -810,11 +924,11 @@ namespace Achuan的PPT插件
                 var byteCount3 = utf.GetByteCount(html);
                 var byteCount4 = utf.GetByteCount(text2);
                 var s2 = string.Format(format, byteCount, byteCount + byteCount2 + byteCount3 + byteCount4, byteCount + byteCount2, byteCount + byteCount2 + byteCount3) + text + html + text2;
-                
+
                 var dataObject = new DataObject();
                 dataObject.SetData(DataFormats.Html, new MemoryStream(utf.GetBytes(s2)));
                 dataObject.SetData(DataFormats.UnicodeText, markdown);
-                
+
                 int retryCount = 3;
                 while (retryCount > 0)
                 {
