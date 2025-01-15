@@ -373,7 +373,7 @@ namespace Achuan的PPT插件
 
                     // Set code block style
                     textBox.Fill.Solid();
-                    textBox.Fill.ForeColor.RGB = isDarkBackground ?
+                    textBox.Fill.ForeColor.RGB = toggleBackgroundCheckBox.Checked ?
                         ColorTranslator.ToOle(Color.FromArgb(30, 30, 30)) :
                         ColorTranslator.ToOle(Color.White);
                     textBox.Line.ForeColor.RGB = ColorTranslator.ToOle(Color.FromArgb(200, 200, 200));
@@ -385,7 +385,7 @@ namespace Achuan的PPT插件
                     // Apply base formatting
                     textBox.TextFrame.TextRange.Font.Name = "Consolas";
                     textBox.TextFrame.TextRange.Font.Size = 12;
-                    textBox.TextFrame.TextRange.Font.Color.RGB = isDarkBackground ?
+                    textBox.TextFrame.TextRange.Font.Color.RGB = toggleBackgroundCheckBox.Checked ?
                         ColorTranslator.ToOle(Color.White) :
                         ColorTranslator.ToOle(Color.Black);
                     textBox.TextFrame.TextRange.ParagraphFormat.Alignment =
@@ -398,7 +398,7 @@ namespace Achuan的PPT插件
                     textBox.TextFrame.MarginBottom = 5;
 
                     // Apply syntax highlighting
-                    var highlighter = new CodeHighlighter(isDarkBackground);
+                    var highlighter = new CodeHighlighter(toggleBackgroundCheckBox.Checked);
                     highlighter.ApplyHighlighting(textBox, code, language);
 
                     // Auto-size the textbox to fit content
@@ -407,9 +407,8 @@ namespace Achuan的PPT插件
             }
         }
 
-        private void toggleBackgroundButton_Click(object sender, RibbonControlEventArgs e)
+        private void checkBox1_Click(object sender, RibbonControlEventArgs e)
         {
-            isDarkBackground = toggleBackgroundButton.Checked;
             PowerPoint.Selection sel = app.ActiveWindow.Selection;
 
             if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
@@ -420,12 +419,12 @@ namespace Achuan的PPT插件
                     {
                         // Update background color
                         shape.Fill.Solid();
-                        shape.Fill.ForeColor.RGB = isDarkBackground ?
+                        shape.Fill.ForeColor.RGB = toggleBackgroundCheckBox.Checked ?
                             ColorTranslator.ToOle(Color.FromArgb(30, 30, 30)) :
                             ColorTranslator.ToOle(Color.White);
 
                         // Update text color
-                        shape.TextFrame.TextRange.Font.Color.RGB = isDarkBackground ?
+                        shape.TextFrame.TextRange.Font.Color.RGB = toggleBackgroundCheckBox.Checked ?
                             ColorTranslator.ToOle(Color.White) :
                             ColorTranslator.ToOle(Color.Black);
                     }
@@ -708,7 +707,7 @@ namespace Achuan的PPT插件
 
             // Set code block style
             textBox.Fill.Solid();
-            textBox.Fill.ForeColor.RGB = isDarkBackground ?
+            textBox.Fill.ForeColor.RGB = toggleBackgroundCheckBox.Checked ?
                 ColorTranslator.ToOle(Color.FromArgb(30, 30, 30)) :
                 ColorTranslator.ToOle(Color.White);
             textBox.Line.ForeColor.RGB = ColorTranslator.ToOle(Color.FromArgb(200, 200, 200));
@@ -719,7 +718,7 @@ namespace Achuan的PPT插件
             // Apply base formatting
             textBox.TextFrame.TextRange.Font.Name = "Consolas";
             textBox.TextFrame.TextRange.Font.Size = 12;
-            textBox.TextFrame.TextRange.Font.Color.RGB = isDarkBackground ?
+            textBox.TextFrame.TextRange.Font.Color.RGB = toggleBackgroundCheckBox.Checked ?
                 ColorTranslator.ToOle(Color.White) :
                 ColorTranslator.ToOle(Color.Black);
             textBox.TextFrame.TextRange.ParagraphFormat.Alignment =
@@ -732,7 +731,7 @@ namespace Achuan的PPT插件
             textBox.TextFrame.MarginBottom = 5;
 
             // Apply syntax highlighting
-            var highlighter = new CodeHighlighter(isDarkBackground);
+            var highlighter = new CodeHighlighter(toggleBackgroundCheckBox.Checked);
             highlighter.ApplyHighlighting(textBox, code, language);
 
             // Auto-size the textbox to fit content

@@ -63,10 +63,10 @@
             this.imgWidthEditBpx = this.Factory.CreateRibbonEditBox();
             this.imgHeightEditBox = this.Factory.CreateRibbonEditBox();
             this.codeGroup = this.Factory.CreateRibbonGroup();
-            this.insertCodeBlockButton = this.Factory.CreateRibbonButton();
-            this.toggleBackgroundButton = this.Factory.CreateRibbonToggleButton();
-            this.insertEquationButton = this.Factory.CreateRibbonButton();
             this.button2 = this.Factory.CreateRibbonButton();
+            this.insertEquationButton = this.Factory.CreateRibbonButton();
+            this.insertCodeBlockButton = this.Factory.CreateRibbonButton();
+            this.toggleBackgroundCheckBox = this.Factory.CreateRibbonCheckBox();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.button1 = this.Factory.CreateRibbonButton();
             this.button4 = this.Factory.CreateRibbonButton();
@@ -221,14 +221,18 @@
             // 
             // copyCrop
             // 
+            this.copyCrop.Image = ((System.Drawing.Image)(resources.GetObject("copyCrop.Image")));
             this.copyCrop.Label = "复制裁剪";
             this.copyCrop.Name = "copyCrop";
+            this.copyCrop.ShowImage = true;
             this.copyCrop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyCrop_Click);
             // 
             // pasteCrop
             // 
+            this.pasteCrop.Image = ((System.Drawing.Image)(resources.GetObject("pasteCrop.Image")));
             this.pasteCrop.Label = "粘贴裁剪";
             this.pasteCrop.Name = "pasteCrop";
+            this.pasteCrop.ShowImage = true;
             this.pasteCrop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteCrop_Click);
             // 
             // 图片自动对齐
@@ -282,28 +286,21 @@
             // 
             // codeGroup
             // 
-            this.codeGroup.Items.Add(this.insertCodeBlockButton);
-            this.codeGroup.Items.Add(this.toggleBackgroundButton);
-            this.codeGroup.Items.Add(this.insertEquationButton);
             this.codeGroup.Items.Add(this.button2);
+            this.codeGroup.Items.Add(this.insertEquationButton);
+            this.codeGroup.Items.Add(this.insertCodeBlockButton);
+            this.codeGroup.Items.Add(this.toggleBackgroundCheckBox);
             this.codeGroup.Label = "Markdown";
             this.codeGroup.Name = "codeGroup";
             // 
-            // insertCodeBlockButton
+            // button2
             // 
-            this.insertCodeBlockButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.insertCodeBlockButton.Image = ((System.Drawing.Image)(resources.GetObject("insertCodeBlockButton.Image")));
-            this.insertCodeBlockButton.Label = "插入代码块";
-            this.insertCodeBlockButton.Name = "insertCodeBlockButton";
-            this.insertCodeBlockButton.ShowImage = true;
-            this.insertCodeBlockButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.insertCodeBlockButton_Click);
-            // 
-            // toggleBackgroundButton
-            // 
-            this.toggleBackgroundButton.Checked = true;
-            this.toggleBackgroundButton.Label = "黑色背景色";
-            this.toggleBackgroundButton.Name = "toggleBackgroundButton";
-            this.toggleBackgroundButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.toggleBackgroundButton_Click);
+            this.button2.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.button2.Image = ((System.Drawing.Image)(resources.GetObject("button2.Image")));
+            this.button2.Label = "插入Markdown";
+            this.button2.Name = "button2";
+            this.button2.ShowImage = true;
+            this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.insertMarkdown_Click);
             // 
             // insertEquationButton
             // 
@@ -314,11 +311,21 @@
             this.insertEquationButton.ShowImage = true;
             this.insertEquationButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.insertEquationButton_Click);
             // 
-            // button2
+            // insertCodeBlockButton
             // 
-            this.button2.Label = "插入Markdown";
-            this.button2.Name = "button2";
-            this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.insertMarkdown_Click);
+            this.insertCodeBlockButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.insertCodeBlockButton.Image = ((System.Drawing.Image)(resources.GetObject("insertCodeBlockButton.Image")));
+            this.insertCodeBlockButton.Label = "插入代码块";
+            this.insertCodeBlockButton.Name = "insertCodeBlockButton";
+            this.insertCodeBlockButton.ShowImage = true;
+            this.insertCodeBlockButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.insertCodeBlockButton_Click);
+            // 
+            // toggleBackgroundCheckBox
+            // 
+            this.toggleBackgroundCheckBox.Checked = true;
+            this.toggleBackgroundCheckBox.Label = "代码黑色背景";
+            this.toggleBackgroundCheckBox.Name = "toggleBackgroundCheckBox";
+            this.toggleBackgroundCheckBox.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.checkBox1_Click);
             // 
             // group2
             // 
@@ -396,13 +403,13 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton insertCodeBlockButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup codeGroup;
-        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleBackgroundButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton insertEquationButton; // Add this line
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button2;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton copyCrop;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton pasteCrop;
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel label2;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button4;
+        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox toggleBackgroundCheckBox;
     }
 
     partial class ThisRibbonCollection
