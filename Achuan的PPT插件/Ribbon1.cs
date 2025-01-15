@@ -723,8 +723,13 @@ namespace Achuan的PPT插件
             var segments = new List<MarkdownSegment>();
             var currentPosition = 0;
 
-            // Updated pattern to better match code blocks and tables
-            var pattern = @"(?:```(\w*)\r?\n(.*?)\r?\n```)|(?:(?:^\|(?:[^|]*\|)+\r?\n\|(?:[-:]+\|)+\r?\n(?:\|(?:[^|]*\|)+\r?\n)+))|(\$\$[\s\S]*?\$\$)";
+            // Updated pattern with improved table detection
+            // (?m) enables multiline mode
+            // Tables are identified as consecutive lines starting and ending with |
+            var pattern = @"(?:```(\w*)\r?\n(.*?)\r?\n```)|" +  // Code blocks
+                         @"(?m:(?:^\|.*\|\r?\n){2,})|" +        // Tables (2 or more lines starting/ending with |)
+                         @"(\$\$[\s\S]*?\$\$)";                 // Math blocks
+
             var regex = new System.Text.RegularExpressions.Regex(pattern,
                 System.Text.RegularExpressions.RegexOptions.Multiline |
                 System.Text.RegularExpressions.RegexOptions.Singleline);
@@ -769,9 +774,15 @@ namespace Achuan的PPT插件
                 }
                 else if (content.StartsWith("|"))
                 {
+                    // Clean up table content (remove trailing whitespace and newlines)
+                    content = string.Join("\n",
+                        content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(line => line.Trim())
+                            .Where(line => line.StartsWith("|") && line.EndsWith("|")));
+
                     segments.Add(new MarkdownSegment
                     {
-                        Content = content.TrimEnd(),
+                        Content = content,
                         IsCodeBlock = false,
                         IsTable = true,
                         IsMathBlock = false
@@ -821,7 +832,7 @@ namespace Achuan的PPT插件
             // Configure the pipeline with all advanced extensions active
             var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
             string html = Markdown.ToHtml(tableContent, pipeline);
-            html = html.Replace("<table>", "<table style='width:200px; border-collapse:collapse;border:1pt solid black;'>");
+            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse;border:1pt solid black;'>");
             html = html.Replace("<td>", "<td style='border:1pt solid black;'>");
             html = html.Replace("<th>", "<th style='border:1pt solid black;'>");
 
@@ -898,7 +909,7 @@ namespace Achuan的PPT插件
             string html = Markdown.ToHtml(markdown, pipeline);
 
             // Add table styling
-            html = html.Replace("<table>", "<table style='width:200px; border-collapse:collapse;border:1pt solid black;'>");
+            html = html.Replace("<table>", "<table style='width:500px; border-collapse:collapse;border:1pt solid black;'>");
             html = html.Replace("<td>", "<td style='border:1pt solid black;'>");
             html = html.Replace("<th>", "<th style='border:1pt solid black;'>");
 
