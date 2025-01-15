@@ -588,7 +588,7 @@ namespace Achuan的PPT插件
                         // Split markdown into segments
                         var segments = SplitMarkdownIntoSegments(markdown);
 
-                        float currentTop = slide.Master.Height / 3;  // Starting position
+                        float currentTop = 0;  // Starting position
                         float left = (slide.Master.Width - 500) / 2; // Center horizontally
 
                         foreach (var segment in segments)
