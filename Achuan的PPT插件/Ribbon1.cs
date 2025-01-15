@@ -597,9 +597,11 @@ namespace Achuan的PPT插件
                             if (shapeRange != null && shapeRange.Count > 0)
                             {
                                 PowerPoint.Shape shape = shapeRange[1];
+                                shape.Width = 500;
                                 // 屏幕居中
                                 shape.Left = (slide.Master.Width - shape.Width) / 2;
                                 shape.Top = (slide.Master.Height - shape.Height) / 2;
+                                
                             }
                         }
                     }
