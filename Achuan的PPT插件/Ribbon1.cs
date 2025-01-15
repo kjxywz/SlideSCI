@@ -710,6 +710,9 @@ namespace Achuan的PPT插件
             // <code>...</code> -> <span style='color: #C00000; font-family: Consolas;'>...</span>
             html = html.Replace("<code>", "<span style='color: #C00000; font-family: Consolas;'>");
             html = html.Replace("</code>", "</span>");
+
+            // 设置
+            html = $"<div style='font-family: 微软雅黑;'>{html}</div>";
             return html;
         }
 
