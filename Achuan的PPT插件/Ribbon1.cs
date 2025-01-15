@@ -761,7 +761,7 @@ namespace Achuan的PPT插件
             var pattern = @"(?:```(\w*)\r?\n(.*?)\r?\n```)|" +  // Code blocks
                          @"(?:\|[^\n]*\|\r?\n\|[-|\s]*\|\r?\n(?:\|[^\n]*\|\r?\n)*\|[^\n]*\|?)|" +  // Tables
                          @"(\$\$[\s\S]*?\$\$)|" +               // Math blocks
-                         @"(?:(?:^|\n)>[ ].+(?:\r?\n>[ ].+)*)";  // Block quotes
+                        @"(?:(?:^|\n)(?:>[^\n]*(?:\r?\n>[^\n]*)*))";  // 引述块（修改后的模式）
 
             var regex = new System.Text.RegularExpressions.Regex(pattern,
                 System.Text.RegularExpressions.RegexOptions.Multiline |
