@@ -93,7 +93,7 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 
 ## 🖥️安装方法
 
-插件为Office Powerpoint设计，兼容安装到WPS（WPS版本不支持插入latex数学公式）
+插件为Office Powerpoint设计，兼容安装到WPS（WPS版本不支持插入latex数学公式、插入markdown笔记）
 
 下载本插件Github页面[Release](https://github.com/Achuan-2/my_ppt_plugin/releases)中的Achuan.PPT.msi，解压，双击安装即可
 
