@@ -631,6 +631,21 @@ namespace Achuan的PPT插件
                                                     textShape.Left = left;
                                                     textShape.Top = currentTop;
                                                     currentTop += textShape.Height + 10;
+                                                    if (textShape.TextFrame.HasText == Office.MsoTriState.msoTrue)
+                                                    {
+                                                        PowerPoint.TextRange textRange = textShape.TextFrame.TextRange;
+                                                        foreach (PowerPoint.TextRange paragraph in textRange.Paragraphs(-1))  // Changed this line
+                                                        {
+                                                            if (paragraph.ParagraphFormat.Bullet.Type != PowerPoint.PpBulletType.ppBulletNone)
+                                                            {
+                                                                PowerPoint.PpBulletType ppBulletType = paragraph.ParagraphFormat.Bullet.Type;
+                                                                paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNone;
+                                                                paragraph.ParagraphFormat.Bullet.Type = ppBulletType;
+
+
+                                                            }
+                                                        }
+                                                    }
                                                     break; // Success, exit retry loop
                                                 }
                                             }
