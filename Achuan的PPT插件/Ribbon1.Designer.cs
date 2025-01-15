@@ -180,7 +180,7 @@
             // copyImgWidth
             // 
             this.copyImgWidth.Image = ((System.Drawing.Image)(resources.GetObject("copyImgWidth.Image")));
-            this.copyImgWidth.Label = "复制图片宽度";
+            this.copyImgWidth.Label = "复制宽度";
             this.copyImgWidth.Name = "copyImgWidth";
             this.copyImgWidth.ShowImage = true;
             this.copyImgWidth.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyImgWidth_Click);
@@ -188,7 +188,7 @@
             // pasteImgWidth
             // 
             this.pasteImgWidth.Image = ((System.Drawing.Image)(resources.GetObject("pasteImgWidth.Image")));
-            this.pasteImgWidth.Label = "粘贴图片宽度";
+            this.pasteImgWidth.Label = "粘贴宽度";
             this.pasteImgWidth.Name = "pasteImgWidth";
             this.pasteImgWidth.ShowImage = true;
             this.pasteImgWidth.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteImgWidth_Click);
@@ -201,7 +201,7 @@
             // copyImgHeight
             // 
             this.copyImgHeight.Image = ((System.Drawing.Image)(resources.GetObject("copyImgHeight.Image")));
-            this.copyImgHeight.Label = "复制图片高度";
+            this.copyImgHeight.Label = "复制高度";
             this.copyImgHeight.Name = "copyImgHeight";
             this.copyImgHeight.ShowImage = true;
             this.copyImgHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyImgHeight_Click);
@@ -209,7 +209,7 @@
             // pasteImgHeight
             // 
             this.pasteImgHeight.Image = ((System.Drawing.Image)(resources.GetObject("pasteImgHeight.Image")));
-            this.pasteImgHeight.Label = "粘贴图片高度";
+            this.pasteImgHeight.Label = "粘贴高度";
             this.pasteImgHeight.Name = "pasteImgHeight";
             this.pasteImgHeight.ShowImage = true;
             this.pasteImgHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteImgHeight_Click);
