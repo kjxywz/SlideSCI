@@ -585,8 +585,12 @@ namespace Achuan的PPT插件
 
                         if (!string.IsNullOrEmpty(html))
                         {
+                            var htmlClipboardData = ClipboardFormats.ConvertHtmlToClipboardData(html);
+                            var bytes = Encoding.UTF8.GetBytes(htmlClipboardData);
+                            var data = Encoding.Default.GetString(bytes);
+
                             var dataObject = new DataObject();
-                            dataObject.SetData(DataFormats.Html, ClipboardFormats.ConvertHtmlToClipboardData(html));
+                            dataObject.SetData(DataFormats.Html, data);
                             Clipboard.SetDataObject(dataObject, true);
 
                             PowerPoint.ShapeRange shapeRange = slide.Shapes.Paste();
@@ -628,7 +632,7 @@ namespace Achuan的PPT插件
                 "</html>";
                 public static string ConvertHtmlToClipboardData(string html)
                 {
-                    var encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+                    var encoding = new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier:false);
                     var data = Array.Empty<byte>();
 
                     var header = encoding.GetBytes(String.Format(HEADER, 0, 1, 2, 3));
