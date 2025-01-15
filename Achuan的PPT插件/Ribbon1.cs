@@ -587,9 +587,12 @@ namespace Achuan的PPT插件
                         {
                             // 优化html中的列表项，添加缩进
                             html = html.Replace("<li>", "<li style='margin-left: 10px;'>");
-
+                            // 优化行内代码粘贴
+                            // <code>...</code> -> <span style='color: #C00000; font-family: Consolas;'>...</span>
+                            html = html.Replace("<code>", "<span style='color: #C00000; font-family: Consolas;'>");
+                            html = html.Replace("</code>", "</span>");
                             // Use new clipboard utility
-                            CopyHtmlToClipBoard(html);
+                            CopyHtmlToClipBoard(markdown, html);
 
                             PowerPoint.ShapeRange shapeRange = slide.Shapes.Paste();
                             if (shapeRange != null && shapeRange.Count > 0)
@@ -609,7 +612,6 @@ namespace Achuan的PPT插件
                                             paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNone;
                                             paragraph.ParagraphFormat.Bullet.Type = ppBulletType;
 
-
                                         }
                                     }
                                 }
@@ -626,7 +628,7 @@ namespace Achuan的PPT插件
                 MessageBox.Show($"操作过程中出错: {ex.Message}\n\n{ex.StackTrace}");
             }
         }
-        public void CopyHtmlToClipBoard(string html)
+        public void CopyHtmlToClipBoard(string markdown, string html)
         {
             var utf = Encoding.UTF8;
             var format = "Version:0.9\r\nStartHTML:{0:000000}\r\nEndHTML:{1:000000}\r\nStartFragment:{2:000000}\r\nEndFragment:{3:000000}\r\n";
@@ -640,6 +642,7 @@ namespace Achuan的PPT插件
             var s2 = string.Format(format, byteCount, byteCount + byteCount2 + byteCount3 + byteCount4, byteCount + byteCount2, byteCount + byteCount2 + byteCount3) + text + html + text2;
             var dataObject = new DataObject();
             dataObject.SetData(DataFormats.Html, new MemoryStream(utf.GetBytes(s2)));
+            dataObject.SetData(DataFormats.UnicodeText, markdown);
             Clipboard.SetDataObject(dataObject);
         }
         private void button3_Click(object sender, RibbonControlEventArgs e)
