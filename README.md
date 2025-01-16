@@ -39,8 +39,9 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
   * 如果不设置图片宽度或高度，则用第一张图片的高度来统一设置对齐时的图片高度
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250116004816-2025-01-16.png)
-* **复制位置和粘贴元素位置**：可以复制多个元素的位置，粘贴给其他元素（可以多选复制和粘贴！），可以用来让不同页的PPT的多个元素位置一致，或者让同一页的不同元素都是一个位置。
-* **复制和粘贴元素宽高**：统一图片宽高
+* **复制位置和粘贴元素位置**：可以复制多个元素的位置，粘贴给其他元素（可以多选复制和粘贴！），可以用来让不同页的PPT的多个元素位置一致，或者让同一页的不同元素都是一个位置（可以先拍好一组元素，用这个功能让另一组元素自动排好，再一起移动到目标位置）。
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-16.gif)
+* **复制和粘贴元素宽高**：支持多选同时粘贴宽高，快速统一图片宽高
 * **支持插入代码块自动高亮**
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250116004856-2025-01-16.png)
@@ -103,10 +104,19 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 
 ## ❓常见问题
 
-* 添加图题的文本框只有文本宽度并且没有居中？
+* **如何把插件的功能添加到PPT的快捷工具栏？**
+
+  按钮右击，添加到「快速访问工具栏」即可
+  ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-16_16-56-07-2025-01-16.png)
+
+  可以把「快速访问工具栏」放在下方，更方便使用
+* **添加图题的文本框只有文本宽度并且没有居中？**
 
   * 可能是设置了默认文本框导致的，需要将图题拉宽并设置居中后，设置居中图题为默认文本框
+* 插入latex公式，显示不正常？
 
+  * 插件比较适合插入单行数学公式，对于复杂的多行语法，推荐使用IguanaTex插件
+  * PPT特殊latex语法举例见 https://github.com/Achuan-2/my_ppt_plugin/issues/7
 
 
 ## ❤️ 用爱发电
