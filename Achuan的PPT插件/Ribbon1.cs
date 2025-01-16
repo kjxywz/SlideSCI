@@ -661,6 +661,8 @@ namespace Achuan的PPT插件
                                                             }
                                                         }
                                                     }
+                                                    System.Threading.Thread.Sleep(200); // Wait longer before retry
+                                                    Clipboard.Clear();
                                                     break; // Success, exit retry loop
                                                 }
                                             }
@@ -689,9 +691,14 @@ namespace Achuan的PPT插件
                             }
                         }
                     }
+                    inputDialog.Dispose();
+                    Clipboard.Clear();
+                    var dataObject = new DataObject();
+                    dataObject.SetData(DataFormats.UnicodeText, markdown);
+                    Clipboard.SetDataObject(dataObject, true, 3, 100); // Add retry and timeout parameters
                 }
 
-                inputDialog.Dispose();
+
             }
             catch (Exception ex)
             {
@@ -1037,8 +1044,11 @@ namespace Achuan的PPT插件
                 int retryCount = 3;
                 while (retryCount > 0)
                 {
+
                     try
                     {
+                        Clipboard.Clear();
+                        System.Threading.Thread.Sleep(100);
                         Clipboard.SetDataObject(dataObject, true, 3, 100); // Add retry and timeout parameters
                         break;
                     }
