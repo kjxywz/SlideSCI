@@ -19,7 +19,7 @@ namespace Achuan的PPT插件
         private float copiedHeight;
         private float copiedLeft;
         private float copiedTop;
-        private bool isDarkBackground = true;  // Changed from false to true
+
         private float cropLeft;
         private float cropRight;
         private float cropTop;
@@ -27,7 +27,7 @@ namespace Achuan的PPT插件
         private bool hasCopiedCrop = false;
         private float originalHeight; // 添加变量存储原始图片高度
         private float currentCropedHeight;
-        private const string CURRENT_VERSION = "1.0.0"; // Change this to match your current version
+
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
             app = Globals.ThisAddIn.Application;
