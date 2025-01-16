@@ -113,7 +113,7 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 * **添加图题的文本框只有文本宽度并且没有居中？**
 
   * 可能是设置了默认文本框导致的，需要将图题拉宽并设置居中后，设置居中图题为默认文本框
-* 插入latex公式，显示不正常？
+* **插入latex公式，显示不正常？**
 
   * 插件比较适合插入单行数学公式，对于复杂的多行语法，推荐使用IguanaTex插件
   * PPT特殊latex语法举例见 https://github.com/Achuan-2/my_ppt_plugin/issues/7
