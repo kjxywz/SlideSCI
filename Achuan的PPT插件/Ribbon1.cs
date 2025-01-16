@@ -691,6 +691,7 @@ namespace Achuan的PPT插件
                                                 System.Threading.Thread.Sleep(200); // Wait longer before retry
                                             }
                                         }
+
                                     }
                                 }
 
@@ -705,6 +706,11 @@ namespace Achuan的PPT插件
                                 continue; // Continue with next segment
                             }
                         }
+                        inputDialog.Dispose();
+                        Clipboard.Clear();
+                        var dataObject = new DataObject();
+                        dataObject.SetData(DataFormats.UnicodeText, markdown);
+                        Clipboard.SetDataObject(dataObject, true, 3, 100); // Add retry and timeout parameters
                     }
                 }
 
