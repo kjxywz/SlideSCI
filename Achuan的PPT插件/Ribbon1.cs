@@ -17,8 +17,9 @@ namespace Achuan的PPT插件
         PowerPoint.Application app;
         private float copiedWidth;
         private float copiedHeight;
-        private float copiedLeft;
-        private float copiedTop;
+
+        private List<float> copiedLeft = new List<float>();
+        private List<float> copiedTop = new List<float>();
 
         private float cropLeft;
         private float cropRight;
@@ -196,14 +197,18 @@ namespace Achuan的PPT插件
             PowerPoint.Selection sel = app.ActiveWindow.Selection;
             if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
             {
-                PowerPoint.Shape shape = sel.ShapeRange[1];
-                copiedLeft = shape.Left;
-                copiedTop = shape.Top;
-                // MessageBox.Show("Position copied!");
+                copiedLeft.Clear();
+                copiedTop.Clear();
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    copiedLeft.Add(shape.Left);
+                    copiedTop.Add(shape.Top);
+                }
+                // MessageBox.Show($"Copied positions of {sel.ShapeRange.Count} shapes");
             }
             else
             {
-                MessageBox.Show("Please select a shape to copy position.");
+                MessageBox.Show("Please select shapes to copy positions.");
             }
         }
 
@@ -212,15 +217,27 @@ namespace Achuan的PPT插件
             PowerPoint.Selection sel = app.ActiveWindow.Selection;
             if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
             {
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                int count = Math.Min(sel.ShapeRange.Count, copiedLeft.Count);
+                if (count == 0)
                 {
-                    shape.Left = copiedLeft;
-                    shape.Top = copiedTop;
+                    MessageBox.Show("No positions copied yet.");
+                    return;
                 }
+
+                for (int i = 0; i < count; i++)
+                {
+                    sel.ShapeRange[i + 1].Left = copiedLeft[i];
+                    sel.ShapeRange[i + 1].Top = copiedTop[i];
+                }
+
+                // if (sel.ShapeRange.Count > copiedLeft.Count)
+                // {
+                //     MessageBox.Show("More shapes selected than positions copied. Only the first " + copiedLeft.Count + " shapes were positioned.");
+                // }
             }
             else
             {
-                MessageBox.Show("Please select a shape to paste position.");
+                MessageBox.Show("Please select shapes to paste positions.");
             }
         }
 
@@ -661,8 +678,6 @@ namespace Achuan的PPT插件
                                                             }
                                                         }
                                                     }
-                                                    System.Threading.Thread.Sleep(200); // Wait longer before retry
-                                                    Clipboard.Clear();
                                                     break; // Success, exit retry loop
                                                 }
                                             }
@@ -691,14 +706,9 @@ namespace Achuan的PPT插件
                             }
                         }
                     }
-                    inputDialog.Dispose();
-                    Clipboard.Clear();
-                    var dataObject = new DataObject();
-                    dataObject.SetData(DataFormats.UnicodeText, markdown);
-                    Clipboard.SetDataObject(dataObject, true, 3, 100); // Add retry and timeout parameters
                 }
 
-
+                inputDialog.Dispose();
             }
             catch (Exception ex)
             {
@@ -1044,11 +1054,8 @@ namespace Achuan的PPT插件
                 int retryCount = 3;
                 while (retryCount > 0)
                 {
-
                     try
                     {
-                        Clipboard.Clear();
-                        System.Threading.Thread.Sleep(100);
                         Clipboard.SetDataObject(dataObject, true, 3, 100); // Add retry and timeout parameters
                         break;
                     }
