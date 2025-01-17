@@ -112,3 +112,7 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20241118182532-2024-11-18.png)
 
 捐赠者列表见：https://www.yuque.com/achuan-2
+
+## 🔍参考项目
+
+* [jph00/latex-ppt: Use LaTeX in PowerPoint](https://github.com/jph00/latex-ppt)
