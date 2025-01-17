@@ -518,16 +518,11 @@ namespace Achuan的PPT插件
                         textBox.Select();
                         app.ActiveWindow.Selection.TextRange.Select();
 
-                        // Run SwitchLatex
-                        app.CommandBars.ExecuteMso("EquationInsertNew");
-                        PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
-                        equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = "\u24C9";
-
                         app.CommandBars.ExecuteMso("EquationInsertNew");
                         app.ActiveWindow.Selection.TextRange.Select();
-                        PowerPoint.Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
+                        PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
                         // Set the LaTeX input to the equation shape
-                        equationShape2.TextFrame.TextRange.Characters(1, equationShape2.TextFrame.TextRange.Text.Length - 1).Text = latexInput;
+                        equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = latexInput;
 
                         // Convert to professional format
                         app.CommandBars.ExecuteMso("EquationProfessional");
@@ -650,6 +645,10 @@ namespace Achuan的PPT插件
                                                     textShape.Left = left;
                                                     textShape.Top = currentTop;
                                                     currentTop += textShape.Height + 10;
+
+                                                    // Process inline math formulas
+                                                    ProcessInlineMathFormulas(textShape);
+
                                                     if (textShape.TextFrame.HasText == Office.MsoTriState.msoTrue)
                                                     {
                                                         PowerPoint.TextRange textRange = textShape.TextFrame.TextRange;
@@ -721,6 +720,31 @@ namespace Achuan的PPT插件
                 MessageBox.Show($"操作过程中出错: {ex.Message}\n\n{ex.StackTrace}");
             }
         }
+
+        private void ProcessInlineMathFormulas(PowerPoint.Shape textShape)
+        {
+            PowerPoint.TextRange textRange = textShape.TextFrame.TextRange;
+            string text = textRange.Text;
+            // Regex pattern to find single-dollar math expressions
+            var matches = System.Text.RegularExpressions.Regex.Matches(text, @"\$([^$\n]+?)\$");
+            
+            // Process matches in reverse order to maintain correct indices
+            for (int i = matches.Count - 1; i >= 0; i--)
+            {
+                var match = matches[i];
+                int start = match.Index + 1;  // Skip the first $
+                int length = match.Length;  // Remove both $ signs
+                string formula = match.Groups[1].Value;
+                //把选中的文本变为红色
+                //textRange.Characters(start, length).Font.Color.RGB = ColorTranslator.ToOle(Color.Red);
+                PowerPoint.TextRange selectedRange = textRange.Characters(start, length);
+                selectedRange.Select();
+                app.CommandBars.ExecuteMso("EquationInsertNew");
+                PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+                app.CommandBars.ExecuteMso("EquationProfessional");
+            }
+        }
+
         private PowerPoint.Shape InsertCodeBlock(string code, string language, float left, float top)
         {
             PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
@@ -945,16 +969,12 @@ namespace Achuan的PPT插件
             textBox.Select();
             app.ActiveWindow.Selection.TextRange.Select();
 
-            // Run SwitchLatex
-            app.CommandBars.ExecuteMso("EquationInsertNew");
-            PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
-            equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = "\u24C9";
 
             app.CommandBars.ExecuteMso("EquationInsertNew");
             app.ActiveWindow.Selection.TextRange.Select();
-            PowerPoint.Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
+            PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
             // Set the LaTeX input to the equation shape
-            equationShape2.TextFrame.TextRange.Characters(1, equationShape2.TextFrame.TextRange.Text.Length - 1).Text = mathContent;
+            equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = mathContent;
 
             // Convert to professional format
             app.CommandBars.ExecuteMso("EquationProfessional");
@@ -1035,6 +1055,11 @@ namespace Achuan的PPT插件
             html = html.Replace("</code>", "</span>");
 
             html = $"<div style='font-family: 微软雅黑;'>{html}</div>";
+
+            // 把<span class="math">\(...\)</span>转换$...$
+            html = System.Text.RegularExpressions.Regex.Replace(html, @"<span class=""math"">\\\((.+?)\\\)</span>", m => $"${m.Groups[1].Value}$");
+            // 弹窗显示
+            //MessageBox.Show($"Markdown转换: {html}");
             return html;
         }
 
