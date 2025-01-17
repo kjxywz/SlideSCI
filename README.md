@@ -57,7 +57,7 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250116004919-2025-01-16.png)
 
-  * 支持行内格式：加粗、下划线、上标、下标、斜体、链接、行级代码
+  * 支持行内格式：加粗、下划线、上标、下标、斜体、链接、行级代码、行级数学公式
   * 支持块级格式：标题、列表、代码块、表格、数学公式、引述块
 
     * 列表特别处理：
