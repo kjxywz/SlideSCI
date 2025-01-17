@@ -742,7 +742,7 @@ namespace Achuan的PPT插件
             for (int i = matches.Count - 1; i >= 0; i--)
             {
                 var match = matches[i];
-                int start = match.Index;  // Include the first $ 
+                int start = match.Index+1;  // Include the first $ 
                 int length = match.Length + 1;  // Include both $ signs
                 string formula = match.Groups[1].Value;
                 // 替换文本：$公式$为公式
