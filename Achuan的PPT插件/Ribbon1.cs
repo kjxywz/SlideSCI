@@ -1168,6 +1168,10 @@ namespace Achuan的PPT插件
         {
             System.Diagnostics.Process.Start("https://github.com/Achuan-2/my_ppt_plugin/");
         }
+        private void openDoc_Click(object sender, RibbonControlEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.yuque.com/achuan-2/blog/etzcergpmb4rr2sk/");
+        }
 
     }
 
