@@ -733,6 +733,11 @@ namespace Achuan的PPT插件
             // Regex pattern to find math expressions between $ signs 
             var matches = System.Text.RegularExpressions.Regex.Matches(text, @"\$([^$\n]+?)\$");
 
+            // 创建tempShape，如果不创建，行内数学公式包括分式就不会正常转化
+            PowerPoint.Shape tempShape = InsertMathBlock("a", 0, 0);
+            // 删除mathShape
+            tempShape.Delete();
+
             // Process matches in reverse order to maintain correct indices
             for (int i = matches.Count - 1; i >= 0; i--)
             {
