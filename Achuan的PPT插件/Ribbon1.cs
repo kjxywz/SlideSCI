@@ -518,11 +518,16 @@ namespace Achuan的PPT插件
                         textBox.Select();
                         app.ActiveWindow.Selection.TextRange.Select();
 
+                        // Run SwitchLatex
+                        app.CommandBars.ExecuteMso("EquationInsertNew");
+                        PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+                        equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = "\u24C9";
+
                         app.CommandBars.ExecuteMso("EquationInsertNew");
                         app.ActiveWindow.Selection.TextRange.Select();
-                        PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+                        PowerPoint.Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
                         // Set the LaTeX input to the equation shape
-                        equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = latexInput;
+                        equationShape2.TextFrame.TextRange.Characters(1, equationShape2.TextFrame.TextRange.Text.Length - 1).Text = latexInput;
 
                         // Convert to professional format
                         app.CommandBars.ExecuteMso("EquationProfessional");
@@ -725,22 +730,22 @@ namespace Achuan的PPT插件
         {
             PowerPoint.TextRange textRange = textShape.TextFrame.TextRange;
             string text = textRange.Text;
-            // Regex pattern to find single-dollar math expressions
+            // Regex pattern to find math expressions between $ signs 
             var matches = System.Text.RegularExpressions.Regex.Matches(text, @"\$([^$\n]+?)\$");
 
             // Process matches in reverse order to maintain correct indices
             for (int i = matches.Count - 1; i >= 0; i--)
             {
                 var match = matches[i];
-                int start = match.Index + 1;  // Skip the first $
-                int length = match.Length;  // Remove both $ signs
+                int start = match.Index;  // Include the first $ 
+                int length = match.Length + 1;  // Include both $ signs
                 string formula = match.Groups[1].Value;
-                //把选中的文本变为红色
-                //textRange.Characters(start, length).Font.Color.RGB = ColorTranslator.ToOle(Color.Red);
+                // 替换文本：$公式$为公式
                 PowerPoint.TextRange selectedRange = textRange.Characters(start, length);
+                selectedRange.Text = formula.Trim('$');
                 selectedRange.Select();
                 app.CommandBars.ExecuteMso("EquationInsertNew");
-                PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+
                 app.CommandBars.ExecuteMso("EquationProfessional");
             }
         }
@@ -969,12 +974,16 @@ namespace Achuan的PPT插件
             textBox.Select();
             app.ActiveWindow.Selection.TextRange.Select();
 
+            // Run SwitchLatex
+            app.CommandBars.ExecuteMso("EquationInsertNew");
+            PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+            equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = "\u24C9";
 
             app.CommandBars.ExecuteMso("EquationInsertNew");
             app.ActiveWindow.Selection.TextRange.Select();
-            PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+            PowerPoint.Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
             // Set the LaTeX input to the equation shape
-            equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = mathContent;
+            equationShape2.TextFrame.TextRange.Characters(1, equationShape2.TextFrame.TextRange.Text.Length - 1).Text = mathContent;
 
             // Convert to professional format
             app.CommandBars.ExecuteMso("EquationProfessional");
