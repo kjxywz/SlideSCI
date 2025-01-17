@@ -727,7 +727,7 @@ namespace Achuan的PPT插件
             string text = textRange.Text;
             // Regex pattern to find single-dollar math expressions
             var matches = System.Text.RegularExpressions.Regex.Matches(text, @"\$([^$\n]+?)\$");
-            
+
             // Process matches in reverse order to maintain correct indices
             for (int i = matches.Count - 1; i >= 0; i--)
             {
@@ -1197,7 +1197,12 @@ namespace Achuan的PPT插件
         {
             System.Diagnostics.Process.Start("https://www.yuque.com/achuan-2/blog/etzcergpmb4rr2sk/");
         }
-
+        private void current_Version(object sender, RibbonControlEventArgs e)
+        {
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Version version = assembly.GetName().Version;
+            MessageBox.Show($"Version {version}", "Current Version");
+        }
     }
 
 }
