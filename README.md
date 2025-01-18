@@ -89,6 +89,12 @@ Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Ac
 
 注意：安装时需要先退出PPT，否则PPT不会即时加载该插件
 
+需要的安装环境
+- 运行环境1：[Microsoft .Net Framework 4.0或更高](https://www.microsoft.com/zh-cn/download/details.aspx?id=17718)
+- 运行环境2：[Microsoft Visual Studio 2010 Tools for Office Runtime](https://www.microsoft.com/zh-cn/download/details.aspx?id=105522)
+
+如果插件安装后无法正常运行、没有在PPT中显示，或者在开发工具→COM加载项里勾选插件，提示“未加载。加载COM加载项时出现运行错误”，请尝试安装上面的环境依赖。
+
 ## ❓常见问题
 
 * **如何把插件的功能添加到PPT的快捷工具栏？**
