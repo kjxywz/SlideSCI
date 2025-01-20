@@ -43,6 +43,7 @@
             this.imgAutoAlign_rowSpace = this.Factory.CreateRibbonEditBox();
             this.imgWidthEditBpx = this.Factory.CreateRibbonEditBox();
             this.imgHeightEditBox = this.Factory.CreateRibbonEditBox();
+            this.positionSortCheckBox = this.Factory.CreateRibbonCheckBox();
             this.图片处理 = this.Factory.CreateRibbonGroup();
             this.AddTitleButton = this.Factory.CreateRibbonButton();
             this.fontNameEditBox = this.Factory.CreateRibbonEditBox();
@@ -99,6 +100,7 @@
             this.图片自动对齐.Items.Add(this.imgAutoAlign_rowSpace);
             this.图片自动对齐.Items.Add(this.imgWidthEditBpx);
             this.图片自动对齐.Items.Add(this.imgHeightEditBox);
+            this.图片自动对齐.Items.Add(this.positionSortCheckBox);
             this.图片自动对齐.Label = "图片自动排列";
             this.图片自动对齐.Name = "图片自动对齐";
             // 
@@ -139,6 +141,13 @@
             this.imgHeightEditBox.Label = "图片高度";
             this.imgHeightEditBox.Name = "imgHeightEditBox";
             this.imgHeightEditBox.Text = null;
+            // 
+            // positionSortCheckBox
+            // 
+            this.positionSortCheckBox.Checked = true;
+            this.positionSortCheckBox.Label = "根据位置排序";
+            this.positionSortCheckBox.Name = "positionSortCheckBox";
+            this.positionSortCheckBox.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.positionSortCheckBox_Click);
             // 
             // 图片处理
             // 
@@ -425,6 +434,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel label3;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button3;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button5;
+        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox positionSortCheckBox; // Add this line
     }
 
     partial class ThisRibbonCollection

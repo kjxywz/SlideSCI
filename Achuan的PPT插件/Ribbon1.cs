@@ -252,6 +252,7 @@ namespace Achuan的PPT插件
                 float imgWidth = 0;
                 float imgHeight = 0;
 
+                // Input validation
                 if (!int.TryParse(imgAutoAlign_colNum.Text, out colNum) || colNum <= 0)
                 {
                     MessageBox.Show("请输入有效的列数量。");
@@ -274,13 +275,29 @@ namespace Achuan的PPT插件
 
                 PowerPoint.Shape firstShape = sel.ShapeRange[1];
 
+                // Create a list of shapes to sort
+                var shapes = new List<PowerPoint.Shape>();
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    shapes.Add(shape);
+                }
+
+                // Sort shapes by position if checkbox is checked
+                if (positionSortCheckBox.Checked)
+                {
+                    shapes = shapes.OrderBy(s => s.Top)  // First sort by Y position (Top)
+                                  .ThenBy(s => s.Left)   // Then sort by X position (Left)
+                                  .ToList();
+                }
+
                 float startX = firstShape.Left;
                 float startY = firstShape.Top;
                 float currentX = startX;
                 float currentY = startY;
                 int currentCol = 0;
 
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                // Arrange shapes in order
+                foreach (PowerPoint.Shape shape in shapes)
                 {
                     if (!useCustomHeight && !useCustomWidth)
                     {
@@ -298,7 +315,6 @@ namespace Achuan的PPT插件
                         }
                     }
 
-
                     shape.Left = currentX;
                     shape.Top = currentY;
 
@@ -306,7 +322,7 @@ namespace Achuan的PPT插件
                     if (currentCol >= colNum)
                     {
                         currentCol = 0;
-                        currentX = startX; // Reset X position to startX
+                        currentX = startX;
                         currentY += shape.Height + rowSpace;
                     }
                     else
@@ -1220,6 +1236,11 @@ namespace Achuan的PPT插件
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             System.Version version = assembly.GetName().Version;
             MessageBox.Show($"Version {version}", "Current Version");
+        }
+
+        private void positionSortCheckBox_Click(object sender, RibbonControlEventArgs e)
+        {
+
         }
     }
 
