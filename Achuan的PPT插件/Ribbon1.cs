@@ -10,8 +10,11 @@ using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using System.IO;
 using System.Collections.Generic; // Add this line
 
+
+
 namespace Achuan的PPT插件
 {
+
     public partial class Ribbon1
     {
         PowerPoint.Application app;
@@ -267,41 +270,74 @@ namespace Achuan的PPT插件
 
                 if (!float.TryParse(imgAutoAlign_rowSpace.Text, out rowSpace) || rowSpace < 0)
                 {
-                    rowSpace = colSpace; // Use column spacing if row spacing is not provided
+                    rowSpace = colSpace;
                 }
 
                 bool useCustomWidth = float.TryParse(imgWidthEditBpx.Text, out imgWidth) && imgWidth > 0;
                 bool useCustomHeight = float.TryParse(imgHeightEditBox.Text, out imgHeight) && imgHeight > 0;
 
-                PowerPoint.Shape firstShape = sel.ShapeRange[1];
-
-                // Create a list of shapes to sort
+                // Create groups based on vertical position
+                var groups = new List<ImageGroup>();
                 var shapes = new List<PowerPoint.Shape>();
                 foreach (PowerPoint.Shape shape in sel.ShapeRange)
                 {
                     shapes.Add(shape);
                 }
 
-                // Sort shapes by position if checkbox is checked
-                if (positionSortCheckBox.Checked)
+                // Sort shapes by top position first
+                shapes = shapes.OrderBy(s => s.Top).ToList();
+
+                // Group shapes based on vertical overlap
+                foreach (var shape in shapes)
                 {
-                    shapes = shapes.OrderBy(s => s.Top)  // First sort by Y position (Top)
-                                  .ThenBy(s => s.Left)   // Then sort by X position (Left)
-                                  .ToList();
+                    bool addedToExistingGroup = false;
+                    foreach (var group in groups)
+                    {
+                        if (group.OverlapsWith(shape))
+                        {
+                            group.AddShape(shape);
+                            addedToExistingGroup = true;
+                            break;
+                        }
+                    }
+
+                    if (!addedToExistingGroup)
+                    {
+                        var newGroup = new ImageGroup();
+                        newGroup.AddShape(shape);
+                        groups.Add(newGroup);
+                    }
                 }
 
-                float startX = firstShape.Left;
-                float startY = firstShape.Top;
-                float currentX = startX;
-                float currentY = startY;
-                int currentCol = 0;
-
-                // Arrange shapes in order
-                foreach (PowerPoint.Shape shape in shapes)
+                // Sort shapes within each group by x position
+                foreach (var group in groups)
                 {
+                    group.Shapes.Sort((a, b) => a.Left.CompareTo(b.Left));
+                }
+
+                // Sort groups by MinTop
+                groups.Sort((a, b) => a.MinTop.CompareTo(b.MinTop));
+
+                // Get the starting position from the first shape of the first group
+                float startX = groups[0].Shapes[0].Left;
+                float currentY = groups[0].Shapes[0].Top;
+                float currentX = startX;
+                float rowMaxHeight = 0;
+                int colCount = 0;
+
+                // Flatten all shapes from all groups into a single list for arrangement
+                var allShapes = new List<PowerPoint.Shape>();
+                foreach (var group in groups)
+                {
+                    allShapes.AddRange(group.Shapes);
+                }
+
+                foreach (var shape in allShapes)
+                {
+                    // Apply size settings if specified
                     if (!useCustomHeight && !useCustomWidth)
                     {
-                        shape.Height = firstShape.Height;
+                        shape.Height = allShapes[0].Height;
                     }
                     else
                     {
@@ -315,18 +351,24 @@ namespace Achuan的PPT插件
                         }
                     }
 
+                    // Position the shape
                     shape.Left = currentX;
                     shape.Top = currentY;
 
-                    currentCol++;
-                    if (currentCol >= colNum)
+                    // Track maximum height in current row
+                    rowMaxHeight = Math.Max(rowMaxHeight, shape.Height);
+
+                    colCount++;
+                    if (colCount >= colNum)
                     {
-                        currentCol = 0;
-                        currentX = startX;
-                        currentY += shape.Height + rowSpace;
+                        // Move to next row
+                        colCount = 0;
+                        currentX = startX; // Reset X position to startX
+                        currentY += rowMaxHeight + rowSpace;
+                        rowMaxHeight = 0;
                     }
-                    else
-                    {
+                    else{
+
                         currentX += shape.Width + colSpace;
                     }
                 }
@@ -815,6 +857,41 @@ namespace Achuan的PPT插件
             textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
 
             return textBox;
+        }
+        public class ImageGroup
+        {
+            public List<PowerPoint.Shape> Shapes { get; set; } = new List<PowerPoint.Shape>();
+            public float MinTop { get; set; }
+            public float MaxBottom { get; set; }
+
+            public bool OverlapsWith(PowerPoint.Shape shape)
+            {
+                float shapeHeight = shape.Height;
+                float threshold = shapeHeight * 0.6f; // 80% of shape height
+                float shapeBottom = shape.Top + shapeHeight;
+                
+                // Calculate overlap height
+                float overlapStart = Math.Max(MinTop, shape.Top);
+                float overlapEnd = Math.Min(MaxBottom, shapeBottom);
+                float overlapHeight = overlapEnd - overlapStart;
+                
+                return overlapHeight >= threshold;
+            }
+
+            public void AddShape(PowerPoint.Shape shape)
+            {
+                if (Shapes.Count == 0)
+                {
+                    MinTop = shape.Top;
+                    MaxBottom = shape.Top + shape.Height;
+                }
+                else
+                {
+                    MinTop = Math.Min(MinTop, shape.Top);
+                    MaxBottom = Math.Max(MaxBottom, shape.Top + shape.Height);
+                }
+                Shapes.Add(shape);
+            }
         }
         private class MarkdownSegment
         {
