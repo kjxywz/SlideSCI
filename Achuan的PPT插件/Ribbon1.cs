@@ -1319,6 +1319,134 @@ namespace Achuan的PPT插件
         {
 
         }
+        
+        private void addLabelsButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            string fontFamily = labelFontNameEditBox.Text; // 修改为使用新控件
+            float fontSize;
+            if (!float.TryParse(labelFontSizeEditBox.Text, out fontSize)) // 修改为使用新控件
+            {
+                MessageBox.Show("请输入有效的字体大小。");
+                return;
+            }
+            float labelOffsetX;
+            if (!float.TryParse(labelOffsetXEditBox.Text, out labelOffsetX))
+            {
+                MessageBox.Show("请输入有效的X偏移量。");
+                return;
+            }
+            float labelOffsetY;
+            if (!float.TryParse(labelOffsetYEditBox.Text, out labelOffsetY))
+            {
+                MessageBox.Show("请输入有效的Y偏移量。");
+                return;
+            }
+            string labelTemplate = labelTemplateComboBox.Text;
+
+            AddLabelsToImages(fontFamily, fontSize, labelOffsetX, labelOffsetY, labelTemplate);
+        }
+
+        private void AddLabelsToImages(string fontFamily, float fontSize, float labelOffsetX, float labelOffsetY, string labelTemplate)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type != PowerPoint.PpSelectionType.ppSelectionShapes || sel.ShapeRange.Count == 0)
+            {
+                MessageBox.Show("请选择要添加标签的图片。");
+                return;
+            }
+
+            var templates = new Dictionary<string, string>
+            {
+                { "A", "ABCDEFGHIJKLMNOPQRSTUVWXYZ" },
+                { "a", "abcdefghijklmnopqrstuvwxyz" },
+                { "A)", "ABCDEFGHIJKLMNOPQRSTUVWXYZ" },
+                { "a)", "abcdefghijklmnopqrstuvwxyz" }
+            };
+
+            if (!templates.ContainsKey(labelTemplate))
+            {
+                labelTemplate = "A";
+            }
+
+            string labels = templates[labelTemplate];
+            int selectionCount = sel.ShapeRange.Count;
+
+            // Create groups based on vertical position
+            var groups = new List<ImageGroup>();
+            var shapes = new List<PowerPoint.Shape>();
+            foreach (PowerPoint.Shape shape in sel.ShapeRange)
+            {
+                shapes.Add(shape);
+            }
+
+            // Group shapes based on vertical overlap
+            foreach (var shape in shapes)
+            {
+                bool addedToExistingGroup = false;
+                foreach (var group in groups)
+                {
+                    if (group.OverlapsWith(shape))
+                    {
+                        group.AddShape(shape);
+                        addedToExistingGroup = true;
+                        break;
+                    }
+                }
+
+                if (!addedToExistingGroup)
+                {
+                    var newGroup = new ImageGroup();
+                    newGroup.AddShape(shape);
+                    groups.Add(newGroup);
+                }
+            }
+
+            // Sort shapes within each group by x position
+            foreach (var group in groups)
+            {
+                group.Shapes.Sort((a, b) => a.Left.CompareTo(b.Left));
+            }
+
+            // Sort groups by MinTop
+            groups.Sort((a, b) => a.MinTop.CompareTo(b.MinTop));
+
+            // Create flattened list of sorted shapes
+            var sortedShapes = new List<PowerPoint.Shape>();
+            foreach (var group in groups)
+            {
+                sortedShapes.AddRange(group.Shapes);
+            }
+
+            // Add labels to sorted shapes
+            for (int i = 0; i < sortedShapes.Count; i++)
+            {
+                try
+                {
+                    var item = sortedShapes[i];
+                    string label = labels[i % labels.Length].ToString();
+                    if (labelTemplate.EndsWith(")"))
+                    {
+                        label += ")";
+                    }
+
+                    var textBox = app.ActiveWindow.View.Slide.Shapes.AddTextbox(
+                        Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                        item.Left + labelOffsetX,
+                        item.Top + labelOffsetY,
+                        fontSize * label.Length, // Width based on font size and label length
+                        fontSize * 2);
+
+                    textBox.TextFrame.TextRange.Text = label;
+                    textBox.TextFrame.TextRange.Font.Size = fontSize;
+                    textBox.TextFrame.TextRange.Font.Name = fontFamily;
+                    textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignLeft;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"添加标签时出错: {ex.Message}");
+                }
+            }
+        }
     }
 
 }

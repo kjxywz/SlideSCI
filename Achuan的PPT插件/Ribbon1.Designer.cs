@@ -34,21 +34,30 @@
         /// </summary>
         private void InitializeComponent()
         {
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl1 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl2 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl3 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl4 = this.Factory.CreateRibbonDropDownItem();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Ribbon1));
             this.tab1 = this.Factory.CreateRibbonTab();
             this.图片自动对齐 = this.Factory.CreateRibbonGroup();
+            this.positionSortCheckBox = this.Factory.CreateRibbonCheckBox();
             this.imgAutoAlign_colNum = this.Factory.CreateRibbonEditBox();
             this.imgAutoAlign_colSpace = this.Factory.CreateRibbonEditBox();
             this.imgAutoAlign_rowSpace = this.Factory.CreateRibbonEditBox();
             this.imgWidthEditBpx = this.Factory.CreateRibbonEditBox();
             this.imgHeightEditBox = this.Factory.CreateRibbonEditBox();
-            this.positionSortCheckBox = this.Factory.CreateRibbonCheckBox();
             this.图片处理 = this.Factory.CreateRibbonGroup();
             this.fontNameEditBox = this.Factory.CreateRibbonEditBox();
             this.fontSizeEditBox = this.Factory.CreateRibbonEditBox();
             this.distanceFromBottomEditBox = this.Factory.CreateRibbonEditBox();
             this.titleTextEditBox = this.Factory.CreateRibbonEditBox();
             this.autoGroupCheckBox = this.Factory.CreateRibbonCheckBox();
+            this.labelOffsetXEditBox = this.Factory.CreateRibbonEditBox();
+            this.labelOffsetYEditBox = this.Factory.CreateRibbonEditBox();
+            this.labelTemplateComboBox = this.Factory.CreateRibbonComboBox();
+            this.labelFontNameEditBox = this.Factory.CreateRibbonEditBox();
+            this.labelFontSizeEditBox = this.Factory.CreateRibbonEditBox();
             this.复制图片格式 = this.Factory.CreateRibbonGroup();
             this.label3 = this.Factory.CreateRibbonLabel();
             this.label1 = this.Factory.CreateRibbonLabel();
@@ -58,6 +67,7 @@
             this.group2 = this.Factory.CreateRibbonGroup();
             this.imgAutoAlign = this.Factory.CreateRibbonButton();
             this.AddTitleButton = this.Factory.CreateRibbonButton();
+            this.addLabelsButton = this.Factory.CreateRibbonButton();
             this.copyPosition = this.Factory.CreateRibbonButton();
             this.pastePosition = this.Factory.CreateRibbonButton();
             this.copyImgWidth = this.Factory.CreateRibbonButton();
@@ -104,6 +114,13 @@
             this.图片自动对齐.Label = "图片自动排列";
             this.图片自动对齐.Name = "图片自动对齐";
             // 
+            // positionSortCheckBox
+            // 
+            this.positionSortCheckBox.Checked = true;
+            this.positionSortCheckBox.Label = "根据位置排序";
+            this.positionSortCheckBox.Name = "positionSortCheckBox";
+            this.positionSortCheckBox.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.positionSortCheckBox_Click);
+            // 
             // imgAutoAlign_colNum
             // 
             this.imgAutoAlign_colNum.Label = "列数量";
@@ -134,13 +151,6 @@
             this.imgHeightEditBox.Name = "imgHeightEditBox";
             this.imgHeightEditBox.Text = null;
             // 
-            // positionSortCheckBox
-            // 
-            this.positionSortCheckBox.Checked = true;
-            this.positionSortCheckBox.Label = "根据位置排序";
-            this.positionSortCheckBox.Name = "positionSortCheckBox";
-            this.positionSortCheckBox.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.positionSortCheckBox_Click);
-            // 
             // 图片处理
             // 
             this.图片处理.Items.Add(this.AddTitleButton);
@@ -149,6 +159,12 @@
             this.图片处理.Items.Add(this.distanceFromBottomEditBox);
             this.图片处理.Items.Add(this.titleTextEditBox);
             this.图片处理.Items.Add(this.autoGroupCheckBox);
+            this.图片处理.Items.Add(this.addLabelsButton);
+            this.图片处理.Items.Add(this.labelOffsetXEditBox);
+            this.图片处理.Items.Add(this.labelOffsetYEditBox);
+            this.图片处理.Items.Add(this.labelTemplateComboBox);
+            this.图片处理.Items.Add(this.labelFontNameEditBox);
+            this.图片处理.Items.Add(this.labelFontSizeEditBox);
             this.图片处理.Label = "添加图片标题";
             this.图片处理.Name = "图片处理";
             // 
@@ -180,6 +196,44 @@
             // 
             this.autoGroupCheckBox.Label = "自动编组";
             this.autoGroupCheckBox.Name = "autoGroupCheckBox";
+            // 
+            // labelOffsetXEditBox
+            // 
+            this.labelOffsetXEditBox.Label = "X Offset";
+            this.labelOffsetXEditBox.Name = "labelOffsetXEditBox";
+            this.labelOffsetXEditBox.Text = "-20";
+            // 
+            // labelOffsetYEditBox
+            // 
+            this.labelOffsetYEditBox.Label = "Y Offset";
+            this.labelOffsetYEditBox.Name = "labelOffsetYEditBox";
+            this.labelOffsetYEditBox.Text = "-7";
+            // 
+            // labelTemplateComboBox
+            // 
+            ribbonDropDownItemImpl1.Label = "A";
+            ribbonDropDownItemImpl2.Label = "a";
+            ribbonDropDownItemImpl3.Label = "A)";
+            ribbonDropDownItemImpl4.Label = "a)";
+            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl1);
+            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl2);
+            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl3);
+            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl4);
+            this.labelTemplateComboBox.Label = "标签模板";
+            this.labelTemplateComboBox.Name = "labelTemplateComboBox";
+            this.labelTemplateComboBox.Text = "A";
+            // 
+            // labelFontNameEditBox
+            // 
+            this.labelFontNameEditBox.Label = "标签字体";
+            this.labelFontNameEditBox.Name = "labelFontNameEditBox";
+            this.labelFontNameEditBox.Text = "Arial";
+            // 
+            // labelFontSizeEditBox
+            // 
+            this.labelFontSizeEditBox.Label = "标签字号";
+            this.labelFontSizeEditBox.Name = "labelFontSizeEditBox";
+            this.labelFontSizeEditBox.Text = "12";
             // 
             // 复制图片格式
             // 
@@ -254,6 +308,15 @@
             this.AddTitleButton.Name = "AddTitleButton";
             this.AddTitleButton.ShowImage = true;
             this.AddTitleButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.AddTitleToImage);
+            // 
+            // addLabelsButton
+            // 
+            this.addLabelsButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.addLabelsButton.Image = ((System.Drawing.Image)(resources.GetObject("addLabelsButton.Image")));
+            this.addLabelsButton.Label = "添加图片标签";
+            this.addLabelsButton.Name = "addLabelsButton";
+            this.addLabelsButton.ShowImage = true;
+            this.addLabelsButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.addLabelsButton_Click);
             // 
             // copyPosition
             // 
@@ -435,6 +498,12 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button3;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button5;
         internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox positionSortCheckBox; // Add this line
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton addLabelsButton;
+        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox labelOffsetXEditBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox labelOffsetYEditBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonComboBox labelTemplateComboBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox labelFontNameEditBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonEditBox labelFontSizeEditBox;
     }
 
     partial class ThisRibbonCollection
