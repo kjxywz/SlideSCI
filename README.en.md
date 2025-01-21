@@ -46,7 +46,7 @@ With AI's help, I developed solutions for these pain points swiftly! The sense o
 
 In the spirit of open source, this plugin is available on GitHub. Stars are appreciated! 🌟
 
-GitHub: [https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Achuan-2/my_ppt_plugin)
+GitHub: [https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-2/SlideSCI)
 
 ## ✨ Key Features
 

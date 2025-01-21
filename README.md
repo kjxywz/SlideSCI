@@ -52,7 +52,7 @@
 
 本着开源的精神，这个插件也在Github上开源了，欢迎大家给我点小星星！
 
-Github地址：[https://github.com/Achuan-2/my_ppt_plugin](https://github.com/Achuan-2/my_ppt_plugin)
+Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-2/SlideSCI)
 
 ## ✨主要功能
 
