@@ -112,7 +112,7 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 
 ## 🖥️安装方法
 
-下载本插件Github页面[Release](https://github.com/Achuan-2/my_ppt_plugin/releases)中的Achuan.PPT.msi，解压，双击安装即可
+下载本插件Github页面[Release](https://github.com/Achuan-2/my_ppt_plugin/releases)中的msi文件，解压，双击安装即可
 
 注意：安装时需要先退出PPT，否则PPT不会即时加载该插件
 

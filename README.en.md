@@ -101,7 +101,7 @@ Developed on Windows 11 using [Visual Studio Tools for Office](https://www.visua
 
 ## 🖥️ Installation
 
-1. Download `Achuan.PPT.msi` from the GitHub [Releases](https://github.com/Achuan-2/my_ppt_plugin/releases).
+1. Download `msi` file from the GitHub [Releases](https://github.com/Achuan-2/my_ppt_plugin/releases).
 2. Extract and double-click to install.
 
 **Note**: Close PowerPoint before installation. Otherwise, the plugin won't load immediately.
