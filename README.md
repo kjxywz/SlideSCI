@@ -1,3 +1,10 @@
+<div align="center">
+
+[English](README.en.md) | 简体中文
+
+</div>
+
+
 ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250117115019-2025-01-17.png)
 
 ## 📄 特别说明
