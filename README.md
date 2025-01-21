@@ -26,7 +26,7 @@
 > 您在本声明未发出之时点使用或者复制了本仓库且本人制作的任何代码或项目且此时还在使用，则视为`已接受`此声明，请仔细阅读
 
 
-## 📝开发背景
+## 📝 开发背景
 
 不知道有没有人和我一样，对PPT积怨已久😡：
 
@@ -54,7 +54,7 @@
 
 Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-2/SlideSCI)
 
-## ✨主要功能
+## ✨ 主要功能
 
 * **批量添加图片标题**：支持<u>批量</u>选中图片后，批量在图片下方添加居中图题，支持设置图片和图题是否自动编组
 
@@ -110,7 +110,7 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 
 插件只支持Windows端，不支持Mac端
 
-## 🖥️安装方法
+## 🖥️ 安装方法
 
 下载本插件Github页面[Release](https://github.com/Achuan-2/my_ppt_plugin/releases)中的msi文件，解压，双击安装即可
 
@@ -122,7 +122,7 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 
 如果插件安装后无法正常运行、没有在PPT中显示，或者在开发工具→COM加载项里勾选插件，提示“未加载。加载COM加载项时出现运行错误”，请尝试安装上面的环境依赖。
 
-## ❓常见问题
+## ❓ 常见问题
 
 * **如何把插件的功能添加到PPT的快捷工具栏？**
 
