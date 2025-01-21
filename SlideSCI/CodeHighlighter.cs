@@ -5,7 +5,7 @@ using System.Linq;  // Add this line
 using System.Text.RegularExpressions;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
-namespace Achuan的PPT插件
+namespace SlideSCI
 {
     public class CodeHighlighter
     {

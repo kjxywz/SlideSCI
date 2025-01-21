@@ -12,7 +12,7 @@ using System.Collections.Generic; // Add this line
 
 
 
-namespace Achuan的PPT插件
+namespace SlideSCI
 {
 
     public partial class Ribbon1
@@ -367,7 +367,8 @@ namespace Achuan的PPT插件
                         currentY += rowMaxHeight + rowSpace;
                         rowMaxHeight = 0;
                     }
-                    else{
+                    else
+                    {
 
                         currentX += shape.Width + colSpace;
                     }
@@ -804,7 +805,7 @@ namespace Achuan的PPT插件
             for (int i = matches.Count - 1; i >= 0; i--)
             {
                 var match = matches[i];
-                int start = match.Index+1;  // Include the first $ 
+                int start = match.Index + 1;  // Include the first $ 
                 int length = match.Length + 1;  // Include both $ signs
                 string formula = match.Groups[1].Value;
                 // 替换文本：$公式$为公式
@@ -869,12 +870,12 @@ namespace Achuan的PPT插件
                 float shapeHeight = shape.Height;
                 float threshold = shapeHeight * 0.6f; // 80% of shape height
                 float shapeBottom = shape.Top + shapeHeight;
-                
+
                 // Calculate overlap height
                 float overlapStart = Math.Max(MinTop, shape.Top);
                 float overlapEnd = Math.Min(MaxBottom, shapeBottom);
                 float overlapHeight = overlapEnd - overlapStart;
-                
+
                 return overlapHeight >= threshold;
             }
 
@@ -1319,7 +1320,7 @@ namespace Achuan的PPT插件
         {
 
         }
-        
+
         private void addLabelsButton_Click(object sender, RibbonControlEventArgs e)
         {
             string fontFamily = labelFontNameEditBox.Text; // 修改为使用新控件

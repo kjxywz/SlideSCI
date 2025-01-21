@@ -1,4 +1,4 @@
-﻿namespace Achuan的PPT插件
+﻿namespace SlideSCI
 {
     partial class Ribbon1 : Microsoft.Office.Tools.Ribbon.RibbonBase
     {

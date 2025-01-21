@@ -1,4 +1,4 @@
-﻿namespace Achuan的PPT插件
+﻿namespace SlideSCI
 {
     public partial class ThisAddIn
     {
