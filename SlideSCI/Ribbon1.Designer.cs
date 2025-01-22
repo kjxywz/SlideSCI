@@ -39,7 +39,6 @@
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl3 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl4 = this.Factory.CreateRibbonDropDownItem();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Ribbon1));
-            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl5 = this.Factory.CreateRibbonDropDownItem();
             this.tab2 = this.Factory.CreateRibbonTab();
             this.图片自动对齐 = this.Factory.CreateRibbonGroup();
             this.positionSortCheckBox = this.Factory.CreateRibbonCheckBox();
@@ -85,7 +84,6 @@
             this.button4 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
-            this.gallery1 = this.Factory.CreateRibbonGallery();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
@@ -240,7 +238,6 @@
             // 
             this.复制图片格式.Items.Add(this.menu1);
             this.复制图片格式.Items.Add(this.label3);
-            this.复制图片格式.Items.Add(this.gallery1);
             this.复制图片格式.Items.Add(this.label1);
             this.复制图片格式.Items.Add(this.label2);
             this.复制图片格式.Label = "复制格式";
@@ -440,14 +437,6 @@
             this.button5.Name = "button5";
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
             // 
-            // gallery1
-            // 
-            ribbonDropDownItemImpl5.Image = ((System.Drawing.Image)(resources.GetObject("ribbonDropDownItemImpl5.Image")));
-            ribbonDropDownItemImpl5.Label = "Item0";
-            this.gallery1.Items.Add(ribbonDropDownItemImpl5);
-            this.gallery1.Label = "gallery1";
-            this.gallery1.Name = "gallery1";
-            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -517,7 +506,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button3;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button5;
         internal Microsoft.Office.Tools.Ribbon.RibbonMenu menu1;
-        internal Microsoft.Office.Tools.Ribbon.RibbonGallery gallery1;
     }
 
     partial class ThisRibbonCollection
