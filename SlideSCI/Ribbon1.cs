@@ -385,10 +385,7 @@ namespace SlideSCI
 
         }
 
-        private void button1_Click(object sender, RibbonControlEventArgs e)
-        {
-            MessageBox.Show("开发者: Achuan-2\n邮箱: achuan-2@outlook.com\nGithub地址：https://github.com/Achuan-2", "关于开发者");
-        }
+
 
         private void insertCodeBlockButton_Click(object sender, RibbonControlEventArgs e)
         {
@@ -1217,10 +1214,6 @@ namespace SlideSCI
             }
         }
 
-        private void button3_Click(object sender, RibbonControlEventArgs e)
-        {
-            System.Diagnostics.Process.Start("https://markdown.com.cn/editor");
-        }
 
         private void copyCrop_Click(object sender, RibbonControlEventArgs e)
         {
@@ -1314,6 +1307,10 @@ namespace SlideSCI
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             System.Version version = assembly.GetName().Version;
             MessageBox.Show($"Version {version}", "Current Version");
+        }
+        private void aboutDeveloper_Click(object sender, RibbonControlEventArgs e)
+        {
+            MessageBox.Show("开发者: Achuan-2\n邮箱: achuan-2@outlook.com\nGithub地址：https://github.com/Achuan-2", "关于开发者");
         }
 
         private void positionSortCheckBox_Click(object sender, RibbonControlEventArgs e)
@@ -1448,6 +1445,7 @@ namespace SlideSCI
                 }
             }
         }
+
     }
 
 }
