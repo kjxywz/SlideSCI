@@ -84,6 +84,8 @@
             this.button4 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
+            this.button6 = this.Factory.CreateRibbonButton();
+            this.button7 = this.Factory.CreateRibbonButton();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
@@ -322,6 +324,8 @@
             this.menu1.Items.Add(this.pasteImgHeight);
             this.menu1.Items.Add(this.copyCrop);
             this.menu1.Items.Add(this.pasteCrop);
+            this.menu1.Items.Add(this.button6);
+            this.menu1.Items.Add(this.button7);
             this.menu1.Label = "复制粘贴格式";
             this.menu1.Name = "menu1";
             this.menu1.ShowImage = true;
@@ -437,6 +441,20 @@
             this.button5.Name = "button5";
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
             // 
+            // button6
+            // 
+            this.button6.Label = "复制文字格式";
+            this.button6.Name = "button6";
+            this.button6.ShowImage = true;
+            this.button6.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyFontStyle_Click);
+            // 
+            // button7
+            // 
+            this.button7.Label = "粘贴文字格式";
+            this.button7.Name = "button7";
+            this.button7.ShowImage = true;
+            this.button7.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteFontStyle_Click);
+            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -506,6 +524,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button3;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button5;
         internal Microsoft.Office.Tools.Ribbon.RibbonMenu menu1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button6;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button7;
     }
 
     partial class ThisRibbonCollection

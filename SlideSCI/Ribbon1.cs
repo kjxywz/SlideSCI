@@ -1446,7 +1446,67 @@ namespace SlideSCI
             }
         }
 
+        private static Microsoft.Office.Interop.PowerPoint.Font _copiedFont;
+
+        private void copyFontStyle_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var selection = app.ActiveWindow.Selection;
+
+                if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+                {
+                    _copiedFont = selection.ShapeRange.TextFrame.TextRange.Font;
+                }
+                else if (selection.Type == PowerPoint.PpSelectionType.ppSelectionText)
+                {
+                    _copiedFont = selection.TextRange.Font;
+                }
+                MessageBox.Show("格式已复制！");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"复制失败：{ex.Message}");
+            }
+        }
+
+        private void pasteFontStyle_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (_copiedFont == null)
+            {
+                MessageBox.Show("请先复制格式");
+                return;
+            }
+
+            try
+            {
+                var selection = app.ActiveWindow.Selection;
+
+                if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+                {
+                    ApplyFont(selection.ShapeRange.TextFrame.TextRange.Font);
+                }
+                else if (selection.Type == PowerPoint.PpSelectionType.ppSelectionText)
+                {
+                    ApplyFont(selection.TextRange.Font);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"粘贴失败：{ex.Message}");
+            }
+        }
+        private void ApplyFont(Microsoft.Office.Interop.PowerPoint.Font targetFont)
+        {
+            targetFont.Name = _copiedFont.Name;
+            targetFont.Size = _copiedFont.Size;
+            targetFont.Bold = _copiedFont.Bold;
+            targetFont.Italic = _copiedFont.Italic;
+            targetFont.Color.RGB = _copiedFont.Color.RGB;
+            targetFont.Underline = _copiedFont.Underline;
+        }
     }
+    
 
 }
 
