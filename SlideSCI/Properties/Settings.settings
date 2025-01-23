@@ -3,5 +3,59 @@
   <Profiles>
     <Profile Name="(Default)" />
   </Profiles>
-  <Settings />
+  <Settings>
+    <!-- Image Title Settings -->
+    <Setting Name="TitleFontName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">微软雅黑</Value>
+    </Setting>
+    <Setting Name="TitleFontSize" Type="System.String" Scope="User">
+      <Value Profile="(Default)">14</Value>
+    </Setting>
+    <Setting Name="TitleDistanceFromBottom" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="TitleText" Type="System.String" Scope="User">
+      <Value Profile="(Default)">图片标题</Value>
+    </Setting>
+    <Setting Name="AutoGroup" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+
+    <!-- Image Label Settings -->
+    <Setting Name="LabelOffsetX" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-20</Value>
+    </Setting>
+    <Setting Name="LabelOffsetY" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-7</Value>
+    </Setting>
+    <Setting Name="LabelTemplate" Type="System.String" Scope="User">
+      <Value Profile="(Default)">A</Value>
+    </Setting>
+    <Setting Name="LabelFontName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Arial</Value>
+    </Setting>
+    <Setting Name="LabelFontSize" Type="System.String" Scope="User">
+      <Value Profile="(Default)">12</Value>
+    </Setting>
+
+    <!-- Image Auto Align Settings -->
+    <Setting Name="PositionSort" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ColNum" Type="System.String" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="ColSpace" Type="System.String" Scope="User">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="RowSpace" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
+    <Setting Name="ImgWidth" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
+    <Setting Name="ImgHeight" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

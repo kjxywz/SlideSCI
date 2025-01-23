@@ -32,9 +32,81 @@ namespace SlideSCI
         private float originalHeight; // 添加变量存储原始图片高度
         private float currentCropedHeight;
 
+
+
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
             app = Globals.ThisAddIn.Application;
+
+            // Load Image Title Settings
+            fontNameEditBox.Text = Properties.Settings.Default.TitleFontName;
+            fontSizeEditBox.Text = Properties.Settings.Default.TitleFontSize;
+            distanceFromBottomEditBox.Text = Properties.Settings.Default.TitleDistanceFromBottom;
+            titleTextEditBox.Text = Properties.Settings.Default.TitleText;
+            autoGroupCheckBox.Checked = Properties.Settings.Default.AutoGroup;
+
+            // Load Image Label Settings
+            labelOffsetXEditBox.Text = Properties.Settings.Default.LabelOffsetX;
+            labelOffsetYEditBox.Text = Properties.Settings.Default.LabelOffsetY;
+            labelTemplateComboBox.Text = Properties.Settings.Default.LabelTemplate;
+            labelFontNameEditBox.Text = Properties.Settings.Default.LabelFontName;
+            labelFontSizeEditBox.Text = Properties.Settings.Default.LabelFontSize;
+
+            // Load Image Auto Align Settings
+            positionSortCheckBox.Checked = Properties.Settings.Default.PositionSort;
+            imgAutoAlign_colNum.Text = Properties.Settings.Default.ColNum;
+            imgAutoAlign_colSpace.Text = Properties.Settings.Default.ColSpace;
+            imgAutoAlign_rowSpace.Text = Properties.Settings.Default.RowSpace;
+            imgWidthEditBpx.Text = Properties.Settings.Default.ImgWidth;
+            imgHeightEditBox.Text = Properties.Settings.Default.ImgHeight;
+
+            // Add event handlers for text changed events
+            fontNameEditBox.TextChanged += SaveSettings;
+            fontSizeEditBox.TextChanged += SaveSettings;
+            distanceFromBottomEditBox.TextChanged += SaveSettings;
+            titleTextEditBox.TextChanged += SaveSettings;
+            autoGroupCheckBox.Click += SaveSettings;
+
+            labelOffsetXEditBox.TextChanged += SaveSettings;
+            labelOffsetYEditBox.TextChanged += SaveSettings;
+            labelTemplateComboBox.TextChanged += SaveSettings;
+            labelFontNameEditBox.TextChanged += SaveSettings;
+            labelFontSizeEditBox.TextChanged += SaveSettings;
+
+            positionSortCheckBox.Click += SaveSettings;
+            imgAutoAlign_colNum.TextChanged += SaveSettings;
+            imgAutoAlign_colSpace.TextChanged += SaveSettings;
+            imgAutoAlign_rowSpace.TextChanged += SaveSettings;
+            imgWidthEditBpx.TextChanged += SaveSettings;
+            imgHeightEditBox.TextChanged += SaveSettings;
+        }
+
+        private void SaveSettings(object sender, RibbonControlEventArgs e)
+        {
+            // Save Image Title Settings
+            Properties.Settings.Default.TitleFontName = fontNameEditBox.Text;
+            Properties.Settings.Default.TitleFontSize = fontSizeEditBox.Text;
+            Properties.Settings.Default.TitleDistanceFromBottom = distanceFromBottomEditBox.Text;
+            Properties.Settings.Default.TitleText = titleTextEditBox.Text;
+            Properties.Settings.Default.AutoGroup = autoGroupCheckBox.Checked;
+
+            // Save Image Label Settings
+            Properties.Settings.Default.LabelOffsetX = labelOffsetXEditBox.Text;
+            Properties.Settings.Default.LabelOffsetY = labelOffsetYEditBox.Text;
+            Properties.Settings.Default.LabelTemplate = labelTemplateComboBox.Text;
+            Properties.Settings.Default.LabelFontName = labelFontNameEditBox.Text;
+            Properties.Settings.Default.LabelFontSize = labelFontSizeEditBox.Text;
+
+            // Save Image Auto Align Settings
+            Properties.Settings.Default.PositionSort = positionSortCheckBox.Checked;
+            Properties.Settings.Default.ColNum = imgAutoAlign_colNum.Text;
+            Properties.Settings.Default.ColSpace = imgAutoAlign_colSpace.Text;
+            Properties.Settings.Default.RowSpace = imgAutoAlign_rowSpace.Text;
+            Properties.Settings.Default.ImgWidth = imgWidthEditBpx.Text;
+            Properties.Settings.Default.ImgHeight = imgHeightEditBox.Text;
+
+            // Save all settings
+            Properties.Settings.Default.Save();
         }
 
         private void AddTitleToImage(object sender, RibbonControlEventArgs e)

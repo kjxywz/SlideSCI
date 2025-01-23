@@ -26,5 +26,197 @@ namespace SlideSCI.Properties
                 return defaultInstance;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("微软雅黑")]
+        public string TitleFontName {
+            get {
+                return ((string)(this["TitleFontName"]));
+            }
+            set {
+                this["TitleFontName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("14")]
+        public string TitleFontSize {
+            get {
+                return ((string)(this["TitleFontSize"]));
+            }
+            set {
+                this["TitleFontSize"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public string TitleDistanceFromBottom {
+            get {
+                return ((string)(this["TitleDistanceFromBottom"]));
+            }
+            set {
+                this["TitleDistanceFromBottom"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("图片标题")]
+        public string TitleText {
+            get {
+                return ((string)(this["TitleText"]));
+            }
+            set {
+                this["TitleText"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoGroup {
+            get {
+                return ((bool)(this["AutoGroup"]));
+            }
+            set {
+                this["AutoGroup"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-20")]
+        public string LabelOffsetX {
+            get {
+                return ((string)(this["LabelOffsetX"]));
+            }
+            set {
+                this["LabelOffsetX"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-7")]
+        public string LabelOffsetY {
+            get {
+                return ((string)(this["LabelOffsetY"]));
+            }
+            set {
+                this["LabelOffsetY"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("A")]
+        public string LabelTemplate {
+            get {
+                return ((string)(this["LabelTemplate"]));
+            }
+            set {
+                this["LabelTemplate"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Arial")]
+        public string LabelFontName {
+            get {
+                return ((string)(this["LabelFontName"]));
+            }
+            set {
+                this["LabelFontName"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("12")]
+        public string LabelFontSize {
+            get {
+                return ((string)(this["LabelFontSize"]));
+            }
+            set {
+                this["LabelFontSize"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool PositionSort {
+            get {
+                return ((bool)(this["PositionSort"]));
+            }
+            set {
+                this["PositionSort"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public string ColNum {
+            get {
+                return ((string)(this["ColNum"]));
+            }
+            set {
+                this["ColNum"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public string ColSpace {
+            get {
+                return ((string)(this["ColSpace"]));
+            }
+            set {
+                this["ColSpace"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string RowSpace {
+            get {
+                return ((string)(this["RowSpace"]));
+            }
+            set {
+                this["RowSpace"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ImgWidth {
+            get {
+                return ((string)(this["ImgWidth"]));
+            }
+            set {
+                this["ImgWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ImgHeight {
+            get {
+                return ((string)(this["ImgHeight"]));
+            }
+            set {
+                this["ImgHeight"] = value;
+            }
+        }
     }
 }
