@@ -360,6 +360,7 @@
             this.pasteImgWidth.Label = "粘贴宽度";
             this.pasteImgWidth.Name = "pasteImgWidth";
             this.pasteImgWidth.ShowImage = true;
+            this.pasteImgWidth.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteImgWidth_Click);
             // 
             // copyImgHeight
             // 
@@ -367,6 +368,7 @@
             this.copyImgHeight.Label = "复制高度";
             this.copyImgHeight.Name = "copyImgHeight";
             this.copyImgHeight.ShowImage = true;
+            this.copyImgHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyImgHeight_Click);
             // 
             // pasteImgHeight
             // 
@@ -374,6 +376,7 @@
             this.pasteImgHeight.Label = "粘贴高度";
             this.pasteImgHeight.Name = "pasteImgHeight";
             this.pasteImgHeight.ShowImage = true;
+            this.pasteImgHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteImgHeight_Click);
             // 
             // copyCrop
             // 

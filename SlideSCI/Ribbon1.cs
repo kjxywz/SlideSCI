@@ -149,6 +149,7 @@ namespace SlideSCI
             {
                 foreach (PowerPoint.Shape shape in sel.ShapeRange)
                 {
+                    shape.LockAspectRatio = Office.MsoTriState.msoTrue; // Lock aspect ratio
                     shape.Width = copiedWidth;
                 }
             }
@@ -186,6 +187,7 @@ namespace SlideSCI
             {
                 foreach (PowerPoint.Shape shape in sel.ShapeRange)
                 {
+                    shape.LockAspectRatio = Office.MsoTriState.msoTrue; // Lock aspect ratio
                     shape.Height = copiedHeight;
                 }
             }
