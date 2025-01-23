@@ -495,24 +495,26 @@ namespace SlideSCI
                 }
                 else
                 {
-                    // 瀑布流排列
+                    // 瀑布流排列：统一所有图片宽度
                     float[] columnTops = new float[colNum];
                     float[] columnLefts = new float[colNum];
+                    
+                    // 统一所有图片的宽度
+                    float uniformWidth = imgWidth > 0 ? imgWidth : shapesToArrange[0].Width;
 
-                    // 初始化每列的顶部位置和左侧位置
+                    // 初始化每列的位置
                     for (int i = 0; i < colNum; i++)
                     {
                         columnTops[i] = currentY;
-                        columnLefts[i] = startX + i * (shapesToArrange[0].Width + colSpace);
+                        columnLefts[i] = startX + i * (uniformWidth + colSpace);
                     }
 
                     foreach (var shape in shapesToArrange)
                     {
-                        if (useCustomWidth && useCustomHeight)
-                        {
-                            shape.Width = imgWidth;
-                            shape.Height = imgHeight;
-                        }
+                        // 统一宽度，保持宽高比
+                        float aspectRatio = shape.Width / shape.Height;
+                        shape.Width = uniformWidth;
+                        shape.Height = uniformWidth / aspectRatio;
 
                         // 找到高度最小的列
                         int minColumn = 0;
@@ -530,7 +532,7 @@ namespace SlideSCI
                         shape.Left = columnLefts[minColumn];
                         shape.Top = columnTops[minColumn];
 
-                        // 更新该列的高度
+                        // 更新该列的高度，加上图片高度和行间距
                         columnTops[minColumn] += shape.Height + rowSpace;
                     }
                 }
