@@ -59,18 +59,24 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 * **批量添加图片标题**：支持<u>批量</u>选中图片后，批量在图片下方添加居中图题，支持设置图片和图题是否自动编组
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250116004806-2025-01-16.png)
+* **批量添加图片标签**：用于科研绘图，可选择添加的标签模板（`A`、`a`、`A)`、`a)`），默认添加的标签字体为`Arial`
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-23_12-14-27-2025-01-23.png)
 * **图片自动排列**：可以自动排列多张图片，支持设置每列多少张图片、列间距多少、行间距多少（默认为空，为列间距大小）、图片宽高
 
   * 如果不设置图片宽度或高度，则用第一张图片的高度来统一设置对齐时的图片高度
   * 勾选根据位置排列，可以根据用户手动排列的图片位置，来自动判断图片的排列顺序。如果不勾选，则根据用户的多选选择顺序来排列
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250116004816-2025-01-16.png)
-* **复制位置和粘贴元素位置**：可以复制多个元素的位置，粘贴给其他元素（可以多选复制和粘贴！），可以用来让不同页的PPT的多个元素位置一致，或者让同一页的不同元素都是一个位置（可以先排好一组元素，用这个功能让另一组元素自动排好，再调整位置）。
+* **复制粘贴格式功能**
+  * **复制粘贴格式**：可以复制形状、文字的格式，粘贴给其他元素。
 
-  ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-17.gif)
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴格式-2025-01-17.gif)
+  * **复制位置和粘贴元素位置**：可以复制多个元素的位置，粘贴给其他元素（可以多选复制和粘贴！），可以用来让不同页的PPT的多个元素位置一致，或者让同一页的不同元素都是一个位置（可以先排好一组元素，用这个功能让另一组元素自动排好，再调整位置）。
 
-  ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-16.gif)
-* **复制和粘贴元素宽高**：支持多选同时粘贴宽高，快速统一图片宽高
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-17.gif)
+
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-16.gif)
+  * **复制和粘贴元素宽高**：支持多选同时粘贴宽高，快速统一图片宽高
 * **支持插入代码块自动高亮**
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250116004856-2025-01-16.png)
