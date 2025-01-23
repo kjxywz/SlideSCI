@@ -77,6 +77,8 @@
             this.pasteImgHeight = this.Factory.CreateRibbonButton();
             this.copyCrop = this.Factory.CreateRibbonButton();
             this.pasteCrop = this.Factory.CreateRibbonButton();
+            this.button6 = this.Factory.CreateRibbonButton();
+            this.button7 = this.Factory.CreateRibbonButton();
             this.button2 = this.Factory.CreateRibbonButton();
             this.insertEquationButton = this.Factory.CreateRibbonButton();
             this.insertCodeBlockButton = this.Factory.CreateRibbonButton();
@@ -84,8 +86,6 @@
             this.button4 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
-            this.button6 = this.Factory.CreateRibbonButton();
-            this.button7 = this.Factory.CreateRibbonButton();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
@@ -316,6 +316,8 @@
             // 
             this.menu1.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.menu1.Image = ((System.Drawing.Image)(resources.GetObject("menu1.Image")));
+            this.menu1.Items.Add(this.button6);
+            this.menu1.Items.Add(this.button7);
             this.menu1.Items.Add(this.copyPosition);
             this.menu1.Items.Add(this.pastePosition);
             this.menu1.Items.Add(this.copyImgWidth);
@@ -324,8 +326,6 @@
             this.menu1.Items.Add(this.pasteImgHeight);
             this.menu1.Items.Add(this.copyCrop);
             this.menu1.Items.Add(this.pasteCrop);
-            this.menu1.Items.Add(this.button6);
-            this.menu1.Items.Add(this.button7);
             this.menu1.Label = "复制粘贴格式";
             this.menu1.Name = "menu1";
             this.menu1.ShowImage = true;
@@ -389,6 +389,22 @@
             this.pasteCrop.Name = "pasteCrop";
             this.pasteCrop.ShowImage = true;
             // 
+            // button6
+            // 
+            this.button6.Image = ((System.Drawing.Image)(resources.GetObject("button6.Image")));
+            this.button6.Label = "复制格式";
+            this.button6.Name = "button6";
+            this.button6.ShowImage = true;
+            this.button6.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyStyle_Click);
+            // 
+            // button7
+            // 
+            this.button7.Image = ((System.Drawing.Image)(resources.GetObject("button7.Image")));
+            this.button7.Label = "粘贴格式";
+            this.button7.Name = "button7";
+            this.button7.ShowImage = true;
+            this.button7.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteStyle_Click);
+            // 
             // button2
             // 
             this.button2.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -440,20 +456,6 @@
             this.button5.Label = "当前版本";
             this.button5.Name = "button5";
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
-            // 
-            // button6
-            // 
-            this.button6.Label = "复制文字格式";
-            this.button6.Name = "button6";
-            this.button6.ShowImage = true;
-            this.button6.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyFontStyle_Click);
-            // 
-            // button7
-            // 
-            this.button7.Label = "粘贴文字格式";
-            this.button7.Name = "button7";
-            this.button7.ShowImage = true;
-            this.button7.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteFontStyle_Click);
             // 
             // Ribbon1
             // 

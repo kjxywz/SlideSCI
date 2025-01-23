@@ -1445,9 +1445,10 @@ namespace SlideSCI
                 }
             }
         }
+        private static Microsoft.Office.Interop.PowerPoint.Font _copiedFont;
 
 
-        private void copyFontStyle_Click(object sender, RibbonControlEventArgs e)
+        private void copyStyle_Click(object sender, RibbonControlEventArgs e)
         {
             PowerPoint.Selection sel = app.ActiveWindow.Selection;
             if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
@@ -1456,29 +1457,47 @@ namespace SlideSCI
                 // 捕获格式
                 sourceShape.PickUp();
             }
+            else if (sel.Type == PowerPoint.PpSelectionType.ppSelectionText)
+            {
+                _copiedFont = sel.TextRange.Font;
+            }
             else
             {
             }
 
         }
 
-        private void pasteFontStyle_Click(object sender, RibbonControlEventArgs e)
+        private void pasteStyle_Click(object sender, RibbonControlEventArgs e)
         {
             PowerPoint.Selection sel = app.ActiveWindow.Selection;
             if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
             {
-            foreach (PowerPoint.Shape shape in sel.ShapeRange)
-            {
-                shape.Apply();
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    shape.Apply();
+                }
             }
+            else if (sel.Type == PowerPoint.PpSelectionType.ppSelectionText)
+            {
+                ApplyFont(sel.TextRange.Font);
             }
             else
             {
             }
         }
 
+        private void ApplyFont(Microsoft.Office.Interop.PowerPoint.Font targetFont)
+        {
+            targetFont.Name = _copiedFont.Name;
+            targetFont.Size = _copiedFont.Size;
+            targetFont.Bold = _copiedFont.Bold;
+            targetFont.Italic = _copiedFont.Italic;
+            targetFont.Color.RGB = _copiedFont.Color.RGB;
+            targetFont.Underline = _copiedFont.Underline;
+        }
+
     }
-    
+
 
 }
 
