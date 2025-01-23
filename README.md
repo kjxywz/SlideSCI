@@ -131,6 +131,7 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 * **如何把插件的功能添加到PPT的快捷工具栏？**
 
   按钮右击，添加到「快速访问工具栏」即可
+
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-16_16-56-07-2025-01-16.png)
 
   可以把「快速访问工具栏」放在下方，更方便使用
