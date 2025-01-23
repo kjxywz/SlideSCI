@@ -1,10 +1,7 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SlideSCI.Properties" GeneratedClassName="Settings">
+  <Profiles />
   <Settings>
-    <!-- Image Title Settings -->
     <Setting Name="TitleFontName" Type="System.String" Scope="User">
       <Value Profile="(Default)">微软雅黑</Value>
     </Setting>
@@ -20,8 +17,6 @@
     <Setting Name="AutoGroup" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-
-    <!-- Image Label Settings -->
     <Setting Name="LabelOffsetX" Type="System.String" Scope="User">
       <Value Profile="(Default)">-20</Value>
     </Setting>
@@ -37,8 +32,6 @@
     <Setting Name="LabelFontSize" Type="System.String" Scope="User">
       <Value Profile="(Default)">12</Value>
     </Setting>
-
-    <!-- Image Auto Align Settings -->
     <Setting Name="PositionSort" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
@@ -49,13 +42,16 @@
       <Value Profile="(Default)">5</Value>
     </Setting>
     <Setting Name="RowSpace" Type="System.String" Scope="User">
-      <Value Profile="(Default)"></Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ImgWidth" Type="System.String" Scope="User">
-      <Value Profile="(Default)"></Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ImgHeight" Type="System.String" Scope="User">
-      <Value Profile="(Default)"></Value>
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ToggleBackground" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -60,6 +60,9 @@ namespace SlideSCI
             imgWidthEditBpx.Text = Properties.Settings.Default.ImgWidth;
             imgHeightEditBox.Text = Properties.Settings.Default.ImgHeight;
 
+            // insertMarkdown
+            toggleBackgroundCheckBox.Checked = Properties.Settings.Default.ToggleBackground;
+
             // Add event handlers for text changed events
             fontNameEditBox.TextChanged += SaveSettings;
             fontSizeEditBox.TextChanged += SaveSettings;
@@ -79,6 +82,7 @@ namespace SlideSCI
             imgAutoAlign_rowSpace.TextChanged += SaveSettings;
             imgWidthEditBpx.TextChanged += SaveSettings;
             imgHeightEditBox.TextChanged += SaveSettings;
+            toggleBackgroundCheckBox.Click += SaveSettings;
         }
 
         private void SaveSettings(object sender, RibbonControlEventArgs e)
@@ -104,6 +108,9 @@ namespace SlideSCI
             Properties.Settings.Default.RowSpace = imgAutoAlign_rowSpace.Text;
             Properties.Settings.Default.ImgWidth = imgWidthEditBpx.Text;
             Properties.Settings.Default.ImgHeight = imgHeightEditBox.Text;
+
+            // Save insertMarkdwon
+            Properties.Settings.Default.ToggleBackground = toggleBackgroundCheckBox.Checked;
 
             // Save all settings
             Properties.Settings.Default.Save();
