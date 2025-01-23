@@ -53,7 +53,7 @@ namespace SlideSCI
             labelFontSizeEditBox.Text = Properties.Settings.Default.LabelFontSize;
 
             // Load Image Auto Align Settings
-            positionSortCheckBox.Checked = Properties.Settings.Default.PositionSort;
+            imgAutoAlignSortTypeDropDown.SelectedItemIndex = Properties.Settings.Default.imgAutoAlignSortType;
             imgAutoAlign_colNum.Text = Properties.Settings.Default.ColNum;
             imgAutoAlign_colSpace.Text = Properties.Settings.Default.ColSpace;
             imgAutoAlign_rowSpace.Text = Properties.Settings.Default.RowSpace;
@@ -76,7 +76,7 @@ namespace SlideSCI
             labelFontNameEditBox.TextChanged += SaveSettings;
             labelFontSizeEditBox.TextChanged += SaveSettings;
 
-            positionSortCheckBox.Click += SaveSettings;
+            imgAutoAlignSortTypeDropDown.SelectionChanged += SaveSettings;
             imgAutoAlign_colNum.TextChanged += SaveSettings;
             imgAutoAlign_colSpace.TextChanged += SaveSettings;
             imgAutoAlign_rowSpace.TextChanged += SaveSettings;
@@ -102,7 +102,7 @@ namespace SlideSCI
             Properties.Settings.Default.LabelFontSize = labelFontSizeEditBox.Text;
 
             // Save Image Auto Align Settings
-            Properties.Settings.Default.PositionSort = positionSortCheckBox.Checked;
+            Properties.Settings.Default.imgAutoAlignSortType = imgAutoAlignSortTypeDropDown.SelectedItemIndex;
             Properties.Settings.Default.ColNum = imgAutoAlign_colNum.Text;
             Properties.Settings.Default.ColSpace = imgAutoAlign_colSpace.Text;
             Properties.Settings.Default.RowSpace = imgAutoAlign_rowSpace.Text;
@@ -114,6 +114,9 @@ namespace SlideSCI
 
             // Save all settings
             Properties.Settings.Default.Save();
+
+            // 弹窗显示已保存
+            // MessageBox.Show("设置已保存");
         }
 
         private void AddTitleToImage(object sender, RibbonControlEventArgs e)
@@ -359,7 +362,7 @@ namespace SlideSCI
 
                 List<PowerPoint.Shape> shapesToArrange = new List<PowerPoint.Shape>();
 
-                if (positionSortCheckBox.Checked)
+                if (imgAutoAlignSortTypeDropDown.SelectedItemIndex == 0)
                 {
                     // Create groups based on vertical position
                     var groups = new List<ImageGroup>();
@@ -1584,7 +1587,6 @@ namespace SlideSCI
             targetFont.Color.RGB = _copiedFont.Color.RGB;
             targetFont.Underline = _copiedFont.Underline;
         }
-
     }
 
 

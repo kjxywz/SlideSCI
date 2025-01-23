@@ -34,14 +34,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl1 = this.Factory.CreateRibbonDropDownItem();
-            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl2 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl3 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl4 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl5 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl6 = this.Factory.CreateRibbonDropDownItem();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Ribbon1));
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl1 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl2 = this.Factory.CreateRibbonDropDownItem();
             this.tab2 = this.Factory.CreateRibbonTab();
             this.图片自动对齐 = this.Factory.CreateRibbonGroup();
-            this.positionSortCheckBox = this.Factory.CreateRibbonCheckBox();
             this.imgAutoAlign_colNum = this.Factory.CreateRibbonEditBox();
             this.imgAutoAlign_colSpace = this.Factory.CreateRibbonEditBox();
             this.imgAutoAlign_rowSpace = this.Factory.CreateRibbonEditBox();
@@ -86,6 +87,9 @@
             this.button4 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
+            this.dropDown1 = this.Factory.CreateRibbonDropDown();
+            this.imgAutoAlignSortTypeDropDown = this.Factory.CreateRibbonDropDown();
+            this.checkBox1 = this.Factory.CreateRibbonCheckBox();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
@@ -107,7 +111,9 @@
             // 图片自动对齐
             // 
             this.图片自动对齐.Items.Add(this.imgAutoAlign);
-            this.图片自动对齐.Items.Add(this.positionSortCheckBox);
+            this.图片自动对齐.Items.Add(this.imgAutoAlignSortTypeDropDown);
+            this.图片自动对齐.Items.Add(this.dropDown1);
+            this.图片自动对齐.Items.Add(this.checkBox1);
             this.图片自动对齐.Items.Add(this.imgAutoAlign_colNum);
             this.图片自动对齐.Items.Add(this.imgAutoAlign_colSpace);
             this.图片自动对齐.Items.Add(this.imgAutoAlign_rowSpace);
@@ -115,13 +121,6 @@
             this.图片自动对齐.Items.Add(this.imgHeightEditBox);
             this.图片自动对齐.Label = "图片自动排列";
             this.图片自动对齐.Name = "图片自动对齐";
-            // 
-            // positionSortCheckBox
-            // 
-            this.positionSortCheckBox.Checked = true;
-            this.positionSortCheckBox.Label = "根据位置排序";
-            this.positionSortCheckBox.Name = "positionSortCheckBox";
-            this.positionSortCheckBox.ScreenTip = "勾选此按钮则按照位置来排序，不勾选按照多选顺序来排列";
             // 
             // imgAutoAlign_colNum
             // 
@@ -213,14 +212,14 @@
             // 
             // labelTemplateComboBox
             // 
-            ribbonDropDownItemImpl1.Label = "A";
-            ribbonDropDownItemImpl2.Label = "a";
-            ribbonDropDownItemImpl3.Label = "A)";
-            ribbonDropDownItemImpl4.Label = "a)";
-            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl1);
-            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl2);
+            ribbonDropDownItemImpl3.Label = "A";
+            ribbonDropDownItemImpl4.Label = "a";
+            ribbonDropDownItemImpl5.Label = "A)";
+            ribbonDropDownItemImpl6.Label = "a)";
             this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl3);
             this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl4);
+            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl5);
+            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl6);
             this.labelTemplateComboBox.Label = "标签模板";
             this.labelTemplateComboBox.Name = "labelTemplateComboBox";
             this.labelTemplateComboBox.Text = "A";
@@ -463,6 +462,27 @@
             this.button5.Name = "button5";
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
             // 
+            // dropDown1
+            // 
+            this.dropDown1.Label = "排列方式";
+            this.dropDown1.Name = "dropDown1";
+            // 
+            // imgAutoAlignSortTypeDropDown
+            // 
+            ribbonDropDownItemImpl1.Label = "根据位置排序";
+            ribbonDropDownItemImpl1.ScreenTip = "用户可以先大概行列排列好，程序自动获取正确顺序";
+            ribbonDropDownItemImpl2.Label = "根据多选顺序排序";
+            ribbonDropDownItemImpl2.ScreenTip = "根据用户多选的顺序来获取图片排列的顺序";
+            this.imgAutoAlignSortTypeDropDown.Items.Add(ribbonDropDownItemImpl1);
+            this.imgAutoAlignSortTypeDropDown.Items.Add(ribbonDropDownItemImpl2);
+            this.imgAutoAlignSortTypeDropDown.Label = "排序方式";
+            this.imgAutoAlignSortTypeDropDown.Name = "imgAutoAlignSortTypeDropDown";
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.Label = "排列排除文本框";
+            this.checkBox1.Name = "checkBox1";
+            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -490,7 +510,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonTab tab2;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 图片自动对齐;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton imgAutoAlign;
-        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox positionSortCheckBox;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox imgAutoAlign_colNum;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox imgAutoAlign_colSpace;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox imgAutoAlign_rowSpace;
@@ -534,6 +553,9 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonMenu menu1;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button6;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button7;
+        internal Microsoft.Office.Tools.Ribbon.RibbonDropDown imgAutoAlignSortTypeDropDown;
+        internal Microsoft.Office.Tools.Ribbon.RibbonDropDown dropDown1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox checkBox1;
     }
 
     partial class ThisRibbonCollection

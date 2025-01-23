@@ -145,18 +145,6 @@ namespace SlideSCI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool PositionSort {
-            get {
-                return ((bool)(this["PositionSort"]));
-            }
-            set {
-                this["PositionSort"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("5")]
         public string ColNum {
             get {
@@ -224,6 +212,18 @@ namespace SlideSCI.Properties {
             }
             set {
                 this["ToggleBackground"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int imgAutoAlignSortType {
+            get {
+                return ((int)(this["imgAutoAlignSortType"]));
+            }
+            set {
+                this["imgAutoAlignSortType"] = value;
             }
         }
     }

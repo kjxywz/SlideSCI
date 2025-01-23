@@ -32,9 +32,6 @@
     <Setting Name="LabelFontSize" Type="System.String" Scope="User">
       <Value Profile="(Default)">12</Value>
     </Setting>
-    <Setting Name="PositionSort" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
     <Setting Name="ColNum" Type="System.String" Scope="User">
       <Value Profile="(Default)">5</Value>
     </Setting>
@@ -52,6 +49,9 @@
     </Setting>
     <Setting Name="ToggleBackground" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="imgAutoAlignSortType" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>
