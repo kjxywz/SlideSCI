@@ -357,68 +357,77 @@ namespace SlideSCI
                 bool useCustomWidth = float.TryParse(imgWidthEditBpx.Text, out imgWidth) && imgWidth > 0;
                 bool useCustomHeight = float.TryParse(imgHeightEditBox.Text, out imgHeight) && imgHeight > 0;
 
-                // Create groups based on vertical position
-                var groups = new List<ImageGroup>();
-                var shapes = new List<PowerPoint.Shape>();
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
-                {
-                    shapes.Add(shape);
-                }
+                List<PowerPoint.Shape> shapesToArrange = new List<PowerPoint.Shape>();
 
-                // Sort shapes by top position first
-                shapes = shapes.OrderBy(s => s.Top).ToList();
-
-                // Group shapes based on vertical overlap
-                foreach (var shape in shapes)
+                if (positionSortCheckBox.Checked)
                 {
-                    bool addedToExistingGroup = false;
-                    foreach (var group in groups)
+                    // Create groups based on vertical position
+                    var groups = new List<ImageGroup>();
+                    var shapes = new List<PowerPoint.Shape>();
+                    foreach (PowerPoint.Shape shape in sel.ShapeRange)
                     {
-                        if (group.OverlapsWith(shape))
+                        shapes.Add(shape);
+                    }
+
+                    // Group shapes based on vertical overlap
+                    foreach (var shape in shapes)
+                    {
+                        bool addedToExistingGroup = false;
+                        foreach (var group in groups)
                         {
-                            group.AddShape(shape);
-                            addedToExistingGroup = true;
-                            break;
+                            if (group.OverlapsWith(shape))
+                            {
+                                group.AddShape(shape);
+                                addedToExistingGroup = true;
+                                break;
+                            }
+                        }
+
+                        if (!addedToExistingGroup)
+                        {
+                            var newGroup = new ImageGroup();
+                            newGroup.AddShape(shape);
+                            groups.Add(newGroup);
                         }
                     }
 
-                    if (!addedToExistingGroup)
+                    // Sort shapes within each group by x position
+                    foreach (var group in groups)
                     {
-                        var newGroup = new ImageGroup();
-                        newGroup.AddShape(shape);
-                        groups.Add(newGroup);
+                        group.Shapes.Sort((a, b) => a.Left.CompareTo(b.Left));
+                    }
+
+                    // Sort groups by MinTop
+                    groups.Sort((a, b) => a.MinTop.CompareTo(b.MinTop));
+
+                    // Flatten all shapes from all groups into a single list for arrangement
+                    foreach (var group in groups)
+                    {
+                        shapesToArrange.AddRange(group.Shapes);
+                    }
+                }
+                else
+                {
+                    // Use shapes in their original order
+                    foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                    {
+                        shapesToArrange.Add(shape);
                     }
                 }
 
-                // Sort shapes within each group by x position
-                foreach (var group in groups)
-                {
-                    group.Shapes.Sort((a, b) => a.Left.CompareTo(b.Left));
-                }
-
-                // Sort groups by MinTop
-                groups.Sort((a, b) => a.MinTop.CompareTo(b.MinTop));
-
-                // Get the starting position from the first shape of the first group
-                float startX = groups[0].Shapes[0].Left;
-                float currentY = groups[0].Shapes[0].Top;
+                // Get the starting position from the first shape
+                float startX = shapesToArrange[0].Left;
+                float currentY = shapesToArrange[0].Top;
                 float currentX = startX;
                 float rowMaxHeight = 0;
                 int colCount = 0;
 
-                // Flatten all shapes from all groups into a single list for arrangement
-                var allShapes = new List<PowerPoint.Shape>();
-                foreach (var group in groups)
-                {
-                    allShapes.AddRange(group.Shapes);
-                }
-
-                foreach (var shape in allShapes)
+                foreach (var shape in shapesToArrange)
                 {
                     // Apply size settings if specified
                     if (!useCustomHeight && !useCustomWidth)
                     {
-                        shape.Height = allShapes[0].Height;
+                        shape.Height = shapesToArrange[0].Height;
                     }
                     else
                     {
@@ -450,7 +459,6 @@ namespace SlideSCI
                     }
                     else
                     {
-
                         currentX += shape.Width + colSpace;
                     }
                 }
