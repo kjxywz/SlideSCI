@@ -417,52 +417,121 @@ namespace SlideSCI
                         shapesToArrange.Add(shape);
                     }
                 }
-
-                // Get the starting position from the first shape
+                // Now Align image
                 float startX = shapesToArrange[0].Left;
                 float currentY = shapesToArrange[0].Top;
-                float currentX = startX;
-                float rowMaxHeight = 0;
-                int colCount = 0;
 
-                foreach (var shape in shapesToArrange)
+                if (imgAutoAlignAlignTypeDropDown.SelectedItemIndex == 0)
                 {
-                    // Apply size settings if specified
-                    if (!useCustomHeight && !useCustomWidth)
+                    // 最大宽度整齐排列
+                    float maxWidth = 0;
+                    foreach (var shape in shapesToArrange)
                     {
-                        shape.Height = shapesToArrange[0].Height;
+                        maxWidth = Math.Max(maxWidth, shape.Width);
                     }
-                    else
+
+                    float currentX = startX;
+                    float rowMaxHeight = 0;
+                    int colCount = 0;
+
+                    foreach (var shape in shapesToArrange)
                     {
-                        if (useCustomWidth)
+                        if (useCustomWidth && useCustomHeight)
                         {
                             shape.Width = imgWidth;
-                        }
-                        if (useCustomHeight)
-                        {
                             shape.Height = imgHeight;
                         }
+
+                        if (colCount >= colNum)
+                        {
+                            colCount = 0;
+                            currentX = startX;
+                            currentY += rowMaxHeight + rowSpace;
+                            rowMaxHeight = 0;
+                        }
+
+                        shape.Left = currentX;
+                        shape.Top = currentY;
+                        rowMaxHeight = Math.Max(rowMaxHeight, shape.Height);
+                        currentX += maxWidth + colSpace;
+                        colCount++;
                     }
+                }
+                else if (imgAutoAlignAlignTypeDropDown.SelectedItemIndex == 1)
+                {
+                    // 统一高度排列
+                    float referenceHeight = shapesToArrange[0].Height;
+                    float currentX = startX;
+                    float rowMaxHeight = 0;
+                    int colCount = 0;
 
-                    // Position the shape
-                    shape.Left = currentX;
-                    shape.Top = currentY;
-
-                    // Track maximum height in current row
-                    rowMaxHeight = Math.Max(rowMaxHeight, shape.Height);
-
-                    colCount++;
-                    if (colCount >= colNum)
+                    foreach (var shape in shapesToArrange)
                     {
-                        // Move to next row
-                        colCount = 0;
-                        currentX = startX; // Reset X position to startX
-                        currentY += rowMaxHeight + rowSpace;
-                        rowMaxHeight = 0;
-                    }
-                    else
-                    {
+                        if (useCustomWidth && useCustomHeight)
+                        {
+                            shape.Width = imgWidth;
+                            shape.Height = imgHeight;
+                        }
+                        else
+                        {
+                            // 保持宽高比调整高度
+                            float aspectRatio = shape.Width / shape.Height;
+                            shape.Height = referenceHeight;
+                            shape.Width = referenceHeight * aspectRatio;
+                        }
+
+                        if (colCount >= colNum)
+                        {
+                            colCount = 0;
+                            currentX = startX;
+                            currentY += referenceHeight + rowSpace;
+                        }
+
+                        shape.Left = currentX;
+                        shape.Top = currentY;
                         currentX += shape.Width + colSpace;
+                        colCount++;
+                    }
+                }
+                else
+                {
+                    // 瀑布流排列
+                    float[] columnTops = new float[colNum];
+                    float[] columnLefts = new float[colNum];
+
+                    // 初始化每列的顶部位置和左侧位置
+                    for (int i = 0; i < colNum; i++)
+                    {
+                        columnTops[i] = currentY;
+                        columnLefts[i] = startX + i * (shapesToArrange[0].Width + colSpace);
+                    }
+
+                    foreach (var shape in shapesToArrange)
+                    {
+                        if (useCustomWidth && useCustomHeight)
+                        {
+                            shape.Width = imgWidth;
+                            shape.Height = imgHeight;
+                        }
+
+                        // 找到高度最小的列
+                        int minColumn = 0;
+                        float minHeight = columnTops[0];
+                        for (int i = 1; i < colNum; i++)
+                        {
+                            if (columnTops[i] < minHeight)
+                            {
+                                minHeight = columnTops[i];
+                                minColumn = i;
+                            }
+                        }
+
+                        // 放置图片
+                        shape.Left = columnLefts[minColumn];
+                        shape.Top = columnTops[minColumn];
+
+                        // 更新该列的高度
+                        columnTops[minColumn] += shape.Height + rowSpace;
                     }
                 }
             }
