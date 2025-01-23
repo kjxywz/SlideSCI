@@ -142,8 +142,8 @@
             ribbonDropDownItemImpl3.ScreenTip = "按所选图片中的最大宽度来占位排列，如果图片宽度不统一，会有较大空隙";
             ribbonDropDownItemImpl4.Label = "统一高度排列";
             ribbonDropDownItemImpl4.ScreenTip = "默认会统一图片的高度整齐紧凑排列在一起";
-            ribbonDropDownItemImpl5.Label = "瀑布流";
-            ribbonDropDownItemImpl5.ScreenTip = "图片紧凑排列在一起";
+            ribbonDropDownItemImpl5.Label = "统一宽度瀑布流";
+            ribbonDropDownItemImpl5.ScreenTip = "默认图片统一宽度紧凑排列";
             this.imgAutoAlignAlignTypeDropDown.Items.Add(ribbonDropDownItemImpl3);
             this.imgAutoAlignAlignTypeDropDown.Items.Add(ribbonDropDownItemImpl4);
             this.imgAutoAlignAlignTypeDropDown.Items.Add(ribbonDropDownItemImpl5);
@@ -177,12 +177,14 @@
             // 
             this.imgWidthEditBpx.Label = "图片宽度";
             this.imgWidthEditBpx.Name = "imgWidthEditBpx";
+            this.imgWidthEditBpx.ScreenTip = "统一设置图片宽度";
             this.imgWidthEditBpx.Text = null;
             // 
             // imgHeightEditBox
             // 
             this.imgHeightEditBox.Label = "图片高度";
             this.imgHeightEditBox.Name = "imgHeightEditBox";
+            this.imgHeightEditBox.ScreenTip = "统一设置图片高度";
             this.imgHeightEditBox.Text = null;
             // 
             // 图片处理
