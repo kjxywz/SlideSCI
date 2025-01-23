@@ -59,12 +59,14 @@ GitHub: [https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-2/Slide
   * Enable "Arrange by Position" to auto-detect order based on manual placement. Otherwise, uses the selection order.
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250116004816-2025-01-16.png)
-* **Copy & Paste Element Positions**: Copy positions of multiple elements and paste them to others (supports multi-select!). Useful for aligning elements across slides or within a slide.
-
-  ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-17.gif)
-
-  ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-16.gif)
-* **Copy & Paste Element Dimensions**: Quickly standardize image sizes via multi-select paste.
+* **Copy & Paste Formatting Features**:
+  * **Copy & Paste Format**: Copy shape and text formatting to other elements.
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴格式-2025-01-17.gif)
+  * **Copy & Paste Element Positions**: Copy positions of multiple elements and paste them to others (supports multi-select!). 
+  Useful for aligning elements across slides or within a slide. (Arrange one group first, then use this feature to auto-align another group before adjusting positions).
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-17.gif)
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-16.gif)
+  * **Copy & Paste Element Dimensions**: Quickly standardize image sizes via multi-select paste.
 * **Insert Syntax-Highlighted Code Blocks**:
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250116004856-2025-01-16.png)
@@ -93,6 +95,9 @@ GitHub: [https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-2/Slide
     * **Blockquotes**:
       * Independent text boxes with black borders.
 
+* **Batch Add Image Labels**: For scientific figures, choose label templates (`A`, `a`, `A)`, `a)`). Default font is `Arial`.
+    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-23_12-14-27-2025-01-23.png)
+
 ## 🪟 Supported Environments
 
 Developed on Windows 11 using [Visual Studio Tools for Office](https://www.visualstudio.com/de/vs/office-tools/) and C#. Designed for Microsoft PowerPoint. Compatible with WPS (note: WPS does not support LaTeX formulas or Markdown insertion).
@@ -101,7 +106,7 @@ Developed on Windows 11 using [Visual Studio Tools for Office](https://www.visua
 
 ## 🖥️ Installation
 
-1. Download `msi` file from the GitHub [Releases](https://github.com/Achuan-2/my_ppt_plugin/releases).
+1. Download `exe` file from the GitHub [Releases](https://github.com/Achuan-2/my_ppt_plugin/releases).
 2. Extract and double-click to install.
 
 **Note**: Close PowerPoint before installation. Otherwise, the plugin won't load immediately.
