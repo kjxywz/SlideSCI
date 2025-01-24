@@ -336,8 +336,8 @@ namespace SlideSCI
                 int colNum;
                 float colSpace;
                 float rowSpace;
-                float imgWidth = 0;
-                float imgHeight = 0;
+                float customWidth = 0;
+                float customHeight = 0;
 
                 // Input validation
                 if (!int.TryParse(imgAutoAlign_colNum.Text, out colNum) || colNum <= 0)
@@ -357,8 +357,8 @@ namespace SlideSCI
                     rowSpace = colSpace;
                 }
 
-                bool useCustomWidth = float.TryParse(imgWidthEditBpx.Text, out imgWidth) && imgWidth > 0;
-                bool useCustomHeight = float.TryParse(imgHeightEditBox.Text, out imgHeight) && imgHeight > 0;
+                bool useCustomWidth = float.TryParse(imgWidthEditBpx.Text, out customWidth) && customWidth > 0;
+                bool useCustomHeight = float.TryParse(imgHeightEditBox.Text, out customHeight) && customHeight > 0;
 
                 List<PowerPoint.Shape> shapesToArrange = new List<PowerPoint.Shape>();
 
@@ -438,8 +438,8 @@ namespace SlideSCI
                     {
                         if (useCustomWidth && useCustomHeight)
                         {
-                            shape.Width = imgWidth;
-                            shape.Height = imgHeight;
+                            shape.Width = customWidth;
+                            shape.Height = customHeight;
                         }
 
                         if (colCount >= colNum)
@@ -461,23 +461,44 @@ namespace SlideSCI
                 {
                     // 统一高度排列
                     float referenceHeight = shapesToArrange[0].Height;
+                    if (useCustomWidth && !useCustomHeight)
+                    {
+                        referenceHeight = 0;
+                    }
                     float currentX = startX;
                     float rowMaxHeight = 0;
                     int colCount = 0;
 
                     foreach (var shape in shapesToArrange)
                     {
-                        if (useCustomWidth && useCustomHeight)
+                        // 保持宽高比调整高度
+                        float aspectRatio = shape.Width / shape.Height;
+                        if (!useCustomWidth && !useCustomHeight)
                         {
-                            shape.Width = imgWidth;
-                            shape.Height = imgHeight;
+
+                            shape.Height = referenceHeight;
+                            shape.Width = referenceHeight * aspectRatio;
                         }
                         else
                         {
-                            // 保持宽高比调整高度
-                            float aspectRatio = shape.Width / shape.Height;
-                            shape.Height = referenceHeight;
-                            shape.Width = referenceHeight * aspectRatio;
+                            if (useCustomWidth && !useCustomHeight)
+                            {
+                                shape.Width = customWidth;
+                                shape.Height = customWidth / aspectRatio;
+                            }
+                            else if (!useCustomWidth && useCustomHeight)
+                            {
+                                shape.Height = customHeight;
+                                shape.Width = customHeight * aspectRatio;
+                                referenceHeight = customHeight;
+                            }
+                            else
+                            {
+                                // 取消锁定纵横比
+                                shape.LockAspectRatio = Office.MsoTriState.msoFalse;
+                                shape.Width = customWidth;
+                                shape.Height = customHeight;
+                            }
                         }
 
                         if (colCount >= colNum)
@@ -485,12 +506,22 @@ namespace SlideSCI
                             colCount = 0;
                             currentX = startX;
                             currentY += referenceHeight + rowSpace;
+                            if (useCustomWidth && !useCustomHeight)
+                            {
+                                referenceHeight = 0;
+                            }
                         }
 
                         shape.Left = currentX;
                         shape.Top = currentY;
                         currentX += shape.Width + colSpace;
                         colCount++;
+
+                        // Calculate the maximum height in the current row
+                        if (useCustomWidth && !useCustomHeight)
+                        {
+                            referenceHeight = Math.Max(referenceHeight, shape.Height);
+                        }
                     }
                 }
                 else
@@ -498,9 +529,9 @@ namespace SlideSCI
                     // 瀑布流排列：统一所有图片宽度
                     float[] columnTops = new float[colNum];
                     float[] columnLefts = new float[colNum];
-                    
+
                     // 统一所有图片的宽度
-                    float uniformWidth = imgWidth > 0 ? imgWidth : shapesToArrange[0].Width;
+                    float uniformWidth = customWidth > 0 ? customWidth : shapesToArrange[0].Width;
 
                     // 初始化每列的位置
                     for (int i = 0; i < colNum; i++)
