@@ -250,5 +250,17 @@ namespace SlideSCI.Properties {
                 this["imgAutoAlighExcludeText"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LabelBold {
+            get {
+                return ((bool)(this["LabelBold"]));
+            }
+            set {
+                this["LabelBold"] = value;
+            }
+        }
     }
 }

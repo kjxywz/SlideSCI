@@ -51,6 +51,7 @@ namespace SlideSCI
             labelTemplateComboBox.Text = Properties.Settings.Default.LabelTemplate;
             labelFontNameEditBox.Text = Properties.Settings.Default.LabelFontName;
             labelFontSizeEditBox.Text = Properties.Settings.Default.LabelFontSize;
+            labelBoldcheckBox.Checked = Properties.Settings.Default.LabelBold;
 
             // Load Image Auto Align Settings
             imgAutoAlignSortTypeDropDown.SelectedItemIndex = Properties.Settings.Default.imgAutoAlignSortType;
@@ -87,6 +88,8 @@ namespace SlideSCI
             imgAutoAlignAlignTypeDropDown.SelectionChanged += SaveSettings;
             excludeTextcheckBox.Click += SaveSettings;
 
+            labelBoldcheckBox.Click += SaveSettings;
+
             toggleBackgroundCheckBox.Click += SaveSettings;
         }
 
@@ -105,7 +108,7 @@ namespace SlideSCI
             Properties.Settings.Default.LabelTemplate = labelTemplateComboBox.Text;
             Properties.Settings.Default.LabelFontName = labelFontNameEditBox.Text;
             Properties.Settings.Default.LabelFontSize = labelFontSizeEditBox.Text;
-
+            Properties.Settings.Default.LabelBold = labelBoldcheckBox.Checked;
             // Save Image Auto Align Settings
             Properties.Settings.Default.imgAutoAlignSortType = imgAutoAlignSortTypeDropDown.SelectedItemIndex;
             Properties.Settings.Default.ColNum = imgAutoAlign_colNum.Text;
@@ -523,7 +526,7 @@ namespace SlideSCI
                         shape.Left = currentX;
                         shape.Top = currentY;
                         rowMaxHeight = Math.Max(rowMaxHeight, shape.Height);
-                        currentX += columnWidths[colCount]+ colSpace;
+                        currentX += columnWidths[colCount] + colSpace;
                         colCount++;
                     }
                 }
@@ -1731,6 +1734,12 @@ namespace SlideSCI
                     textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
                     // 不自动换行
                     textBox.TextFrame.WordWrap = Office.MsoTriState.msoFalse;
+
+                    // 自动加粗
+                    if (labelBoldcheckBox.Checked)
+                    {
+                        textBox.TextFrame.TextRange.Font.Bold = Office.MsoTriState.msoTrue;
+                    }
                 }
                 catch (Exception ex)
                 {

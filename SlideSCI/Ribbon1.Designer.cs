@@ -74,6 +74,8 @@
             this.codeGroup = this.Factory.CreateRibbonGroup();
             this.toggleBackgroundCheckBox = this.Factory.CreateRibbonCheckBox();
             this.group2 = this.Factory.CreateRibbonGroup();
+            this.group1 = this.Factory.CreateRibbonGroup();
+            this.labelBoldcheckBox = this.Factory.CreateRibbonCheckBox();
             this.imgAutoAlign = this.Factory.CreateRibbonButton();
             this.AddTitleButton = this.Factory.CreateRibbonButton();
             this.addLabelsButton = this.Factory.CreateRibbonButton();
@@ -101,12 +103,14 @@
             this.复制图片格式.SuspendLayout();
             this.codeGroup.SuspendLayout();
             this.group2.SuspendLayout();
+            this.group1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab2
             // 
             this.tab2.Groups.Add(this.图片自动对齐);
             this.tab2.Groups.Add(this.图片处理);
+            this.tab2.Groups.Add(this.group1);
             this.tab2.Groups.Add(this.复制图片格式);
             this.tab2.Groups.Add(this.codeGroup);
             this.tab2.Groups.Add(this.group2);
@@ -198,12 +202,6 @@
             this.图片处理.Items.Add(this.distanceFromBottomEditBox);
             this.图片处理.Items.Add(this.titleTextEditBox);
             this.图片处理.Items.Add(this.autoGroupCheckBox);
-            this.图片处理.Items.Add(this.addLabelsButton);
-            this.图片处理.Items.Add(this.labelOffsetXEditBox);
-            this.图片处理.Items.Add(this.labelOffsetYEditBox);
-            this.图片处理.Items.Add(this.labelTemplateComboBox);
-            this.图片处理.Items.Add(this.labelFontNameEditBox);
-            this.图片处理.Items.Add(this.labelFontSizeEditBox);
             this.图片处理.Label = "添加图片标题";
             this.图片处理.Name = "图片处理";
             // 
@@ -325,6 +323,24 @@
             this.group2.Items.Add(this.button5);
             this.group2.Label = "关于";
             this.group2.Name = "group2";
+            // 
+            // group1
+            // 
+            this.group1.Items.Add(this.addLabelsButton);
+            this.group1.Items.Add(this.labelFontSizeEditBox);
+            this.group1.Items.Add(this.labelFontNameEditBox);
+            this.group1.Items.Add(this.labelTemplateComboBox);
+            this.group1.Items.Add(this.labelOffsetYEditBox);
+            this.group1.Items.Add(this.labelOffsetXEditBox);
+            this.group1.Items.Add(this.labelBoldcheckBox);
+            this.group1.Label = "添加图片标签";
+            this.group1.Name = "group1";
+            // 
+            // labelBoldcheckBox
+            // 
+            this.labelBoldcheckBox.Checked = true;
+            this.labelBoldcheckBox.Label = "自动加粗";
+            this.labelBoldcheckBox.Name = "labelBoldcheckBox";
             // 
             // imgAutoAlign
             // 
@@ -522,6 +538,8 @@
             this.codeGroup.PerformLayout();
             this.group2.ResumeLayout(false);
             this.group2.PerformLayout();
+            this.group1.ResumeLayout(false);
+            this.group1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -577,6 +595,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonDropDown imgAutoAlignSortTypeDropDown;
         internal Microsoft.Office.Tools.Ribbon.RibbonDropDown imgAutoAlignAlignTypeDropDown;
         internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox excludeTextcheckBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox labelBoldcheckBox;
     }
 
     partial class ThisRibbonCollection
