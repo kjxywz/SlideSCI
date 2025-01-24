@@ -69,6 +69,7 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-24_18-40-24-2025-01-24.png)
 * **复制粘贴格式功能**
+  
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-24_18-40-49-2025-01-24.png)
   * **复制粘贴格式**：可以复制形状、文字的格式，粘贴给其他元素。
 
