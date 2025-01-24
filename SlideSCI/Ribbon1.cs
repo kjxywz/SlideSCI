@@ -156,7 +156,8 @@ namespace SlideSCI
                         titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
                         titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
                         titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignCenter;
-
+                        // 不自动换行
+                        //titleShape.TextFrame.WordWrap = Office.MsoTriState.msoFalse;
                         if (autoGroup)
                         {
                             PowerPoint.ShapeRange shapeRange = slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name });
@@ -450,6 +451,13 @@ namespace SlideSCI
                     else if (!useCustomWidth && useCustomHeight)
                     {
                         maxWidth = 0;
+                        foreach (var shape in shapesToArrange)
+                        {
+                            float aspectRatio = shape.Width / shape.Height;
+                            shape.Height = customHeight;
+                            shape.Width = customHeight * aspectRatio;
+                            maxWidth = Math.Max(maxWidth, shape.Width);
+                        }
                     }
                     else
                     {
@@ -475,9 +483,6 @@ namespace SlideSCI
                         {
                             shape.Height = customHeight;
                             shape.Width = customHeight * aspectRatio;
-                            // referenceHeight = customHeight;
-                            // 需要计算最大占位宽度
-                            maxWidth = Math.Max(maxWidth, shape.Width);
                         }
                         else if (useCustomWidth && useCustomHeight)
                         {
