@@ -144,8 +144,8 @@
             // 
             // imgAutoAlignAlignTypeDropDown
             // 
-            ribbonDropDownItemImpl3.Label = "最大宽度整齐排列";
-            ribbonDropDownItemImpl3.ScreenTip = "按所选图片中的最大宽度来占位排列，如果图片宽度不统一，会有较大空隙";
+            ribbonDropDownItemImpl3.Label = "列最大宽度占位排列";
+            ribbonDropDownItemImpl3.ScreenTip = "按每列的最大宽度来占位排列，以保持表格布局";
             ribbonDropDownItemImpl4.Label = "统一高度排列";
             ribbonDropDownItemImpl4.ScreenTip = "默认会统一图片的高度整齐紧凑排列在一起";
             ribbonDropDownItemImpl5.Label = "统一宽度瀑布流";
