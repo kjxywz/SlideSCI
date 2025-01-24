@@ -425,9 +425,18 @@ namespace SlideSCI
                 {
                     // 最大宽度整齐排列
                     float maxWidth = 0;
-                    foreach (var shape in shapesToArrange)
+                    if (useCustomWidth)
                     {
-                        maxWidth = Math.Max(maxWidth, shape.Width);
+                        maxWidth = customWidth;
+                    }
+                    else if (!useCustomWidth && useCustomHeight){
+                        maxWidth = 0;
+                    }
+                    else{
+                        foreach (var shape in shapesToArrange)
+                        {
+                            maxWidth = Math.Max(maxWidth, shape.Width);
+                        }
                     }
 
                     float currentX = startX;
@@ -436,8 +445,24 @@ namespace SlideSCI
 
                     foreach (var shape in shapesToArrange)
                     {
-                        if (useCustomWidth && useCustomHeight)
+                        float aspectRatio = shape.Width / shape.Height;
+                        if (useCustomWidth && !useCustomHeight)
                         {
+                            shape.Width = customWidth;
+                            shape.Height = customWidth / aspectRatio;
+                        }
+                        else if (!useCustomWidth && useCustomHeight)
+                        {
+                            shape.Height = customHeight;
+                            shape.Width = customHeight * aspectRatio;
+                            // referenceHeight = customHeight;
+                            // 需要计算最大占位宽度
+                            maxWidth = Math.Max(maxWidth, shape.Width);
+                        }
+                        else if (useCustomWidth && useCustomHeight)
+                        {
+                            // 取消锁定纵横比
+                            shape.LockAspectRatio = Office.MsoTriState.msoFalse;
                             shape.Width = customWidth;
                             shape.Height = customHeight;
                         }
