@@ -359,15 +359,26 @@ namespace SlideSCI
 
                 bool useCustomWidth = float.TryParse(imgWidthEditBpx.Text, out customWidth) && customWidth > 0;
                 bool useCustomHeight = float.TryParse(imgHeightEditBox.Text, out customHeight) && customHeight > 0;
+                var selectedImgShape = new List<PowerPoint.Shape>();
+                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                {
+                    // Skip text boxes if excludeTextcheckBox is checked
+                    if (excludeTextcheckBox.Checked && shape.Type == Office.MsoShapeType.msoTextBox)
+                    {
+                        continue;
+                    }
+                    selectedImgShape.Add(shape);
+                }
 
                 List<PowerPoint.Shape> shapesToArrange = new List<PowerPoint.Shape>();
+
 
                 if (imgAutoAlignSortTypeDropDown.SelectedItemIndex == 0)
                 {
                     // Create groups based on vertical position
                     var groups = new List<ImageGroup>();
                     var shapes = new List<PowerPoint.Shape>();
-                    foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                    foreach (PowerPoint.Shape shape in selectedImgShape)
                     {
                         shapes.Add(shape);
                     }
@@ -412,7 +423,7 @@ namespace SlideSCI
                 else
                 {
                     // Use shapes in their original order
-                    foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                    foreach (PowerPoint.Shape shape in selectedImgShape)
                     {
                         shapesToArrange.Add(shape);
                     }
