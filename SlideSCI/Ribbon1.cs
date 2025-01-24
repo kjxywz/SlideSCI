@@ -295,8 +295,8 @@ namespace SlideSCI
                 copiedTop.Clear();
                 foreach (PowerPoint.Shape shape in sel.ShapeRange)
                 {
-                    copiedLeft.Add(shape.Left);
-                    copiedTop.Add(shape.Top);
+                    copiedLeft.Add(shape.Left + shape.Width / 2);
+                    copiedTop.Add(shape.Top + shape.Height / 2);
                 }
                 // MessageBox.Show($"Copied positions of {sel.ShapeRange.Count} shapes");
             }
@@ -320,8 +320,8 @@ namespace SlideSCI
 
                 for (int i = 0; i < count; i++)
                 {
-                    sel.ShapeRange[i + 1].Left = copiedLeft[i];
-                    sel.ShapeRange[i + 1].Top = copiedTop[i];
+                    sel.ShapeRange[i + 1].Left = copiedLeft[i] - sel.ShapeRange[i + 1].Width / 2;
+                    sel.ShapeRange[i + 1].Top = copiedTop[i] - sel.ShapeRange[i + 1].Height / 2;
                 }
 
                 // if (sel.ShapeRange.Count > copiedLeft.Count)
