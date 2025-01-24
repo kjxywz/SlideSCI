@@ -1611,16 +1611,27 @@ namespace SlideSCI
             bool isNumeric = labelTemplate.StartsWith("1");
             int selectionCount = sel.ShapeRange.Count;
 
+
             // Create groups based on vertical position
             var groups = new List<ImageGroup>();
-            var shapes = new List<PowerPoint.Shape>();
+            var selectedImgShapes = new List<PowerPoint.Shape>();
             foreach (PowerPoint.Shape shape in sel.ShapeRange)
             {
-                shapes.Add(shape);
+                // Skip text boxes if excludeTextcheckBox is checked
+                if (shape.Type == Office.MsoShapeType.msoTextBox || shape.Type == Office.MsoShapeType.msoAutoShape)
+                {
+                    continue;
+                }
+                selectedImgShapes.Add(shape);
+            }
+            if (selectedImgShapes.Count == 0)
+            {
+                MessageBox.Show("请选择要添加标签的图片。");
+                return;
             }
 
             // Group shapes based on vertical overlap
-            foreach (var shape in shapes)
+            foreach (var shape in selectedImgShapes)
             {
                 bool addedToExistingGroup = false;
                 foreach (var group in groups)
@@ -1682,13 +1693,19 @@ namespace SlideSCI
                         Office.MsoTextOrientation.msoTextOrientationHorizontal,
                         item.Left + labelOffsetX,
                         item.Top + labelOffsetY,
-                        fontSize * label.Length, // Width based on font size and label length
+                        0, // Initial width
                         fontSize * 2);
 
+                    // Set the text and font properties
                     textBox.TextFrame.TextRange.Text = label;
                     textBox.TextFrame.TextRange.Font.Size = fontSize;
                     textBox.TextFrame.TextRange.Font.Name = fontFamily;
                     textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignLeft;
+
+                    // Auto-size the textbox to fit the text
+                    textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+                    // 不自动换行
+                    textBox.TextFrame.WordWrap = Office.MsoTriState.msoFalse;
                 }
                 catch (Exception ex)
                 {
