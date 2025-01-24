@@ -72,8 +72,6 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
   
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-24_18-40-49-2025-01-24.png)
   * **复制粘贴格式**：可以复制形状、文字的格式，粘贴给其他元素。
-
-    ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴格式-2025-01-17.gif)
   * **复制位置和粘贴元素位置**：可以复制多个元素的位置，粘贴给其他元素（可以多选复制和粘贴！），可以用来让不同页的PPT的多个元素位置一致，或者让同一页的不同元素都是一个位置（可以先排好一组元素，用这个功能让另一组元素自动排好，再调整位置）。
 
     ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/复制粘贴位置-2025-01-17.gif)
