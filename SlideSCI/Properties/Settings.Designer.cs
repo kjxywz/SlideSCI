@@ -226,5 +226,29 @@ namespace SlideSCI.Properties {
                 this["imgAutoAlignSortType"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int imgAutoAlignAlignType {
+            get {
+                return ((int)(this["imgAutoAlignAlignType"]));
+            }
+            set {
+                this["imgAutoAlignAlignType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool imgAutoAlighExcludeText {
+            get {
+                return ((bool)(this["imgAutoAlighExcludeText"]));
+            }
+            set {
+                this["imgAutoAlighExcludeText"] = value;
+            }
+        }
     }
 }

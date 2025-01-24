@@ -59,6 +59,8 @@ namespace SlideSCI
             imgAutoAlign_rowSpace.Text = Properties.Settings.Default.RowSpace;
             imgWidthEditBpx.Text = Properties.Settings.Default.ImgWidth;
             imgHeightEditBox.Text = Properties.Settings.Default.ImgHeight;
+            imgAutoAlignAlignTypeDropDown.SelectedItemIndex = Properties.Settings.Default.imgAutoAlignAlignType;
+            excludeTextcheckBox.Checked = Properties.Settings.Default.imgAutoAlighExcludeText;
 
             // insertMarkdown
             toggleBackgroundCheckBox.Checked = Properties.Settings.Default.ToggleBackground;
@@ -82,6 +84,9 @@ namespace SlideSCI
             imgAutoAlign_rowSpace.TextChanged += SaveSettings;
             imgWidthEditBpx.TextChanged += SaveSettings;
             imgHeightEditBox.TextChanged += SaveSettings;
+            imgAutoAlignAlignTypeDropDown.SelectionChanged += SaveSettings;
+            excludeTextcheckBox.Click += SaveSettings;
+
             toggleBackgroundCheckBox.Click += SaveSettings;
         }
 
@@ -108,6 +113,8 @@ namespace SlideSCI
             Properties.Settings.Default.RowSpace = imgAutoAlign_rowSpace.Text;
             Properties.Settings.Default.ImgWidth = imgWidthEditBpx.Text;
             Properties.Settings.Default.ImgHeight = imgHeightEditBox.Text;
+            Properties.Settings.Default.imgAutoAlignAlignType = imgAutoAlignAlignTypeDropDown.SelectedItemIndex;
+            Properties.Settings.Default.imgAutoAlighExcludeText = excludeTextcheckBox.Checked;
 
             // Save insertMarkdwon
             Properties.Settings.Default.ToggleBackground = toggleBackgroundCheckBox.Checked;
@@ -440,10 +447,12 @@ namespace SlideSCI
                     {
                         maxWidth = customWidth;
                     }
-                    else if (!useCustomWidth && useCustomHeight){
+                    else if (!useCustomWidth && useCustomHeight)
+                    {
                         maxWidth = 0;
                     }
-                    else{
+                    else
+                    {
                         foreach (var shape in shapesToArrange)
                         {
                             maxWidth = Math.Max(maxWidth, shape.Width);
