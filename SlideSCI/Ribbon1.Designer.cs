@@ -161,6 +161,7 @@
             // 
             // excludeTextcheckBox
             // 
+            this.excludeTextcheckBox.Checked = true;
             this.excludeTextcheckBox.Label = "排除文本框";
             this.excludeTextcheckBox.Name = "excludeTextcheckBox";
             // 
