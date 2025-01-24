@@ -438,39 +438,57 @@ namespace SlideSCI
                 }
                 // Now Align image
                 float startX = shapesToArrange[0].Left;
+                float startY = shapesToArrange[0].Top;
                 float currentY = shapesToArrange[0].Top;
 
                 if (imgAutoAlignAlignTypeDropDown.SelectedItemIndex == 0)
                 {
-                    // 最大宽度整齐排列
-                    float maxWidth = 0;
-                    if (useCustomWidth)
+                    // 1. 预先将图片分配到列
+                    List<List<PowerPoint.Shape>> columns = new List<List<PowerPoint.Shape>>();
+                    for (int i = 0; i < colNum; i++)
                     {
-                        maxWidth = customWidth;
-                    }
-                    else if (!useCustomWidth && useCustomHeight)
-                    {
-                        maxWidth = 0;
-                        foreach (var shape in shapesToArrange)
-                        {
-                            float aspectRatio = shape.Width / shape.Height;
-                            shape.Height = customHeight;
-                            shape.Width = customHeight * aspectRatio;
-                            maxWidth = Math.Max(maxWidth, shape.Width);
-                        }
-                    }
-                    else
-                    {
-                        foreach (var shape in shapesToArrange)
-                        {
-                            maxWidth = Math.Max(maxWidth, shape.Width);
-                        }
+                        columns.Add(new List<PowerPoint.Shape>());
                     }
 
+                    for (int i = 0; i < shapesToArrange.Count; i++)
+                    {
+                        columns[i % colNum].Add(shapesToArrange[i]); // 按顺序分配到列
+                    }
+
+                    // 2. 计算每列的最大宽度
+                    List<float> columnWidths = new List<float>();
+                    for (int i = 0; i < colNum; i++)
+                    {
+                        float columnMaxWidth = 0;
+                        foreach (var shape in columns[i])
+                        {
+                            float aspectRatio = shape.Width / shape.Height;
+
+                            if (useCustomWidth && !useCustomHeight)
+                            {
+                                shape.Width = customWidth;
+                                shape.Height = customWidth / aspectRatio;
+                            }
+                            else if (!useCustomWidth && useCustomHeight)
+                            {
+                                shape.Height = customHeight;
+                                shape.Width = customHeight * aspectRatio;
+                            }
+                            else if (useCustomWidth && useCustomHeight)
+                            {
+                                // 取消锁定纵横比 (假设 Shape 类有 LockAspectRatio 属性)
+                                // shape.LockAspectRatio = Office.MsoTriState.msoFalse; // 如果使用 Office Interop
+                                shape.Width = customWidth;
+                                shape.Height = customHeight;
+                            }
+                            columnMaxWidth = Math.Max(columnMaxWidth, shape.Width);
+                        }
+                        columnWidths.Add(columnMaxWidth);
+                    }
                     float currentX = startX;
                     float rowMaxHeight = 0;
                     int colCount = 0;
-
+                    // 3. 按行进行排列
                     foreach (var shape in shapesToArrange)
                     {
                         float aspectRatio = shape.Width / shape.Height;
@@ -483,6 +501,8 @@ namespace SlideSCI
                         {
                             shape.Height = customHeight;
                             shape.Width = customHeight * aspectRatio;
+                            // referenceHeight = customHeight;
+                            // 需要计算最大占位宽度
                         }
                         else if (useCustomWidth && useCustomHeight)
                         {
@@ -503,7 +523,7 @@ namespace SlideSCI
                         shape.Left = currentX;
                         shape.Top = currentY;
                         rowMaxHeight = Math.Max(rowMaxHeight, shape.Height);
-                        currentX += maxWidth + colSpace;
+                        currentX += columnWidths[colCount]+ colSpace;
                         colCount++;
                     }
                 }
