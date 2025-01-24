@@ -44,6 +44,8 @@
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl7 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl8 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl9 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl10 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl11 = this.Factory.CreateRibbonDropDownItem();
             this.tab2 = this.Factory.CreateRibbonTab();
             this.图片自动对齐 = this.Factory.CreateRibbonGroup();
             this.imgAutoAlign = this.Factory.CreateRibbonButton();
@@ -280,10 +282,14 @@
             ribbonDropDownItemImpl7.Label = "a";
             ribbonDropDownItemImpl8.Label = "A)";
             ribbonDropDownItemImpl9.Label = "a)";
+            ribbonDropDownItemImpl10.Label = "1";
+            ribbonDropDownItemImpl11.Label = "1)";
             this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl6);
             this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl7);
             this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl8);
             this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl9);
+            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl10);
+            this.labelTemplateComboBox.Items.Add(ribbonDropDownItemImpl11);
             this.labelTemplateComboBox.Label = "标签模板";
             this.labelTemplateComboBox.Name = "labelTemplateComboBox";
             this.labelTemplateComboBox.Text = "A";

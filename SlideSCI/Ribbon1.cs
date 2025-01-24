@@ -1597,7 +1597,9 @@ namespace SlideSCI
                 { "A", "ABCDEFGHIJKLMNOPQRSTUVWXYZ" },
                 { "a", "abcdefghijklmnopqrstuvwxyz" },
                 { "A)", "ABCDEFGHIJKLMNOPQRSTUVWXYZ" },
-                { "a)", "abcdefghijklmnopqrstuvwxyz" }
+                { "a)", "abcdefghijklmnopqrstuvwxyz" },
+                { "1", "123456789" },  // Added numeric template
+                { "1)", "123456789" }  // Added numeric template with parenthesis
             };
 
             if (!templates.ContainsKey(labelTemplate))
@@ -1606,6 +1608,7 @@ namespace SlideSCI
             }
 
             string labels = templates[labelTemplate];
+            bool isNumeric = labelTemplate.StartsWith("1");
             int selectionCount = sel.ShapeRange.Count;
 
             // Create groups based on vertical position
@@ -1660,7 +1663,16 @@ namespace SlideSCI
                 try
                 {
                     var item = sortedShapes[i];
-                    string label = labels[i % labels.Length].ToString();
+                    string label;
+                    if (isNumeric)
+                    {
+                        label = (i + 1).ToString();
+                    }
+                    else
+                    {
+                        label = labels[i % labels.Length].ToString();
+                    }
+
                     if (labelTemplate.EndsWith(")"))
                     {
                         label += ")";
