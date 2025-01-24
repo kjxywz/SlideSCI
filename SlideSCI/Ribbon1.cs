@@ -1104,7 +1104,7 @@ namespace SlideSCI
             public bool OverlapsWith(PowerPoint.Shape shape)
             {
                 float shapeHeight = shape.Height;
-                float threshold = shapeHeight * 0.6f; // 80% of shape height
+                float threshold = shapeHeight * 0.5f; // 50% of shape height
                 float shapeBottom = shape.Top + shapeHeight;
 
                 // Calculate overlap height
