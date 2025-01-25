@@ -142,7 +142,7 @@ namespace SlideSCI
                 bool autoGroup = autoGroupCheckBox.Checked;
                 string fontName = fontNameEditBox.Text;
                 string titleText = titleTextEditBox.Text;
-
+                int count = 1;
                 foreach (PowerPoint.Shape selectedShape in sel.ShapeRange)
                 {
                     if (selectedShape.Type == Office.MsoShapeType.msoPicture)
@@ -166,6 +166,16 @@ namespace SlideSCI
                             PowerPoint.ShapeRange shapeRange = slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name });
                             shapeRange.Group();
                         }
+                        // 自动选择
+                        if (count == 1)
+                        {
+                            titleShape.Select(Office.MsoTriState.msoTrue);
+                        }
+                        else
+                        {
+                            titleShape.Select(Office.MsoTriState.msoFalse);
+                        }
+                        count++;
                     }
                 }
             }
@@ -1739,6 +1749,15 @@ namespace SlideSCI
                     if (labelBoldcheckBox.Checked)
                     {
                         textBox.TextFrame.TextRange.Font.Bold = Office.MsoTriState.msoTrue;
+                    }
+                    // 自动选择
+                    if (i == 0)
+                    {
+                        textBox.Select(Office.MsoTriState.msoTrue);
+                    }
+                    else
+                    {
+                        textBox.Select(Office.MsoTriState.msoFalse);
                     }
                 }
                 catch (Exception ex)
