@@ -1816,6 +1816,49 @@ namespace SlideSCI
             targetFont.Color.RGB = _copiedFont.Color.RGB;
             targetFont.Underline = _copiedFont.Underline;
         }
+
+        private void pastePictureAndText(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            {
+                try
+                {
+                    // Store original position
+                    float left = sel.ShapeRange.Left;
+                    float top = sel.ShapeRange.Top;
+                    
+                    // Group the shapes first if multiple shapes selected
+                    PowerPoint.Shape groupedShape = sel.ShapeRange.Count > 1 ? 
+                        sel.ShapeRange.Group() : sel.ShapeRange[1];
+                    
+                    // Copy grouped shape
+                    groupedShape.Copy();
+                    
+                    // Delete original shape
+                    groupedShape.Delete();
+                    
+                    // Paste as Enhanced Metafile
+                    PowerPoint.ShapeRange pastedShapes = app.ActiveWindow.View.Slide.Shapes.PasteSpecial(PowerPoint.PpPasteDataType.ppPasteEnhancedMetafile);
+                    
+                    // Move to original position
+                    if (pastedShapes != null)
+                    {
+                        pastedShapes.Left = left;
+                        pastedShapes.Top = top;
+                        pastedShapes.Select();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"粘贴为增强型图形时出错: {ex.Message}");
+                }
+            }
+            else
+            {
+                MessageBox.Show("请先选择要转换的对象。");
+            }
+        }
     }
 
 
