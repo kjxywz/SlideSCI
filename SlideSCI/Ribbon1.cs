@@ -145,8 +145,7 @@ namespace SlideSCI
                 int count = 1;
                 foreach (PowerPoint.Shape selectedShape in sel.ShapeRange)
                 {
-                    if (selectedShape.Type == Office.MsoShapeType.msoPicture)
-                    {
+
                         PowerPoint.Shape titleShape = slide.Shapes.AddTextbox(
                             Office.MsoTextOrientation.msoTextOrientationHorizontal,
                             selectedShape.Left,
@@ -176,7 +175,7 @@ namespace SlideSCI
                             titleShape.Select(Office.MsoTriState.msoFalse);
                         }
                         count++;
-                    }
+                    
                 }
             }
             else

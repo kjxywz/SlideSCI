@@ -92,21 +92,21 @@
             this.insertEquationButton = this.Factory.CreateRibbonButton();
             this.insertCodeBlockButton = this.Factory.CreateRibbonButton();
             this.toggleBackgroundCheckBox = this.Factory.CreateRibbonCheckBox();
+            this.group3 = this.Factory.CreateRibbonGroup();
+            this.button1 = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
+            this.splitButton1 = this.Factory.CreateRibbonSplitButton();
             this.button4 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
-            this.splitButton1 = this.Factory.CreateRibbonSplitButton();
-            this.group3 = this.Factory.CreateRibbonGroup();
-            this.button1 = this.Factory.CreateRibbonButton();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
             this.group1.SuspendLayout();
             this.复制图片格式.SuspendLayout();
             this.codeGroup.SuspendLayout();
-            this.group2.SuspendLayout();
             this.group3.SuspendLayout();
+            this.group2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab2
@@ -488,11 +488,35 @@
             this.toggleBackgroundCheckBox.Label = "代码黑色背景";
             this.toggleBackgroundCheckBox.Name = "toggleBackgroundCheckBox";
             // 
+            // group3
+            // 
+            this.group3.Items.Add(this.button1);
+            this.group3.Label = "其他";
+            this.group3.Name = "group3";
+            // 
+            // button1
+            // 
+            this.button1.Label = "图片和文字同步缩放";
+            this.button1.Name = "button1";
+            this.button1.ScreenTip = "组合后，调整组合形状，文字也会同步缩放";
+            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pastePictureAndText);
+            // 
             // group2
             // 
             this.group2.Items.Add(this.splitButton1);
             this.group2.Label = "关于";
             this.group2.Name = "group2";
+            // 
+            // splitButton1
+            // 
+            this.splitButton1.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.splitButton1.Image = ((System.Drawing.Image)(resources.GetObject("splitButton1.Image")));
+            this.splitButton1.Items.Add(this.button4);
+            this.splitButton1.Items.Add(this.button3);
+            this.splitButton1.Items.Add(this.button5);
+            this.splitButton1.Label = "开发者";
+            this.splitButton1.Name = "splitButton1";
+            this.splitButton1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.aboutDeveloper_Click);
             // 
             // button4
             // 
@@ -515,30 +539,6 @@
             this.button5.ShowImage = true;
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
             // 
-            // splitButton1
-            // 
-            this.splitButton1.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.splitButton1.Image = ((System.Drawing.Image)(resources.GetObject("splitButton1.Image")));
-            this.splitButton1.Items.Add(this.button4);
-            this.splitButton1.Items.Add(this.button3);
-            this.splitButton1.Items.Add(this.button5);
-            this.splitButton1.Label = "开发者";
-            this.splitButton1.Name = "splitButton1";
-            this.splitButton1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.aboutDeveloper_Click);
-            // 
-            // group3
-            // 
-            this.group3.Items.Add(this.button1);
-            this.group3.Label = "其他";
-            this.group3.Name = "group3";
-            // 
-            // button1
-            // 
-            this.button1.Label = "图片和文字同步缩放";
-            this.button1.Name = "button1";
-            this.button1.ScreenTip = "组合后，调整组合形状，文字也会同步缩放";
-            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pastePictureAndText);
-            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -557,10 +557,10 @@
             this.复制图片格式.PerformLayout();
             this.codeGroup.ResumeLayout(false);
             this.codeGroup.PerformLayout();
-            this.group2.ResumeLayout(false);
-            this.group2.PerformLayout();
             this.group3.ResumeLayout(false);
             this.group3.PerformLayout();
+            this.group2.ResumeLayout(false);
+            this.group2.PerformLayout();
             this.ResumeLayout(false);
 
         }
