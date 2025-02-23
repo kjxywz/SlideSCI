@@ -12,7 +12,7 @@ namespace SlideSCI.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.8.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.12.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -145,7 +145,7 @@ namespace SlideSCI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
         public string ColNum {
             get {
                 return ((string)(this["ColNum"]));
@@ -157,7 +157,7 @@ namespace SlideSCI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
         public string ColSpace {
             get {
                 return ((string)(this["ColSpace"]));
@@ -169,7 +169,7 @@ namespace SlideSCI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
         public string RowSpace {
             get {
                 return ((string)(this["RowSpace"]));
@@ -260,6 +260,30 @@ namespace SlideSCI.Properties {
             }
             set {
                 this["LabelBold"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("6")]
+        public int imgAutoAlign_rowSpace {
+            get {
+                return ((int)(this["imgAutoAlign_rowSpace"]));
+            }
+            set {
+                this["imgAutoAlign_rowSpace"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool imgAddTitleExcludeText {
+            get {
+                return ((bool)(this["imgAddTitleExcludeText"]));
+            }
+            set {
+                this["imgAddTitleExcludeText"] = value;
             }
         }
     }

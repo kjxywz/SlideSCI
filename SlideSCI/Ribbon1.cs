@@ -1,23 +1,23 @@
-﻿using Markdig;  // 修改为使用签名版本的命名空间
-using Microsoft.Office.Tools.Ribbon;
-using System;
-using System.Text;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Markdig;  // 修改为使用签名版本的命名空间
+using Microsoft.Office.Interop.PowerPoint;
+using Microsoft.Office.Tools.Ribbon;
+using Font = System.Drawing.Font; // Add this line
 using Office = Microsoft.Office.Core;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
-using System.IO;
-using System.Collections.Generic; // Add this line
-
-
 
 namespace SlideSCI
 {
-
     public partial class Ribbon1
     {
-        PowerPoint.Application app;
+        private PowerPoint.Application app;
         private float copiedWidth;
         private float copiedHeight;
 
@@ -31,8 +31,6 @@ namespace SlideSCI
         private bool hasCopiedCrop = false;
         private float originalHeight; // 添加变量存储原始图片高度
         private float currentCropedHeight;
-
-
 
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
@@ -62,6 +60,7 @@ namespace SlideSCI
             imgHeightEditBox.Text = Properties.Settings.Default.ImgHeight;
             imgAutoAlignAlignTypeDropDown.SelectedItemIndex = Properties.Settings.Default.imgAutoAlignAlignType;
             excludeTextcheckBox.Checked = Properties.Settings.Default.imgAutoAlighExcludeText;
+            excludeTextcheckBox2.Checked = Properties.Settings.Default.imgAddTitleExcludeText;
 
             // insertMarkdown
             toggleBackgroundCheckBox.Checked = Properties.Settings.Default.ToggleBackground;
@@ -91,8 +90,63 @@ namespace SlideSCI
             labelBoldcheckBox.Click += SaveSettings;
 
             toggleBackgroundCheckBox.Click += SaveSettings;
+            iniCombobox();
+
+
         }
 
+        /// <summary>
+        /// 初始化下拉框的值
+        /// </summary>
+        public void iniCombobox()
+        {
+            //字体名
+            List<string> FontNames = new List<string>() { "Arial", "微软雅黑", "黑体", "方正兰亭黑体", "仿宋", "楷体", "宋体", "新宋体", "华文中宋", "华文仿宋", "华文行楷", "华文新魏", "汉仪综艺体简", "思源黑体", "思源宋体", "庞门正道标题体", "方正清刻本悦宋", "文悦新青年体", "演示新手书" };
+            FreshCombobox(fontNameEditBox, FontNames);
+            FreshCombobox(labelFontNameEditBox, FontNames);
+            //字号
+            List<string> FontSizes = new List<string>() { "2", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "18", "20", "22", "24", "26", "28", "30", "40", "50", "60", "80", "100", "120", "150", "200" };
+            FreshCombobox(fontSizeEditBox, FontSizes);
+            FreshCombobox(labelFontSizeEditBox, FontSizes);
+            //图片宽度和高度
+            List<string> PicSizes = new List<string>() { "0cm", "0.5cm", "1cm", "2cm", "3cm", "4cm", "5cm", "6cm", "7cm", "8cm", "9cm", "10cm", "12cm", "15cm", "20cm", "25cm", "30cm", "35cm", "40cm", "45cm", "50cm", "60cm", "70cm", "80cm", "100cm", "120cm", "150cm", "200cm" };
+            FreshCombobox(imgWidthEditBpx, PicSizes);
+            FreshCombobox(imgHeightEditBox, PicSizes);
+            //图下距离
+            List<string> PicDistance = new List<string>() { "0", "1", "2", "3", "4", "5", "6", "7", "8", "10", "11", "12", "13", "14", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "90", "100", "120", "150", "200", "500" };
+            FreshCombobox(distanceFromBottomEditBox, PicDistance);
+            //XY偏移
+            List<string> OffsetValues = new List<string>() { "-40", "-30", "-20", "-10", "-15", "-10", "-9", "-8", "-7", "-6", "-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "15", "20", "25", "30", "40", };
+            FreshCombobox(labelOffsetYEditBox, OffsetValues);
+            FreshCombobox(labelOffsetXEditBox, OffsetValues);
+            //列间距
+            List<string> columnGap = new List<string>() { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "30", "35", "40", "45", "50", "55", "60", "80" };
+            FreshCombobox(imgAutoAlign_colSpace, columnGap);
+            //行间距
+            List<string> RowGap = new List<string>() { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17(≈08字框高)", "18(≈09字框高)", "20(≈10字框高)", "22(≈12字框高)", "25(≈14字框高)", "27(≈16字框高)", "29(≈18字框高)", "32(≈20字框高)", "34(≈22字框高)", "37(≈24字框高)", "39(≈26字框高)", "41(≈28字框高)", "44(≈30字框高)", "51(≈35字框高)", "56(≈40字框高)", "68(≈50字框高)", "80(≈60字框高)" };
+            FreshCombobox(imgAutoAlign_rowSpace, RowGap);
+            //列数量
+            List<string> columNums = new List<string>() { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" };
+            FreshCombobox(imgAutoAlign_colNum, columNums);
+
+        }
+
+        /// <summary>
+        /// RibbonComboBox下拉值初始化
+        /// </summary>
+        /// <param name="BOX"></param>
+        private void FreshCombobox(RibbonComboBox BOX, List<string> itemLabel)
+        {
+            BOX.Items.Clear();
+            // 使用 LINQ 创建 RibbonDropDownItem 并添加到 RibbonDropDown 中
+            itemLabel.Select(x =>
+            {
+                RibbonDropDownItem item = Globals.Factory.GetRibbonFactory().CreateRibbonDropDownItem();
+                item.Label = x; // 设置项的显示文本
+                return item;
+            }).ToList().ForEach(item => BOX.Items.Add(item)); // 将项添加到下拉菜单中
+
+        }
         private void SaveSettings(object sender, RibbonControlEventArgs e)
         {
             // Save Image Title Settings
@@ -118,6 +172,7 @@ namespace SlideSCI
             Properties.Settings.Default.ImgHeight = imgHeightEditBox.Text;
             Properties.Settings.Default.imgAutoAlignAlignType = imgAutoAlignAlignTypeDropDown.SelectedItemIndex;
             Properties.Settings.Default.imgAutoAlighExcludeText = excludeTextcheckBox.Checked;
+            Properties.Settings.Default.imgAddTitleExcludeText = excludeTextcheckBox2.Checked;
 
             // Save insertMarkdwon
             Properties.Settings.Default.ToggleBackground = toggleBackgroundCheckBox.Checked;
@@ -129,58 +184,177 @@ namespace SlideSCI
             // MessageBox.Show("设置已保存");
         }
 
+        /// <summary>
+        /// 图片加标题
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void AddTitleToImage(object sender, RibbonControlEventArgs e)
         {
+            AddTitleFun();
+        }
+
+        /// <summary>
+        /// 图片加标题
+        /// </summary>
+        private void AddTitleFun()
+        {
             PowerPoint.Application app = Globals.ThisAddIn.Application;
-            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            Slide slide = app.ActiveWindow.View.Slide;
+            Selection sel = app.ActiveWindow.Selection;
+            bool autoGroup = autoGroupCheckBox.Checked;//自动编组
+            List<ShapeRange> allshapesName = new List<ShapeRange> { };//需要编组的对象集合
+            List<Shape> allshapes = new List<Shape> { };//编组后的对象
 
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                float fontSize = float.Parse(fontSizeEditBox.Text);
-                float distanceFromBottom = float.Parse(distanceFromBottomEditBox.Text);
-                bool autoGroup = autoGroupCheckBox.Checked;
-                string fontName = fontNameEditBox.Text;
-                string titleText = titleTextEditBox.Text;
+                float fontSize = float.Parse(fontSizeEditBox.Text);//字号
+                float distanceFromBottom = float.Parse(distanceFromBottomEditBox.Text);//图下距离
+                string fontName = fontNameEditBox.Text;//字体名称
+                string titleText = titleTextEditBox.Text;//标题文本
                 int count = 1;
-                foreach (PowerPoint.Shape selectedShape in sel.ShapeRange)
+                float tolerance = 10f;//通常图片排列错位容差，10就够用
+                ShapeRange sel2 = GetSortedSelection(sel, tolerance);
+                var selectedImgShape = new List<Shape>();
+
+                foreach (Shape shape in sel.ShapeRange)
                 {
+                    Office.MsoShapeType objType = shape.Type;
+                    //是否排除文本框、形状等格式。excludeTextcheckBox2.Checked，则排除
+                    if (excludeTextcheckBox2.Checked && (objType is Office.MsoShapeType.msoTextBox || objType is Office.MsoShapeType.msoAutoShape || objType is Office.MsoShapeType.msoMedia))
+                    {
+                        continue;
+                    }
+                    selectedImgShape.Add(shape);
+                }
 
-                        PowerPoint.Shape titleShape = slide.Shapes.AddTextbox(
-                            Office.MsoTextOrientation.msoTextOrientationHorizontal,
-                            selectedShape.Left,
-                            selectedShape.Top + selectedShape.Height + distanceFromBottom,
-                            selectedShape.Width,
-                            fontSize * 2);
+                foreach (Shape selectedShape in selectedImgShape)
+                {
+                    Shape titleShape = slide.Shapes.AddTextbox(Office.MsoTextOrientation.msoTextOrientationHorizontal, selectedShape.Left, selectedShape.Top + selectedShape.Height + distanceFromBottom, selectedShape.Width, fontSize * 2);
 
-                        titleShape.TextFrame.TextRange.Text = titleText;
-                        titleShape.TextFrame.TextRange.Font.Size = fontSize;
-                        titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
-                        titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
-                        titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignCenter;
-                        // 不自动换行
-                        //titleShape.TextFrame.WordWrap = Office.MsoTriState.msoFalse;
-                        if (autoGroup)
-                        {
-                            PowerPoint.ShapeRange shapeRange = slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name });
-                            shapeRange.Group();
-                        }
-                        // 自动选择
-                        if (count == 1)
-                        {
-                            titleShape.Select(Office.MsoTriState.msoTrue);
-                        }
-                        else
-                        {
-                            titleShape.Select(Office.MsoTriState.msoFalse);
-                        }
-                        count++;
-                    
+                    titleShape.TextFrame.TextRange.Text = count + "、" + titleText;
+                    titleShape.TextFrame.TextRange.Font.Size = fontSize;
+                    titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
+                    titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
+                    titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
+                    allshapesName.Add(slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name }));
+                    // 自动选择
+                    if (count == 1)
+                    {
+                        titleShape.Select(Office.MsoTriState.msoTrue);
+                    }
+                    else
+                    {
+                        titleShape.Select(Office.MsoTriState.msoFalse);
+                    }
+                    count++;
                 }
             }
             else
             {
-                MessageBox.Show("Please select an image to add a title.");
+                MessageBox.Show("请选择需要增加标题的图片、形状、视频对象.");
+            }
+            //自动编组
+            if (autoGroup)
+            {
+                foreach (var shapeRange2 in allshapesName)
+                {
+                    //PowerPoint.ShapeRange shapeRange2 = slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name });
+
+                    Shape GroupObj = shapeRange2.Group();
+                    allshapes.Add(GroupObj);
+                }
+                SelectMultipleShapes(allshapes);
+            }
+        }
+
+        /// <summary>
+        /// 选择集排序
+        /// </summary>
+        /// <param name="initialSelection">原始选择集</param>
+        /// <returns></returns>
+        public ShapeRange GetSortedSelection(Selection initialSelection, float tolerance)
+        {
+            try
+            {
+                // 确保选择集中有形状对象
+                if (initialSelection.ShapeRange.Count == 0)
+                {
+                    MessageBox.Show("初始选择集中未包含任何形状。");
+                    return null;
+                }
+
+                // 将选择集中的形状转换为 List<PowerPoint.Shape>
+                List<Shape> shapes = initialSelection.ShapeRange.Cast<Shape>().ToList();
+
+                // 根据 X 从小到大、Y 从大到小排序
+                var sortedShapes = shapes
+                    .OrderBy(shape => shape.Top + tolerance)  // Y 坐标从小到大
+                    .ThenByDescending(shape => (shape.Left + tolerance) * -1) // X 坐标从大到小
+                    .ToList();
+
+                // 将排序后的形状转换为 ShapeRange
+                object[] shapeNames = sortedShapes.Select(shape => (object)shape.Name).ToArray();
+                ShapeRange sortedShapeRange = initialSelection.ShapeRange[1].Parent.Shapes.Range(shapeNames);
+
+                return sortedShapeRange;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"排序失败：{ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 选择多个对象
+        /// </summary>
+        /// <param name="shapeNames"></param>
+        public void SelectMultipleShapes(List<Shape> shapesToSelect)
+        {
+            try
+            {
+                // 获取当前 PowerPoint 应用实例
+                PowerPoint.Application pptApp = Globals.ThisAddIn.Application;
+
+                // 检查是否处于普通视图
+                if (pptApp.ActiveWindow.View.Type != PpViewType.ppViewNormal)
+                {
+                    MessageBox.Show("请切换到普通视图以操作形状。");
+                    return;
+                }
+
+                // 获取当前幻灯片
+                Slide currentSlide = pptApp.ActiveWindow.View.Slide as Slide;
+                if (currentSlide == null)
+                {
+                    MessageBox.Show("未找到活动幻灯片。");
+                    return;
+                }
+
+                // 提取形状名称列表
+                List<object> shapeNames = new List<object>();
+                foreach (Shape shape in shapesToSelect)
+                {
+                    shapeNames.Add((object)shape.Name);
+                }
+
+                // 选中所有形状
+                if (shapeNames.Count > 0)
+                {
+                    ShapeRange selectedShapes = currentSlide.Shapes.Range(shapeNames.ToArray());
+                    selectedShapes.Select();
+                    pptApp.ActiveWindow.Activate(); // 确保窗口焦点
+                }
+                else
+                {
+                    MessageBox.Show("未提供有效的形状列表。");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"操作失败：{ex.Message}");
             }
         }
 
@@ -192,10 +366,10 @@ namespace SlideSCI
                 return;
             }
 
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                foreach (Shape shape in sel.ShapeRange)
                 {
                     shape.Width = copiedWidth;
                     shape.Height = copiedHeight;
@@ -209,10 +383,10 @@ namespace SlideSCI
 
         private void copyImgWidthHeight_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                PowerPoint.Shape shape = sel.ShapeRange[1];
+                Shape shape = sel.ShapeRange[1];
                 copiedWidth = shape.Width;
                 copiedHeight = shape.Height;
                 // MessageBox.Show("Image dimensions copied!");
@@ -225,10 +399,10 @@ namespace SlideSCI
 
         private void copyImgWidth_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                PowerPoint.Shape shape = sel.ShapeRange[1];
+                Shape shape = sel.ShapeRange[1];
                 copiedWidth = shape.Width;
                 // MessageBox.Show("Image width copied!");
             }
@@ -246,10 +420,10 @@ namespace SlideSCI
                 return;
             }
 
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                foreach (Shape shape in sel.ShapeRange)
                 {
                     shape.LockAspectRatio = Office.MsoTriState.msoTrue; // Lock aspect ratio
                     shape.Width = copiedWidth;
@@ -263,10 +437,10 @@ namespace SlideSCI
 
         private void copyImgHeight_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                PowerPoint.Shape shape = sel.ShapeRange[1];
+                Shape shape = sel.ShapeRange[1];
                 copiedHeight = shape.Height;
                 // MessageBox.Show("Image height copied!");
             }
@@ -284,10 +458,10 @@ namespace SlideSCI
                 return;
             }
 
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                foreach (Shape shape in sel.ShapeRange)
                 {
                     shape.LockAspectRatio = Office.MsoTriState.msoTrue; // Lock aspect ratio
                     shape.Height = copiedHeight;
@@ -301,12 +475,12 @@ namespace SlideSCI
 
         private void copyPosition_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
                 copiedLeft.Clear();
                 copiedTop.Clear();
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                foreach (Shape shape in sel.ShapeRange)
                 {
                     copiedLeft.Add(shape.Left + shape.Width / 2);
                     copiedTop.Add(shape.Top + shape.Height / 2);
@@ -321,8 +495,8 @@ namespace SlideSCI
 
         private void pastePosition_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
                 int count = Math.Min(sel.ShapeRange.Count, copiedLeft.Count);
                 if (count == 0)
@@ -348,10 +522,23 @@ namespace SlideSCI
             }
         }
 
+        /// <summary>
+        /// 图片排列
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void imgAutoAlign_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            AlignPics();
+        }
+
+        /// <summary>
+        /// 图片对齐排列
+        /// </summary>
+        private void AlignPics()
+        {
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
                 int colNum;
                 float colSpace;
@@ -372,33 +559,35 @@ namespace SlideSCI
                     return;
                 }
 
-                if (!float.TryParse(imgAutoAlign_rowSpace.Text, out rowSpace) || rowSpace < 0)
+                if (!float.TryParse(imgAutoAlign_rowSpace.Text.Split(new char[] { '(', ' ' })[0], out rowSpace) || rowSpace < 0)
                 {
                     rowSpace = colSpace;
                 }
 
-                bool useCustomWidth = float.TryParse(imgWidthEditBpx.Text, out customWidth) && customWidth > 0;
-                bool useCustomHeight = float.TryParse(imgHeightEditBox.Text, out customHeight) && customHeight > 0;
-                var selectedImgShape = new List<PowerPoint.Shape>();
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                bool useCustomWidth = float.TryParse(imgWidthEditBpx.Text.Split('c')[0], out customWidth) && customWidth > 0;
+                bool useCustomHeight = float.TryParse(imgHeightEditBox.Text.Split('c')[0], out customHeight) && customHeight > 0;
+                customWidth = (float)(customWidth * 28.34646);
+                customHeight = (float)(customHeight * 28.34646);
+                var selectedImgShape = new List<Shape>();
+                foreach (Shape shape in sel.ShapeRange)
                 {
                     // Skip text boxes if excludeTextcheckBox is checked
-                    if (excludeTextcheckBox.Checked && shape.Type == Office.MsoShapeType.msoTextBox)
+                    Office.MsoShapeType objType = shape.Type;
+                    if (excludeTextcheckBox.Checked && (objType is Office.MsoShapeType.msoTextBox || objType is Office.MsoShapeType.msoAutoShape || objType is Office.MsoShapeType.msoMedia))
                     {
                         continue;
                     }
                     selectedImgShape.Add(shape);
                 }
 
-                List<PowerPoint.Shape> shapesToArrange = new List<PowerPoint.Shape>();
-
+                List<Shape> shapesToArrange = new List<Shape>();
 
                 if (imgAutoAlignSortTypeDropDown.SelectedItemIndex == 0)
                 {
                     // Create groups based on vertical position
                     var groups = new List<ImageGroup>();
-                    var shapes = new List<PowerPoint.Shape>();
-                    foreach (PowerPoint.Shape shape in selectedImgShape)
+                    var shapes = new List<Shape>();
+                    foreach (Shape shape in selectedImgShape)
                     {
                         shapes.Add(shape);
                     }
@@ -443,7 +632,7 @@ namespace SlideSCI
                 else
                 {
                     // Use shapes in their original order
-                    foreach (PowerPoint.Shape shape in selectedImgShape)
+                    foreach (Shape shape in selectedImgShape)
                     {
                         shapesToArrange.Add(shape);
                     }
@@ -456,10 +645,10 @@ namespace SlideSCI
                 if (imgAutoAlignAlignTypeDropDown.SelectedItemIndex == 0)
                 {
                     // 1. 预先将图片分配到列
-                    List<List<PowerPoint.Shape>> columns = new List<List<PowerPoint.Shape>>();
+                    List<List<Shape>> columns = new List<List<Shape>>();
                     for (int i = 0; i < colNum; i++)
                     {
-                        columns.Add(new List<PowerPoint.Shape>());
+                        columns.Add(new List<Shape>());
                     }
 
                     for (int i = 0; i < shapesToArrange.Count; i++)
@@ -557,7 +746,6 @@ namespace SlideSCI
                         float aspectRatio = shape.Width / shape.Height;
                         if (!useCustomWidth && !useCustomHeight)
                         {
-
                             shape.Height = referenceHeight;
                             shape.Width = referenceHeight * aspectRatio;
                         }
@@ -658,14 +846,10 @@ namespace SlideSCI
 
         private void gallery1_Click(object sender, RibbonControlEventArgs e)
         {
-
         }
-
-
 
         private void insertCodeBlockButton_Click(object sender, RibbonControlEventArgs e)
         {
-
             // Create and configure input dialog
             Form inputDialog = new Form()
             {
@@ -714,9 +898,9 @@ namespace SlideSCI
                 if (!string.IsNullOrEmpty(code))
                 {
                     PowerPoint.Application app = Globals.ThisAddIn.Application;
-                    PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+                    Slide slide = app.ActiveWindow.View.Slide;
 
-                    PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+                    Shape textBox = slide.Shapes.AddTextbox(
                         Office.MsoTextOrientation.msoTextOrientationHorizontal,
                         100, 100, 500, 300);
 
@@ -738,7 +922,7 @@ namespace SlideSCI
                         ColorTranslator.ToOle(Color.White) :
                         ColorTranslator.ToOle(Color.Black);
                     textBox.TextFrame.TextRange.ParagraphFormat.Alignment =
-                        PowerPoint.PpParagraphAlignment.ppAlignLeft;
+                        PpParagraphAlignment.ppAlignLeft;
 
                     // Set margins
                     textBox.TextFrame.MarginLeft = 10;
@@ -751,18 +935,18 @@ namespace SlideSCI
                     highlighter.ApplyHighlighting(textBox, code, language);
 
                     // Auto-size the textbox to fit content
-                    textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+                    textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
                 }
             }
         }
 
         private void checkBox1_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
+            Selection sel = app.ActiveWindow.Selection;
 
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                foreach (Shape shape in sel.ShapeRange)
                 {
                     if (shape.HasTextFrame == Office.MsoTriState.msoTrue)
                     {
@@ -784,8 +968,7 @@ namespace SlideSCI
         private void insertEquationButton_Click(object sender, RibbonControlEventArgs e)
         {
             PowerPoint.Application app = Globals.ThisAddIn.Application;
-            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
-
+            Slide slide = app.ActiveWindow.View.Slide;
 
             // Prompt user for LaTeX input
             Form inputDialog = new Form()
@@ -842,7 +1025,7 @@ namespace SlideSCI
                     try
                     {
                         // Insert a new textbox in the center of the slide
-                        PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+                        Shape textBox = slide.Shapes.AddTextbox(
                         Office.MsoTextOrientation.msoTextOrientationHorizontal,
                         slide.Master.Width / 2 - 100, slide.Master.Height / 2 - 50, 500, 500);
 
@@ -852,19 +1035,19 @@ namespace SlideSCI
 
                         // Run SwitchLatex
                         app.CommandBars.ExecuteMso("EquationInsertNew");
-                        PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+                        Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
                         equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = "\u24C9";
 
                         app.CommandBars.ExecuteMso("EquationInsertNew");
                         app.ActiveWindow.Selection.TextRange.Select();
-                        PowerPoint.Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
+                        Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
                         // Set the LaTeX input to the equation shape
                         equationShape2.TextFrame.TextRange.Characters(1, equationShape2.TextFrame.TextRange.Text.Length - 1).Text = latexInput;
 
                         // Convert to professional format
                         app.CommandBars.ExecuteMso("EquationProfessional");
 
-                        textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+                        textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
                     }
                     catch (Exception ex)
                     {
@@ -931,7 +1114,7 @@ namespace SlideSCI
                     string markdown = markdownInput.Text?.Trim() ?? "";
                     if (!string.IsNullOrEmpty(markdown))
                     {
-                        PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+                        Slide slide = app.ActiveWindow.View.Slide;
 
                         // Split markdown into segments
                         var segments = SplitMarkdownIntoSegments(markdown);
@@ -943,7 +1126,7 @@ namespace SlideSCI
                         {
                             try
                             {
-                                PowerPoint.Shape shape = null;
+                                Shape shape = null;
                                 if (segment.IsCodeBlock)
                                 {
                                     shape = InsertCodeBlock(segment.Content, segment.Language, left, currentTop);
@@ -973,11 +1156,11 @@ namespace SlideSCI
                                             {
                                                 CopyHtmlToClipBoard(segment.Content, html);
                                                 System.Threading.Thread.Sleep(100); // Add 100ms delay
-                                                PowerPoint.ShapeRange textContent = slide.Shapes.Paste();
+                                                ShapeRange textContent = slide.Shapes.Paste();
 
                                                 if (textContent != null && textContent.Count > 0)
                                                 {
-                                                    PowerPoint.Shape textShape = textContent[1];
+                                                    Shape textShape = textContent[1];
                                                     textShape.Width = 500;
                                                     textShape.Left = left;
                                                     textShape.Top = currentTop;
@@ -988,13 +1171,13 @@ namespace SlideSCI
 
                                                     if (textShape.TextFrame.HasText == Office.MsoTriState.msoTrue)
                                                     {
-                                                        PowerPoint.TextRange textRange = textShape.TextFrame.TextRange;
-                                                        foreach (PowerPoint.TextRange paragraph in textRange.Paragraphs(-1))  // Changed this line
+                                                        TextRange textRange = textShape.TextFrame.TextRange;
+                                                        foreach (TextRange paragraph in textRange.Paragraphs(-1))  // Changed this line
                                                         {
-                                                            if (paragraph.ParagraphFormat.Bullet.Type != PowerPoint.PpBulletType.ppBulletNone)
+                                                            if (paragraph.ParagraphFormat.Bullet.Type != PpBulletType.ppBulletNone)
                                                             {
-                                                                PowerPoint.PpBulletType ppBulletType = paragraph.ParagraphFormat.Bullet.Type;
-                                                                paragraph.ParagraphFormat.Bullet.Type = PowerPoint.PpBulletType.ppBulletNone;
+                                                                PpBulletType ppBulletType = paragraph.ParagraphFormat.Bullet.Type;
+                                                                paragraph.ParagraphFormat.Bullet.Type = PpBulletType.ppBulletNone;
                                                                 paragraph.ParagraphFormat.Bullet.Type = ppBulletType;
 
                                                                 // Handle task list items
@@ -1027,7 +1210,6 @@ namespace SlideSCI
                                                 System.Threading.Thread.Sleep(200); // Wait longer before retry
                                             }
                                         }
-
                                     }
                                 }
 
@@ -1058,19 +1240,19 @@ namespace SlideSCI
             }
         }
 
-        private void ProcessInlineMathFormulas(PowerPoint.Shape textShape)
+        private void ProcessInlineMathFormulas(Shape textShape)
         {
-            PowerPoint.TextRange textRange = textShape.TextFrame.TextRange;
+            TextRange textRange = textShape.TextFrame.TextRange;
             string text = textRange.Text;
-            // Regex pattern to find math expressions between $ signs 
-            var matches = System.Text.RegularExpressions.Regex.Matches(text, @"\$([^$\n]+?)\$");
+            // Regex pattern to find math expressions between $ signs
+            var matches = Regex.Matches(text, @"\$([^$\n]+?)\$");
             // matches.Count如果=0，说明没有匹配到，直接返回
             if (matches.Count == 0)
             {
                 return;
             }
             // 创建tempShape，如果不创建，行内数学公式包括分式就不会正常转化
-            PowerPoint.Shape tempShape = InsertMathBlock("a", 0, 0);
+            Shape tempShape = InsertMathBlock("a", 0, 0);
             // 删除mathShape
             tempShape.Delete();
 
@@ -1078,11 +1260,11 @@ namespace SlideSCI
             for (int i = matches.Count - 1; i >= 0; i--)
             {
                 var match = matches[i];
-                int start = match.Index + 1;  // Include the first $ 
+                int start = match.Index + 1;  // Include the first $
                 int length = match.Length + 1;  // Include both $ signs
                 string formula = match.Groups[1].Value;
                 // 替换文本：$公式$为公式
-                PowerPoint.TextRange selectedRange = textRange.Characters(start, length);
+                TextRange selectedRange = textRange.Characters(start, length);
                 selectedRange.Text = formula.Trim('$');
                 selectedRange.Select();
                 app.CommandBars.ExecuteMso("EquationInsertNew");
@@ -1091,10 +1273,10 @@ namespace SlideSCI
             }
         }
 
-        private PowerPoint.Shape InsertCodeBlock(string code, string language, float left, float top)
+        private Shape InsertCodeBlock(string code, string language, float left, float top)
         {
-            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
-            PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+            Slide slide = app.ActiveWindow.View.Slide;
+            Shape textBox = slide.Shapes.AddTextbox(
                 Office.MsoTextOrientation.msoTextOrientationHorizontal,
                 left, top, 500, 300);
 
@@ -1115,7 +1297,7 @@ namespace SlideSCI
                 ColorTranslator.ToOle(Color.White) :
                 ColorTranslator.ToOle(Color.Black);
             textBox.TextFrame.TextRange.ParagraphFormat.Alignment =
-                PowerPoint.PpParagraphAlignment.ppAlignLeft;
+                PpParagraphAlignment.ppAlignLeft;
 
             // Set margins
             textBox.TextFrame.MarginLeft = 10;
@@ -1128,17 +1310,18 @@ namespace SlideSCI
             highlighter.ApplyHighlighting(textBox, code, language);
 
             // Auto-size the textbox to fit content
-            textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+            textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
 
             return textBox;
         }
+
         public class ImageGroup
         {
-            public List<PowerPoint.Shape> Shapes { get; set; } = new List<PowerPoint.Shape>();
+            public List<Shape> Shapes { get; set; } = new List<Shape>();
             public float MinTop { get; set; }
             public float MaxBottom { get; set; }
 
-            public bool OverlapsWith(PowerPoint.Shape shape)
+            public bool OverlapsWith(Shape shape)
             {
                 float shapeHeight = shape.Height;
                 float threshold = shapeHeight * 0.5f; // 50% of shape height
@@ -1152,7 +1335,7 @@ namespace SlideSCI
                 return overlapHeight >= threshold;
             }
 
-            public void AddShape(PowerPoint.Shape shape)
+            public void AddShape(Shape shape)
             {
                 if (Shapes.Count == 0)
                 {
@@ -1167,6 +1350,7 @@ namespace SlideSCI
                 Shapes.Add(shape);
             }
         }
+
         private class MarkdownSegment
         {
             public string Content { get; set; }
@@ -1191,13 +1375,13 @@ namespace SlideSCI
                          @"(\$\$[\s\S]*?\$\$)|" +               // Math blocks
                         @"(?:(?:^|\n)(?:>[^\n]*(?:\r?\n>[^\n]*)*))";  // 引述块（修改后的模式）
 
-            var regex = new System.Text.RegularExpressions.Regex(pattern,
-                System.Text.RegularExpressions.RegexOptions.Multiline |
-                System.Text.RegularExpressions.RegexOptions.Singleline);
+            var regex = new Regex(pattern,
+                RegexOptions.Multiline |
+                RegexOptions.Singleline);
 
             var matches = regex.Matches(markdown);
 
-            foreach (System.Text.RegularExpressions.Match match in matches)
+            foreach (Match match in matches)
             {
                 // Add text before special block if exists
                 if (match.Index > currentPosition)
@@ -1305,10 +1489,10 @@ namespace SlideSCI
             return segments;
         }
 
-        private PowerPoint.Shape InsertTable(string tableContent, float left, float top)
+        private Shape InsertTable(string tableContent, float left, float top)
         {
-            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
-            PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+            Slide slide = app.ActiveWindow.View.Slide;
+            Shape textBox = slide.Shapes.AddTextbox(
                 Office.MsoTextOrientation.msoTextOrientationHorizontal,
                 left, top, 500, 300);
 
@@ -1325,7 +1509,7 @@ namespace SlideSCI
             CopyHtmlToClipBoard(tableContent, html);
             System.Threading.Thread.Sleep(100);
 
-            PowerPoint.ShapeRange tableShape = slide.Shapes.Paste();
+            ShapeRange tableShape = slide.Shapes.Paste();
             if (tableShape != null && tableShape.Count > 0)
             {
                 tableShape[1].Left = left;
@@ -1337,12 +1521,12 @@ namespace SlideSCI
             return textBox;
         }
 
-        private PowerPoint.Shape InsertMathBlock(string mathContent, float left, float top)
+        private Shape InsertMathBlock(string mathContent, float left, float top)
         {
-            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
+            Slide slide = app.ActiveWindow.View.Slide;
 
             // Insert a new textbox
-            PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+            Shape textBox = slide.Shapes.AddTextbox(
                 Office.MsoTextOrientation.msoTextOrientationHorizontal,
                 left, top, 500, 500);
 
@@ -1352,31 +1536,29 @@ namespace SlideSCI
 
             // Run SwitchLatex
             app.CommandBars.ExecuteMso("EquationInsertNew");
-            PowerPoint.Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
+            Shape equationShape = app.ActiveWindow.Selection.ShapeRange[1];
             equationShape.TextFrame.TextRange.Characters(1, equationShape.TextFrame.TextRange.Text.Length - 1).Text = "\u24C9";
 
             app.CommandBars.ExecuteMso("EquationInsertNew");
             app.ActiveWindow.Selection.TextRange.Select();
-            PowerPoint.Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
+            Shape equationShape2 = app.ActiveWindow.Selection.ShapeRange[1];
             // Set the LaTeX input to the equation shape
             equationShape2.TextFrame.TextRange.Characters(1, equationShape2.TextFrame.TextRange.Text.Length - 1).Text = mathContent;
 
             // Convert to professional format
             app.CommandBars.ExecuteMso("EquationProfessional");
             // Auto-size and position
-            equationShape.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+            equationShape.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
             equationShape.Left = left;
             equationShape.Top = top;
-
-
 
             return equationShape;
         }
 
-        private PowerPoint.Shape InsertBlockQuote(string content, float left, float top)
+        private Shape InsertBlockQuote(string content, float left, float top)
         {
-            PowerPoint.Slide slide = app.ActiveWindow.View.Slide;
-            PowerPoint.Shape textBox = slide.Shapes.AddTextbox(
+            Slide slide = app.ActiveWindow.View.Slide;
+            Shape textBox = slide.Shapes.AddTextbox(
                 Office.MsoTextOrientation.msoTextOrientationHorizontal,
                 left, top, 500, 300);
 
@@ -1395,10 +1577,10 @@ namespace SlideSCI
             CopyHtmlToClipBoard(content, html);
             System.Threading.Thread.Sleep(100);
 
-            PowerPoint.ShapeRange quoteShape = slide.Shapes.Paste();
+            ShapeRange quoteShape = slide.Shapes.Paste();
             if (quoteShape != null && quoteShape.Count > 0)
             {
-                PowerPoint.Shape shape = quoteShape[1];
+                Shape shape = quoteShape[1];
                 shape.Left = left;
                 shape.Top = top;
 
@@ -1416,9 +1598,9 @@ namespace SlideSCI
 
         private string ProcessMarkdown(string markdown)
         {
-            var codeBlockRegex = new System.Text.RegularExpressions.Regex(
+            var codeBlockRegex = new Regex(
                 @"```.*?\r?\n(.*?)\r?\n```",
-                System.Text.RegularExpressions.RegexOptions.Singleline
+                RegexOptions.Singleline
             );
 
             markdown = codeBlockRegex.Replace(markdown, string.Empty);
@@ -1442,7 +1624,7 @@ namespace SlideSCI
             html = $"<div style='font-family: 微软雅黑;'>{html}</div>";
 
             // 把<span class="math">\(...\)</span>转换$...$
-            html = System.Text.RegularExpressions.Regex.Replace(html, @"<span class=""math"">\\\((.+?)\\\)</span>", m => $"${m.Groups[1].Value}$");
+            html = Regex.Replace(html, @"<span class=""math"">\\\((.+?)\\\)</span>", m => $"${m.Groups[1].Value}$");
             // 弹窗显示
             //MessageBox.Show($"Markdown转换: {html}");
             return html;
@@ -1490,13 +1672,12 @@ namespace SlideSCI
             }
         }
 
-
         private void copyCrop_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                PowerPoint.Shape shape = sel.ShapeRange[1];
+                Shape shape = sel.ShapeRange[1];
 
                 // 保存裁剪设置
                 cropLeft = shape.PictureFormat.CropLeft;
@@ -1516,7 +1697,6 @@ namespace SlideSCI
             {
                 MessageBox.Show("请选择一个图片对象");
             }
-
         }
 
         private void pasteCrop_Click(object sender, RibbonControlEventArgs e)
@@ -1526,10 +1706,10 @@ namespace SlideSCI
                 MessageBox.Show("请先复制图片裁剪设置");
                 return;
             }
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                foreach (Shape shape in sel.ShapeRange)
                 {
                     try
                     {
@@ -1574,16 +1754,19 @@ namespace SlideSCI
         {
             System.Diagnostics.Process.Start("https://github.com/Achuan-2/my_ppt_plugin/");
         }
+
         private void openDoc_Click(object sender, RibbonControlEventArgs e)
         {
             System.Diagnostics.Process.Start("https://www.yuque.com/achuan-2/blog/etzcergpmb4rr2sk/");
         }
+
         private void current_Version(object sender, RibbonControlEventArgs e)
         {
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            System.Version version = assembly.GetName().Version;
+            Version version = assembly.GetName().Version;
             MessageBox.Show($"Version {version}", "Current Version");
         }
+
         private void aboutDeveloper_Click(object sender, RibbonControlEventArgs e)
         {
             MessageBox.Show("开发者: Achuan-2\n邮箱: achuan-2@outlook.com\nGithub地址：https://github.com/Achuan-2", "关于开发者");
@@ -1591,7 +1774,6 @@ namespace SlideSCI
 
         private void positionSortCheckBox_Click(object sender, RibbonControlEventArgs e)
         {
-
         }
 
         private void addLabelsButton_Click(object sender, RibbonControlEventArgs e)
@@ -1620,10 +1802,18 @@ namespace SlideSCI
             AddLabelsToImages(fontFamily, fontSize, labelOffsetX, labelOffsetY, labelTemplate);
         }
 
+        /// <summary>
+        /// 图片添加标签
+        /// </summary>
+        /// <param name="fontFamily"></param>
+        /// <param name="fontSize"></param>
+        /// <param name="labelOffsetX"></param>
+        /// <param name="labelOffsetY"></param>
+        /// <param name="labelTemplate">标签格式</param>
         private void AddLabelsToImages(string fontFamily, float fontSize, float labelOffsetX, float labelOffsetY, string labelTemplate)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type != PowerPoint.PpSelectionType.ppSelectionShapes || sel.ShapeRange.Count == 0)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type != PpSelectionType.ppSelectionShapes || sel.ShapeRange.Count == 0)
             {
                 MessageBox.Show("请选择要添加标签的图片。");
                 return;
@@ -1636,7 +1826,14 @@ namespace SlideSCI
                 { "A)", "ABCDEFGHIJKLMNOPQRSTUVWXYZ" },
                 { "a)", "abcdefghijklmnopqrstuvwxyz" },
                 { "1", "123456789" },  // Added numeric template
-                { "1)", "123456789" }  // Added numeric template with parenthesis
+                { "1)", "123456789" },  // Added numeric template with parenthesis
+                {"Ⅰ","ⅠⅡⅢⅣⅤⅥⅦⅦⅨⅩ" },
+                {"Ⅰ)","ⅠⅡⅢⅣⅤⅥⅦⅦⅨⅩ" },
+                {"①","①②③④⑤⑥⑦⑧⑨⑩" },
+                {"①)","①②③④⑤⑥⑦⑧⑨⑩" },
+                {"一","一二三四五六七八九十" },
+                {"一)","一二三四五六七八九十" }
+
             };
 
             if (!templates.ContainsKey(labelTemplate))
@@ -1648,11 +1845,10 @@ namespace SlideSCI
             bool isNumeric = labelTemplate.StartsWith("1");
             int selectionCount = sel.ShapeRange.Count;
 
-
             // Create groups based on vertical position
             var groups = new List<ImageGroup>();
-            var selectedImgShapes = new List<PowerPoint.Shape>();
-            foreach (PowerPoint.Shape shape in sel.ShapeRange)
+            var selectedImgShapes = new List<Shape>();
+            foreach (Shape shape in sel.ShapeRange)
             {
                 // Skip text boxes if excludeTextcheckBox is checked
                 if (shape.Type == Office.MsoShapeType.msoTextBox || shape.Type == Office.MsoShapeType.msoAutoShape)
@@ -1699,7 +1895,7 @@ namespace SlideSCI
             groups.Sort((a, b) => a.MinTop.CompareTo(b.MinTop));
 
             // Create flattened list of sorted shapes
-            var sortedShapes = new List<PowerPoint.Shape>();
+            var sortedShapes = new List<Shape>();
             foreach (var group in groups)
             {
                 sortedShapes.AddRange(group.Shapes);
@@ -1737,10 +1933,10 @@ namespace SlideSCI
                     textBox.TextFrame.TextRange.Text = label;
                     textBox.TextFrame.TextRange.Font.Size = fontSize;
                     textBox.TextFrame.TextRange.Font.Name = fontFamily;
-                    textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignLeft;
+                    textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
 
                     // Auto-size the textbox to fit the text
-                    textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeShapeToFitText;
+                    textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
                     // 不自动换行
                     textBox.TextFrame.WordWrap = Office.MsoTriState.msoFalse;
 
@@ -1765,39 +1961,38 @@ namespace SlideSCI
                 }
             }
         }
-        private static Microsoft.Office.Interop.PowerPoint.Font _copiedFont;
 
+        private static PowerPoint.Font _copiedFont;
 
         private void copyStyle_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                PowerPoint.Shape sourceShape = sel.ShapeRange[1];
+                Shape sourceShape = sel.ShapeRange[1];
                 // 捕获格式
                 sourceShape.PickUp();
             }
-            else if (sel.Type == PowerPoint.PpSelectionType.ppSelectionText)
+            else if (sel.Type == PpSelectionType.ppSelectionText)
             {
                 _copiedFont = sel.TextRange.Font;
             }
             else
             {
             }
-
         }
 
         private void pasteStyle_Click(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                foreach (PowerPoint.Shape shape in sel.ShapeRange)
+                foreach (Shape shape in sel.ShapeRange)
                 {
                     shape.Apply();
                 }
             }
-            else if (sel.Type == PowerPoint.PpSelectionType.ppSelectionText)
+            else if (sel.Type == PpSelectionType.ppSelectionText)
             {
                 ApplyFont(sel.TextRange.Font);
             }
@@ -1806,7 +2001,7 @@ namespace SlideSCI
             }
         }
 
-        private void ApplyFont(Microsoft.Office.Interop.PowerPoint.Font targetFont)
+        private void ApplyFont(PowerPoint.Font targetFont)
         {
             targetFont.Name = _copiedFont.Name;
             targetFont.Size = _copiedFont.Size;
@@ -1818,28 +2013,28 @@ namespace SlideSCI
 
         private void pastePictureAndText(object sender, RibbonControlEventArgs e)
         {
-            PowerPoint.Selection sel = app.ActiveWindow.Selection;
-            if (sel.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+            Selection sel = app.ActiveWindow.Selection;
+            if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
                 try
                 {
                     // Store original position
                     float left = sel.ShapeRange.Left;
                     float top = sel.ShapeRange.Top;
-                    
+
                     // Group the shapes first if multiple shapes selected
-                    PowerPoint.Shape groupedShape = sel.ShapeRange.Count > 1 ? 
+                    Shape groupedShape = sel.ShapeRange.Count > 1 ?
                         sel.ShapeRange.Group() : sel.ShapeRange[1];
-                    
+
                     // Copy grouped shape
                     groupedShape.Copy();
-                    
+
                     // Delete original shape
                     groupedShape.Delete();
-                    
+
                     // Paste as Enhanced Metafile
-                    PowerPoint.ShapeRange pastedShapes = app.ActiveWindow.View.Slide.Shapes.PasteSpecial(PowerPoint.PpPasteDataType.ppPasteEnhancedMetafile);
-                    
+                    ShapeRange pastedShapes = app.ActiveWindow.View.Slide.Shapes.PasteSpecial(PpPasteDataType.ppPasteEnhancedMetafile);
+
                     // Move to original position
                     if (pastedShapes != null)
                     {
@@ -1858,8 +2053,45 @@ namespace SlideSCI
                 MessageBox.Show("请先选择要转换的对象。");
             }
         }
+
+        private void imgAutoAlign_rowSpace_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            string str1 = imgAutoAlign_rowSpace.Text.Split(new char[] { '≈' })[1];
+            if (str1 != null)
+            {
+                fontSizeEditBox.Text = Regex.Replace(str1, @"[^\d.\d]", "");
+            }
+            AlignPics();
+        }
+
+        private void imgAutoAlign_colNum_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            AlignPics();
+        }
+
+        private void imgAutoAlign_colSpace_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            AlignPics();
+        }
+
+        private void imgWidthEditBpx_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            AlignPics();
+        }
+
+        private void imgHeightEditBox_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            AlignPics();
+        }
+
+        private void excludeTextcheckBox_Click(object sender, RibbonControlEventArgs e)
+        {
+
+        }
+
+        private void excludeTextcheckBox2_Click(object sender, RibbonControlEventArgs e)
+        {
+
+        }
     }
-
-
 }
-

@@ -33,13 +33,13 @@
       <Value Profile="(Default)">12</Value>
     </Setting>
     <Setting Name="ColNum" Type="System.String" Scope="User">
-      <Value Profile="(Default)">5</Value>
+      <Value Profile="(Default)">3</Value>
     </Setting>
     <Setting Name="ColSpace" Type="System.String" Scope="User">
-      <Value Profile="(Default)">5</Value>
+      <Value Profile="(Default)">10</Value>
     </Setting>
     <Setting Name="RowSpace" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">25</Value>
     </Setting>
     <Setting Name="ImgWidth" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -60,6 +60,12 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="LabelBold" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="imgAutoAlign_rowSpace" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">6</Value>
+    </Setting>
+    <Setting Name="imgAddTitleExcludeText" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
