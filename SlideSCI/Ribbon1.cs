@@ -261,10 +261,10 @@ namespace SlideSCI
                 foreach (var shapeRange2 in allshapesName)
                 {
                     //PowerPoint.ShapeRange shapeRange2 = slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name });
-
+                    Shape GroupObj;
                     try
                     {
-                        Shape GroupObj = shapeRange2.Group();
+                        GroupObj = shapeRange2.Group();
                     }
                     catch (Exception ex)
                     {
