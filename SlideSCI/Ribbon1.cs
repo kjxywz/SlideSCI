@@ -233,7 +233,7 @@ namespace SlideSCI
                 {
                     Shape titleShape = slide.Shapes.AddTextbox(Office.MsoTextOrientation.msoTextOrientationHorizontal, selectedShape.Left, selectedShape.Top + selectedShape.Height + distanceFromBottom, selectedShape.Width, fontSize * 2);
 
-                    titleShape.TextFrame.TextRange.Text = count + "、" + titleText;
+                    titleShape.TextFrame.TextRange.Text = titleText;
                     titleShape.TextFrame.TextRange.Font.Size = fontSize;
                     titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
                     titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
