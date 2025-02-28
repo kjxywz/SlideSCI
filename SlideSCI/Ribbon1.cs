@@ -262,7 +262,15 @@ namespace SlideSCI
                 {
                     //PowerPoint.ShapeRange shapeRange2 = slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name });
 
-                    Shape GroupObj = shapeRange2.Group();
+                    try
+                    {
+                        Shape GroupObj = shapeRange2.Group();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"编组失败：{ex.Message}");
+                        continue;
+                    }
                     allshapes.Add(GroupObj);
                 }
                 SelectMultipleShapes(allshapes);
