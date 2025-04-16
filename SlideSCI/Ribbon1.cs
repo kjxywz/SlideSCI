@@ -2046,12 +2046,40 @@ namespace SlideSCI
                 try
                 {
                     // Store original position
-                    float left = sel.ShapeRange.Left;
-                    float top = sel.ShapeRange.Top;
+                    // float left = sel.ShapeRange.Left;
+                    // float top = sel.ShapeRange.Top;
 
                     // Group the shapes first if multiple shapes selected
-                    Shape groupedShape = sel.ShapeRange.Count > 1 ?
-                        sel.ShapeRange.Group() : sel.ShapeRange[1];
+                    Shape groupedShape;
+                    try {
+                        // First attempt - try to group directly
+                        groupedShape = sel.ShapeRange.Count > 1 ? 
+                            sel.ShapeRange.Group() : sel.ShapeRange[1];
+                    } 
+                    catch (Exception ex) {
+                        // If direct grouping fails, try the copy-delete-paste-group approach
+                        try {
+                            // Copy the shapes
+                            sel.ShapeRange.Copy();
+                            
+   
+                            
+                            // Delete original shapes
+                            sel.ShapeRange.Delete();
+                            
+                            // Paste back the shapes
+                            ShapeRange pastedShapes2 = app.ActiveWindow.View.Slide.Shapes.Paste();
+                            
+                            
+                            // Try grouping again
+                            groupedShape = pastedShapes2.Count > 1 ? 
+                                pastedShapes2.Group() : pastedShapes2[1];
+                        }
+                        catch (Exception innerEx) {
+                            MessageBox.Show($"无法组合对象: {innerEx.Message}\n原始错误: {ex.Message}");
+                            return;
+                        }
+                    }
 
                     // Copy grouped shape
                     groupedShape.Copy();
@@ -2062,13 +2090,13 @@ namespace SlideSCI
                     // Paste as Enhanced Metafile
                     ShapeRange pastedShapes = app.ActiveWindow.View.Slide.Shapes.PasteSpecial(PpPasteDataType.ppPasteEnhancedMetafile);
 
-                    // Move to original position
-                    if (pastedShapes != null)
-                    {
-                        pastedShapes.Left = left;
-                        pastedShapes.Top = top;
-                        pastedShapes.Select();
-                    }
+                    // // Move to original position
+                    // if (pastedShapes != null)
+                    // {
+                    //     pastedShapes.Left = left;
+                    //     pastedShapes.Top = top;
+                    //     pastedShapes.Select();
+                    // }
                 }
                 catch (Exception ex)
                 {
