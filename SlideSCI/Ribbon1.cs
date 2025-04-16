@@ -1127,7 +1127,7 @@ namespace SlideSCI
                         // Split markdown into segments
                         var segments = SplitMarkdownIntoSegments(markdown);
 
-                        float currentTop = 0;  // Starting position
+                        float currentTop = slide.Master.Height/2 ;  // Starting position
                         float left = (slide.Master.Width - 500) / 2; // Center horizontally
 
                         foreach (var segment in segments)
@@ -2098,6 +2098,11 @@ namespace SlideSCI
         }
 
         private void excludeTextcheckBox2_Click(object sender, RibbonControlEventArgs e)
+        {
+
+        }
+
+        private void button8_Click(object sender, RibbonControlEventArgs e)
         {
 
         }
