@@ -128,6 +128,11 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 
 如果插件安装后无法正常运行、没有在PPT中显示，或者在开发工具→COM加载项里勾选插件，提示“未加载。加载COM加载项时出现运行错误”，请尝试安装上面的环境依赖。
 
+## 📝 使用介绍视频
+
+* [让AI帮我我开发了一个PPT插件！支持一键添加图片标题，复制粘贴位置、一键图片对齐、一键插入代码块、一键插入latex公式！_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV15YcmeSEbq/?spm_id_from=0.0.homepage.video_card.click&vd_source=b4a1fcb6dce305e26d8d16d9cbb71304)
+* [可能是全网第一个支持插入Markdown到PPT的PPT插件_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1VXcZe2EyK/?spm_id_from=0.0.homepage.video_card.click)
+
 ## ❓ 常见问题
 
 * **如何把插件的功能添加到PPT的快捷工具栏？**
