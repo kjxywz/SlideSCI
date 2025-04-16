@@ -202,78 +202,97 @@ namespace SlideSCI
             PowerPoint.Application app = Globals.ThisAddIn.Application;
             Slide slide = app.ActiveWindow.View.Slide;
             Selection sel = app.ActiveWindow.Selection;
-            bool autoGroup = autoGroupCheckBox.Checked;//自动编组
-            List<ShapeRange> allshapesName = new List<ShapeRange> { };//需要编组的对象集合
-            List<Shape> allshapes = new List<Shape> { };//编组后的对象
-
+            bool autoGroup = autoGroupCheckBox.Checked; // 自动编组
+            List<ShapeRange> allshapesName = new List<ShapeRange>(); // 需要编组的对象集合
+            List<Shape> allshapes = new List<Shape>(); // 编组后的对象
 
             if (sel.Type == PpSelectionType.ppSelectionShapes)
             {
-                float fontSize = float.Parse(fontSizeEditBox.Text);//字号
-                float distanceFromBottom = float.Parse(distanceFromBottomEditBox.Text);//图下距离
-                string fontName = fontNameEditBox.Text;//字体名称
-                string titleText = titleTextEditBox.Text;//标题文本
-                int count = 1;
-                float tolerance = 10f;//通常图片排列错位容差，10就够用
-                ShapeRange sel2 = GetSortedSelection(sel, tolerance);
-                var selectedImgShape = new List<Shape>();
+            float fontSize = float.Parse(fontSizeEditBox.Text); // 字号
+            float distanceFromBottom = float.Parse(distanceFromBottomEditBox.Text); // 图下距离
+            string fontName = fontNameEditBox.Text; // 字体名称
+            string titleText = titleTextEditBox.Text; // 标题文本
+            int count = 1;
+            float tolerance = 10f; // 通常图片排列错位容差，10就够用
+            ShapeRange sel2 = GetSortedSelection(sel, tolerance);
+            var selectedImgShape = new List<Shape>();
 
-                foreach (Shape shape in sel.ShapeRange)
+            foreach (Shape shape in sel.ShapeRange)
+            {
+                Office.MsoShapeType objType = shape.Type;
+                // 是否排除文本框、形状等格式。excludeTextcheckBox2.Checked，则排除
+                if (excludeTextcheckBox2.Checked && (objType is Office.MsoShapeType.msoTextBox || objType is Office.MsoShapeType.msoAutoShape || objType is Office.MsoShapeType.msoMedia))
                 {
-                    Office.MsoShapeType objType = shape.Type;
-                    //是否排除文本框、形状等格式。excludeTextcheckBox2.Checked，则排除
-                    if (excludeTextcheckBox2.Checked && (objType is Office.MsoShapeType.msoTextBox || objType is Office.MsoShapeType.msoAutoShape || objType is Office.MsoShapeType.msoMedia))
-                    {
-                        continue;
-                    }
-                    selectedImgShape.Add(shape);
+                continue;
                 }
+                selectedImgShape.Add(shape);
+            }
 
-                foreach (Shape selectedShape in selectedImgShape)
+            foreach (Shape selectedShape in selectedImgShape)
+            {
+                Shape titleShape = slide.Shapes.AddTextbox(Office.MsoTextOrientation.msoTextOrientationHorizontal, selectedShape.Left, selectedShape.Top + selectedShape.Height + distanceFromBottom, selectedShape.Width, fontSize * 2);
+
+                titleShape.TextFrame.TextRange.Text = titleText;
+                titleShape.TextFrame.TextRange.Font.Size = fontSize;
+                titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
+                titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
+                titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
+                allshapesName.Add(slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name }));
+                // 自动选择
+                if (count == 1)
                 {
-                    Shape titleShape = slide.Shapes.AddTextbox(Office.MsoTextOrientation.msoTextOrientationHorizontal, selectedShape.Left, selectedShape.Top + selectedShape.Height + distanceFromBottom, selectedShape.Width, fontSize * 2);
-
-                    titleShape.TextFrame.TextRange.Text = titleText;
-                    titleShape.TextFrame.TextRange.Font.Size = fontSize;
-                    titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
-                    titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
-                    titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
-                    allshapesName.Add(slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name }));
-                    // 自动选择
-                    if (count == 1)
-                    {
-                        titleShape.Select(Office.MsoTriState.msoTrue);
-                    }
-                    else
-                    {
-                        titleShape.Select(Office.MsoTriState.msoFalse);
-                    }
-                    count++;
+                titleShape.Select(Office.MsoTriState.msoTrue);
                 }
+                else
+                {
+                titleShape.Select(Office.MsoTriState.msoFalse);
+                }
+                count++;
+            }
             }
             else
             {
-                MessageBox.Show("请选择需要增加标题的图片、形状、视频对象.");
+            MessageBox.Show("请选择需要增加标题的图片、形状、视频对象.");
             }
-            //自动编组
+
+            // 自动编组
             if (autoGroup)
             {
-                foreach (var shapeRange2 in allshapesName)
+            foreach (var shapeRange2 in allshapesName)
+            {
+                Shape GroupObj;
+                try
                 {
-                    //PowerPoint.ShapeRange shapeRange2 = slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name });
-                    Shape GroupObj;
-                    try
-                    {
-                        GroupObj = shapeRange2.Group();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"编组失败：{ex.Message}");
-                        continue;
-                    }
-                    allshapes.Add(GroupObj);
-                }
+                GroupObj = shapeRange2.Group();
+                allshapes.Add(GroupObj);
                 SelectMultipleShapes(allshapes);
+                }
+                catch (Exception ex)
+                {
+                try
+                {
+                    // 如果编组失败，尝试复制、删除、粘贴再编组
+                    // float originalLeft = shapeRange2[1].Left;
+                    // float originalTop = shapeRange2[1].Top;
+
+                    shapeRange2.Copy();
+                    shapeRange2.Delete();
+
+                    ShapeRange pastedShapes = slide.Shapes.Paste();
+                    // pastedShapes.Left = originalLeft;
+                    // pastedShapes.Top = originalTop;
+
+                    GroupObj = pastedShapes.Group();
+                    allshapes.Add(GroupObj);
+                    SelectMultipleShapes(allshapes);
+                }
+                catch (Exception innerEx)
+                {
+                    MessageBox.Show($"编组失败：{innerEx.Message}");
+                    continue;
+                }
+                }
+            }
             }
         }
 
@@ -1127,8 +1146,8 @@ namespace SlideSCI
                         // Split markdown into segments
                         var segments = SplitMarkdownIntoSegments(markdown);
 
-                        float currentTop = slide.Master.Height/2 ;  // Starting position
-                        float left = (slide.Master.Width - 500) / 2; // Center horizontally
+                        float currentTop = 0 ;  // Starting position
+                        float left = slide.Master.Width; // Center horizontally
 
                         foreach (var segment in segments)
                         {
