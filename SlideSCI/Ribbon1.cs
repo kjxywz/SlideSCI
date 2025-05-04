@@ -2169,9 +2169,16 @@ namespace SlideSCI
 
         }
 
-        private void button8_Click(object sender, RibbonControlEventArgs e)
-        {
 
+
+        private void donate(object sender, RibbonControlEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.yuque.com/achuan-2");
+        }
+
+        private void developer_website(object sender, RibbonControlEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.github.com/achuan-2");
         }
     }
 }

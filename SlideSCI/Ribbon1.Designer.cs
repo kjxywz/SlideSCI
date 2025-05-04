@@ -158,10 +158,11 @@
             this.insertCodeBlockButton = this.Factory.CreateRibbonButton();
             this.toggleBackgroundCheckBox = this.Factory.CreateRibbonCheckBox();
             this.group2 = this.Factory.CreateRibbonGroup();
-            this.splitButton1 = this.Factory.CreateRibbonSplitButton();
             this.button4 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
+            this.赞赏 = this.Factory.CreateRibbonButton();
+            this.开发者 = this.Factory.CreateRibbonButton();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
@@ -709,29 +710,25 @@
             // 
             // group2
             // 
-            this.group2.Items.Add(this.splitButton1);
+            this.group2.Items.Add(this.赞赏);
+            this.group2.Items.Add(this.button4);
+            this.group2.Items.Add(this.开发者);
+            this.group2.Items.Add(this.button3);
+            this.group2.Items.Add(this.button5);
             this.group2.Label = "关于";
             this.group2.Name = "group2";
             // 
-            // splitButton1
-            // 
-            this.splitButton1.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.splitButton1.Image = ((System.Drawing.Image)(resources.GetObject("splitButton1.Image")));
-            this.splitButton1.Items.Add(this.button4);
-            this.splitButton1.Items.Add(this.button3);
-            this.splitButton1.Items.Add(this.button5);
-            this.splitButton1.Label = "开发者";
-            this.splitButton1.Name = "splitButton1";
-            // 
             // button4
             // 
-            this.button4.Label = "Github";
+            this.button4.Image = ((System.Drawing.Image)(resources.GetObject("button4.Image")));
+            this.button4.Label = "项目Github";
             this.button4.Name = "button4";
             this.button4.ShowImage = true;
             this.button4.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.openGithub_Click);
             // 
             // button3
             // 
+            this.button3.Image = ((System.Drawing.Image)(resources.GetObject("button3.Image")));
             this.button3.Label = "使用介绍";
             this.button3.Name = "button3";
             this.button3.ShowImage = true;
@@ -739,10 +736,27 @@
             // 
             // button5
             // 
+            this.button5.Image = ((System.Drawing.Image)(resources.GetObject("button5.Image")));
             this.button5.Label = "当前版本";
             this.button5.Name = "button5";
             this.button5.ShowImage = true;
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
+            // 
+            // 赞赏
+            // 
+            this.赞赏.Image = ((System.Drawing.Image)(resources.GetObject("赞赏.Image")));
+            this.赞赏.Label = "赞赏";
+            this.赞赏.Name = "赞赏";
+            this.赞赏.ShowImage = true;
+            this.赞赏.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.donate);
+            // 
+            // 开发者
+            // 
+            this.开发者.Image = ((System.Drawing.Image)(resources.GetObject("开发者.Image")));
+            this.开发者.Label = "开发者";
+            this.开发者.Name = "开发者";
+            this.开发者.ShowImage = true;
+            this.开发者.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.developer_website);
             // 
             // Ribbon1
             // 
@@ -824,12 +838,13 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton insertCodeBlockButton;
         internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox toggleBackgroundCheckBox;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
-        internal Microsoft.Office.Tools.Ribbon.RibbonSplitButton splitButton1;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button4;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button3;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button5;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 赞赏;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 开发者;
     }
 
     partial class ThisRibbonCollection
