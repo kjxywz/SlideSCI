@@ -231,13 +231,33 @@ namespace SlideSCI
             foreach (Shape selectedShape in selectedImgShape)
             {
                 Shape titleShape = slide.Shapes.AddTextbox(Office.MsoTextOrientation.msoTextOrientationHorizontal, selectedShape.Left, selectedShape.Top + selectedShape.Height + distanceFromBottom, selectedShape.Width, fontSize * 2);
-
+                
+                // 设置标题文本和格式
                 titleShape.TextFrame.TextRange.Text = titleText;
                 titleShape.TextFrame.TextRange.Font.Size = fontSize;
                 titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
                 titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
                 titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
+
+
+                // 形状中的文字是否自动换行
+                titleShape.TextFrame.WordWrap = Office.MsoTriState.msoTrue; 
+                // 自动调整文本框大小
+                titleShape.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
+                // https://learn.microsoft.com/en-us/office/vba/api/powerpoint.textframe.autosize: 
+                // ppAutoSizeNone ：不自动调整大小，ppAutoSizeShapeToFitText ：自动调整大小，ppAutoSizeMixed：混合模式
+
+
+
+                // 设置文本框宽度
+                titleShape.Width = selectedShape.Width;
+                titleShape.Left = selectedShape.Left; // 设置文本框左对齐
+                //titleShape.Top = selectedShape.Top + selectedShape.Height + distanceFromBottom;
+                
+
+                
                 allshapesName.Add(slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name }));
+                
                 // 自动选择
                 if (count == 1)
                 {
