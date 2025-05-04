@@ -34,6 +34,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Ribbon1));
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl1 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl2 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl3 = this.Factory.CreateRibbonDropDownItem();
@@ -106,9 +107,9 @@
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl70 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl71 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl72 = this.Factory.CreateRibbonDropDownItem();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Ribbon1));
             this.tab2 = this.Factory.CreateRibbonTab();
             this.图片自动对齐 = this.Factory.CreateRibbonGroup();
+            this.imgAutoAlign = this.Factory.CreateRibbonButton();
             this.imgAutoAlignSortTypeDropDown = this.Factory.CreateRibbonDropDown();
             this.imgAutoAlignAlignTypeDropDown = this.Factory.CreateRibbonDropDown();
             this.excludeTextcheckBox = this.Factory.CreateRibbonCheckBox();
@@ -118,6 +119,7 @@
             this.imgWidthEditBpx = this.Factory.CreateRibbonComboBox();
             this.imgHeightEditBox = this.Factory.CreateRibbonComboBox();
             this.图片处理 = this.Factory.CreateRibbonGroup();
+            this.AddTitleButton = this.Factory.CreateRibbonButton();
             this.fontNameEditBox = this.Factory.CreateRibbonComboBox();
             this.fontSizeEditBox = this.Factory.CreateRibbonComboBox();
             this.distanceFromBottomEditBox = this.Factory.CreateRibbonComboBox();
@@ -125,19 +127,17 @@
             this.autoGroupCheckBox = this.Factory.CreateRibbonCheckBox();
             this.excludeTextcheckBox2 = this.Factory.CreateRibbonCheckBox();
             this.group1 = this.Factory.CreateRibbonGroup();
+            this.addLabelsButton = this.Factory.CreateRibbonButton();
             this.labelFontSizeEditBox = this.Factory.CreateRibbonComboBox();
             this.labelFontNameEditBox = this.Factory.CreateRibbonComboBox();
             this.labelTemplateComboBox = this.Factory.CreateRibbonComboBox();
             this.labelOffsetYEditBox = this.Factory.CreateRibbonComboBox();
             this.labelOffsetXEditBox = this.Factory.CreateRibbonComboBox();
             this.labelBoldcheckBox = this.Factory.CreateRibbonCheckBox();
-            this.imgAutoAlign = this.Factory.CreateRibbonButton();
-            this.AddTitleButton = this.Factory.CreateRibbonButton();
-            this.addLabelsButton = this.Factory.CreateRibbonButton();
+            this.group3 = this.Factory.CreateRibbonGroup();
+            this.button1 = this.Factory.CreateRibbonButton();
             this.tab1 = this.Factory.CreateRibbonTab();
             this.复制图片格式 = this.Factory.CreateRibbonGroup();
-            this.copyCrop = this.Factory.CreateRibbonButton();
-            this.pasteCrop = this.Factory.CreateRibbonButton();
             this.button6 = this.Factory.CreateRibbonButton();
             this.button7 = this.Factory.CreateRibbonButton();
             this.separator1 = this.Factory.CreateRibbonSeparator();
@@ -149,6 +149,9 @@
             this.separator3 = this.Factory.CreateRibbonSeparator();
             this.copyImgHeight = this.Factory.CreateRibbonButton();
             this.pasteImgHeight = this.Factory.CreateRibbonButton();
+            this.separator4 = this.Factory.CreateRibbonSeparator();
+            this.copyCrop = this.Factory.CreateRibbonButton();
+            this.pasteCrop = this.Factory.CreateRibbonButton();
             this.codeGroup = this.Factory.CreateRibbonGroup();
             this.button2 = this.Factory.CreateRibbonButton();
             this.insertEquationButton = this.Factory.CreateRibbonButton();
@@ -159,18 +162,15 @@
             this.button4 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
-            this.separator4 = this.Factory.CreateRibbonSeparator();
-            this.group3 = this.Factory.CreateRibbonGroup();
-            this.button1 = this.Factory.CreateRibbonButton();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
             this.group1.SuspendLayout();
+            this.group3.SuspendLayout();
             this.tab1.SuspendLayout();
             this.复制图片格式.SuspendLayout();
             this.codeGroup.SuspendLayout();
             this.group2.SuspendLayout();
-            this.group3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab2
@@ -195,6 +195,15 @@
             this.图片自动对齐.Items.Add(this.imgHeightEditBox);
             this.图片自动对齐.Label = "图片自动排列";
             this.图片自动对齐.Name = "图片自动对齐";
+            // 
+            // imgAutoAlign
+            // 
+            this.imgAutoAlign.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.imgAutoAlign.Image = ((System.Drawing.Image)(resources.GetObject("imgAutoAlign.Image")));
+            this.imgAutoAlign.Label = "图片排列";
+            this.imgAutoAlign.Name = "imgAutoAlign";
+            this.imgAutoAlign.ShowImage = true;
+            this.imgAutoAlign.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.imgAutoAlign_Click);
             // 
             // imgAutoAlignSortTypeDropDown
             // 
@@ -391,6 +400,16 @@
             this.图片处理.Label = "添加图片标题";
             this.图片处理.Name = "图片处理";
             // 
+            // AddTitleButton
+            // 
+            this.AddTitleButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.AddTitleButton.Description = "添加图片标题";
+            this.AddTitleButton.Image = ((System.Drawing.Image)(resources.GetObject("AddTitleButton.Image")));
+            this.AddTitleButton.Label = "图片加标题";
+            this.AddTitleButton.Name = "AddTitleButton";
+            this.AddTitleButton.ShowImage = true;
+            this.AddTitleButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.AddTitleToImage);
+            // 
             // fontNameEditBox
             // 
             this.fontNameEditBox.Label = "字体名";
@@ -441,6 +460,15 @@
             this.group1.Items.Add(this.labelBoldcheckBox);
             this.group1.Label = "添加图片标签";
             this.group1.Name = "group1";
+            // 
+            // addLabelsButton
+            // 
+            this.addLabelsButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.addLabelsButton.Image = ((System.Drawing.Image)(resources.GetObject("addLabelsButton.Image")));
+            this.addLabelsButton.Label = "图片加标签";
+            this.addLabelsButton.Name = "addLabelsButton";
+            this.addLabelsButton.ShowImage = true;
+            this.addLabelsButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.addLabelsButton_Click);
             // 
             // labelFontSizeEditBox
             // 
@@ -502,33 +530,18 @@
             this.labelBoldcheckBox.Label = "加粗";
             this.labelBoldcheckBox.Name = "labelBoldcheckBox";
             // 
-            // imgAutoAlign
+            // group3
             // 
-            this.imgAutoAlign.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.imgAutoAlign.Image = ((System.Drawing.Image)(resources.GetObject("imgAutoAlign.Image")));
-            this.imgAutoAlign.Label = "图片排列";
-            this.imgAutoAlign.Name = "imgAutoAlign";
-            this.imgAutoAlign.ShowImage = true;
-            this.imgAutoAlign.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.imgAutoAlign_Click);
+            this.group3.Items.Add(this.button1);
+            this.group3.Label = "其他";
+            this.group3.Name = "group3";
             // 
-            // AddTitleButton
+            // button1
             // 
-            this.AddTitleButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.AddTitleButton.Description = "添加图片标题";
-            this.AddTitleButton.Image = ((System.Drawing.Image)(resources.GetObject("AddTitleButton.Image")));
-            this.AddTitleButton.Label = "图片加标题";
-            this.AddTitleButton.Name = "AddTitleButton";
-            this.AddTitleButton.ShowImage = true;
-            this.AddTitleButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.AddTitleToImage);
-            // 
-            // addLabelsButton
-            // 
-            this.addLabelsButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.addLabelsButton.Image = ((System.Drawing.Image)(resources.GetObject("addLabelsButton.Image")));
-            this.addLabelsButton.Label = "图片加标签";
-            this.addLabelsButton.Name = "addLabelsButton";
-            this.addLabelsButton.ShowImage = true;
-            this.addLabelsButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.addLabelsButton_Click);
+            this.button1.Label = "图文同缩";
+            this.button1.Name = "button1";
+            this.button1.ScreenTip = "组合后，调整组合形状，文字也会同步缩放";
+            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pastePictureAndText);
             // 
             // tab1
             // 
@@ -556,22 +569,6 @@
             this.复制图片格式.Items.Add(this.pasteCrop);
             this.复制图片格式.Label = "复制格式";
             this.复制图片格式.Name = "复制图片格式";
-            // 
-            // copyCrop
-            // 
-            this.copyCrop.Image = ((System.Drawing.Image)(resources.GetObject("copyCrop.Image")));
-            this.copyCrop.Label = "复制图片裁剪";
-            this.copyCrop.Name = "copyCrop";
-            this.copyCrop.ShowImage = true;
-            this.copyCrop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyCrop_Click);
-            // 
-            // pasteCrop
-            // 
-            this.pasteCrop.Image = ((System.Drawing.Image)(resources.GetObject("pasteCrop.Image")));
-            this.pasteCrop.Label = "粘贴图片裁剪";
-            this.pasteCrop.Name = "pasteCrop";
-            this.pasteCrop.ShowImage = true;
-            this.pasteCrop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteCrop_Click);
             // 
             // button6
             // 
@@ -648,6 +645,26 @@
             this.pasteImgHeight.Name = "pasteImgHeight";
             this.pasteImgHeight.ShowImage = true;
             this.pasteImgHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteImgHeight_Click);
+            // 
+            // separator4
+            // 
+            this.separator4.Name = "separator4";
+            // 
+            // copyCrop
+            // 
+            this.copyCrop.Image = ((System.Drawing.Image)(resources.GetObject("copyCrop.Image")));
+            this.copyCrop.Label = "复制图片裁剪";
+            this.copyCrop.Name = "copyCrop";
+            this.copyCrop.ShowImage = true;
+            this.copyCrop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.copyCrop_Click);
+            // 
+            // pasteCrop
+            // 
+            this.pasteCrop.Image = ((System.Drawing.Image)(resources.GetObject("pasteCrop.Image")));
+            this.pasteCrop.Label = "粘贴图片裁剪";
+            this.pasteCrop.Name = "pasteCrop";
+            this.pasteCrop.ShowImage = true;
+            this.pasteCrop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pasteCrop_Click);
             // 
             // codeGroup
             // 
@@ -727,23 +744,6 @@
             this.button5.ShowImage = true;
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
             // 
-            // separator4
-            // 
-            this.separator4.Name = "separator4";
-            // 
-            // group3
-            // 
-            this.group3.Items.Add(this.button1);
-            this.group3.Label = "其他";
-            this.group3.Name = "group3";
-            // 
-            // button1
-            // 
-            this.button1.Label = "图文同缩";
-            this.button1.Name = "button1";
-            this.button1.ScreenTip = "组合后，调整组合形状，文字也会同步缩放";
-            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pastePictureAndText);
-            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -759,6 +759,8 @@
             this.图片处理.PerformLayout();
             this.group1.ResumeLayout(false);
             this.group1.PerformLayout();
+            this.group3.ResumeLayout(false);
+            this.group3.PerformLayout();
             this.tab1.ResumeLayout(false);
             this.tab1.PerformLayout();
             this.复制图片格式.ResumeLayout(false);
@@ -767,8 +769,6 @@
             this.codeGroup.PerformLayout();
             this.group2.ResumeLayout(false);
             this.group2.PerformLayout();
-            this.group3.ResumeLayout(false);
-            this.group3.PerformLayout();
             this.ResumeLayout(false);
 
         }
