@@ -123,29 +123,32 @@ If the plugin fails to load (e.g., "Runtime error loading COM add-in"), install 
   Right-click a button and select "Add to Quick Access Toolbar."  
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-16_16-56-07-2025-01-16.png)  
   Move the Quick Access Toolbar below the ribbon for easier access.
-* **Caption text boxes aren't centered or lack proper width?**  
-  Set a default text box: Widen the caption, center it, then set it as the default.
+
 * **LaTeX formulas display incorrectly?**  
   Best for single-line formulas. For complex multi-line formulas, use [IguanaTex](https://github.com/Jonathan-LeRoux/IguanaTex).  
   See examples of PPT-specific LaTeX syntax [here](https://github.com/Achuan-2/my_ppt_plugin/issues/7).
 
-## ❤️ Support
+## ❤️ Support My Work
 
-If you enjoy this plugin, consider giving a ⭐ on GitHub or donating to fuel further development.  
+If you like my plugin, please consider giving a star to the GitHub repository and making a donation. This will encourage me to continue improving this plugin.
 
 ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20241118182532-2024-11-18.png)
 
-Donor list: https://www.yuque.com/achuan-2
+See the list of donors here: https://www.yuque.com/achuan-2
+
 
 ## 👨‍💻 Feedback
 
-Report issues via:
-1. GitHub [Issues](https://github.com/Achuan-2/my_ppt_plugin/issues)
-2. Email: [achuan-2@outlook.com](mailto:achuan-2@outlook.com)
+If you encounter any problems during use, you can provide feedback through the following ways:
 
-## 🔍 Credits & References
+1. Submit an [Issue](https://github.com/Achuan-2/my_ppt_plugin/issues) on GitHub
+2. Send an email to: achuan-2@outlook.com
 
-* [jph00/latex-ppt](https://github.com/jph00/latex-ppt): LaTeX in PowerPoint support.
-* [Markdig](https://github.com/xoofx/markdig): Markdown parsing.
-* Thanks to Visual Studio Tools for Office for development tools.
-* Gratitude to all users for suggestions and feedback.
+
+## 🔍 References & Acknowledgements
+
+* [jph00/latex-ppt](https://github.com/jph00/latex-ppt): LaTeX in PowerPoint support
+* [Markdig](https://github.com/xoofx/markdig): Markdown parsing support
+* Thanks to Visual Studio Tools For Office for providing development support
+* Thanks to the donors
+* Thanks to all users who provided suggestions and feedback

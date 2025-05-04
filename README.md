@@ -148,9 +148,9 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-16_16-56-07-2025-01-16.png)
 
   可以把「快速访问工具栏」放在下方，更方便使用
-* **添加图题的文本框只有文本宽度并且没有居中？**
 
-  * 可能是设置了默认文本框导致的，需要将图题拉宽并设置居中后，设置居中图题为默认文本框
+  ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-05-04_10-54-17-2025-05-04.png)
+
 * **插入latex公式，显示不正常？**
 
   * 插件比较适合插入单行数学公式，对于复杂的多行语法，推荐使用IguanaTex插件
@@ -178,4 +178,5 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 * [jph00/latex-ppt](https://github.com/jph00/latex-ppt): LaTeX in PowerPoint 支持
 * [Markdig](https://github.com/xoofx/markdig): Markdown 解析支持
 * 感谢 Visual Studio Tools For Office 提供的开发支持
+* 感谢捐赠的用户
 * 感谢所有提供建议和反馈的用户
