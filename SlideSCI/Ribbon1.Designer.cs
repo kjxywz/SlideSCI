@@ -158,11 +158,11 @@
             this.insertCodeBlockButton = this.Factory.CreateRibbonButton();
             this.toggleBackgroundCheckBox = this.Factory.CreateRibbonCheckBox();
             this.group2 = this.Factory.CreateRibbonGroup();
+            this.赞赏 = this.Factory.CreateRibbonButton();
             this.button4 = this.Factory.CreateRibbonButton();
+            this.开发者 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
-            this.赞赏 = this.Factory.CreateRibbonButton();
-            this.开发者 = this.Factory.CreateRibbonButton();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
@@ -718,6 +718,14 @@
             this.group2.Label = "关于";
             this.group2.Name = "group2";
             // 
+            // 赞赏
+            // 
+            this.赞赏.Image = ((System.Drawing.Image)(resources.GetObject("赞赏.Image")));
+            this.赞赏.Label = "赞赏";
+            this.赞赏.Name = "赞赏";
+            this.赞赏.ShowImage = true;
+            this.赞赏.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.donate);
+            // 
             // button4
             // 
             this.button4.Image = ((System.Drawing.Image)(resources.GetObject("button4.Image")));
@@ -725,6 +733,14 @@
             this.button4.Name = "button4";
             this.button4.ShowImage = true;
             this.button4.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.openGithub_Click);
+            // 
+            // 开发者
+            // 
+            this.开发者.Image = ((System.Drawing.Image)(resources.GetObject("开发者.Image")));
+            this.开发者.Label = "开发者";
+            this.开发者.Name = "开发者";
+            this.开发者.ShowImage = true;
+            this.开发者.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.developer_website);
             // 
             // button3
             // 
@@ -741,22 +757,6 @@
             this.button5.Name = "button5";
             this.button5.ShowImage = true;
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
-            // 
-            // 赞赏
-            // 
-            this.赞赏.Image = ((System.Drawing.Image)(resources.GetObject("赞赏.Image")));
-            this.赞赏.Label = "赞赏";
-            this.赞赏.Name = "赞赏";
-            this.赞赏.ShowImage = true;
-            this.赞赏.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.donate);
-            // 
-            // 开发者
-            // 
-            this.开发者.Image = ((System.Drawing.Image)(resources.GetObject("开发者.Image")));
-            this.开发者.Label = "开发者";
-            this.开发者.Name = "开发者";
-            this.开发者.ShowImage = true;
-            this.开发者.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.developer_website);
             // 
             // Ribbon1
             // 
