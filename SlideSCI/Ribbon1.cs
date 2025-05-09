@@ -1223,16 +1223,13 @@ namespace SlideSCI
                                                         {
                                                             if (paragraph.ParagraphFormat.Bullet.Type != PpBulletType.ppBulletNone)
                                                             {
-                                                                // 保存type和start value
+                                                                // 保存列表样式
                                                                 PpBulletType ppBulletType = paragraph.ParagraphFormat.Bullet.Type;
-                                                                // 如果是ppBulletNumbered，保存start value
-                                                                
-
-                                                                // 获取character
                                                                 int character = paragraph.ParagraphFormat.Bullet.Character;
                                                                 int startValue = paragraph.ParagraphFormat.Bullet.StartValue; // 有序列表的编号
                                                                 PpNumberedBulletStyle stype = paragraph.ParagraphFormat.Bullet.Style; // 有序列表的样式：1、A、一等
-
+                                                                
+                                                                // 重新设置列表样式，曲线救国来添加悬挂缩进（找不到代码的方式直接添加悬挂缩进
                                                                 //paragraph.ParagraphFormat.Bullet.Type = PpBulletType.ppBulletNone;
                                                                 paragraph.ParagraphFormat.Bullet.Type = ppBulletType;
                                                                 paragraph.ParagraphFormat.Bullet.Character = character;
@@ -1241,9 +1238,14 @@ namespace SlideSCI
                                                                     paragraph.ParagraphFormat.Bullet.StartValue = startValue;
                                                                     paragraph.ParagraphFormat.Bullet.Style = stype;
                                                                 }
-                                                                 // 弹窗输出ppBulletType是什么
+                                                                // 列表样式不受后面字体样式的干扰
+                                                                paragraph.ParagraphFormat.Bullet.UseTextFont = Office.MsoTriState.msoFalse;
+                                                                paragraph.ParagraphFormat.Bullet.UseTextColor = Office.MsoTriState.msoFalse;
+                                                                paragraph.ParagraphFormat.Bullet.Font.Bold = Office.MsoTriState.msoFalse;
+                                                                paragraph.ParagraphFormat.Bullet.Font.Italic = Office.MsoTriState.msoFalse;
+                                                                // 弹窗输出ppBulletType是什么
                                                                 // MessageBox.Show($"Bullet type: {ppBulletType}, Start value: {startValue}, Character: {character}, Style: {stype}");
-                                                                
+
                                                                 string text = paragraph.Text.Trim();
                                                                 if (text.StartsWith("- [x]"))
                                                                 {
