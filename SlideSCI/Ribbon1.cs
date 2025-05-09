@@ -1307,12 +1307,14 @@ namespace SlideSCI
             for (int i = matches.Count - 1; i >= 0; i--)
             {
                 var match = matches[i];
-                int start = match.Index + 1;  // Include the first $
-                int length = match.Length + 1;  // Include both $ signs
-                string formula = match.Groups[1].Value;
-                // 替换文本：$公式$为公式
+                int start = match.Index + 1;  // 1-based start index of the match (e.g., the first '$')
+                int length = match.Length;    // Length of the matched string (e.g., "$formula$")
+                string formula = match.Groups[1].Value; // Content within $...$ (e.g., "formula")
+                
+                // Select the range "$formula$"
                 TextRange selectedRange = textRange.Characters(start, length);
-                selectedRange.Text = formula.Trim('$');
+                // Replace its text with "formula"
+                selectedRange.Text = formula; 
                 selectedRange.Select();
                 app.CommandBars.ExecuteMso("EquationInsertNew");
 
