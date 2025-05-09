@@ -1223,11 +1223,27 @@ namespace SlideSCI
                                                         {
                                                             if (paragraph.ParagraphFormat.Bullet.Type != PpBulletType.ppBulletNone)
                                                             {
+                                                                // 保存type和start value
                                                                 PpBulletType ppBulletType = paragraph.ParagraphFormat.Bullet.Type;
-                                                                paragraph.ParagraphFormat.Bullet.Type = PpBulletType.ppBulletNone;
-                                                                paragraph.ParagraphFormat.Bullet.Type = ppBulletType;
+                                                                // 如果是ppBulletNumbered，保存start value
+                                                                
 
-                                                                // Handle task list items
+                                                                // 获取character
+                                                                int character = paragraph.ParagraphFormat.Bullet.Character;
+                                                                int startValue = paragraph.ParagraphFormat.Bullet.StartValue; // 有序列表的编号
+                                                                PpNumberedBulletStyle stype = paragraph.ParagraphFormat.Bullet.Style; // 有序列表的样式：1、A、一等
+
+                                                                //paragraph.ParagraphFormat.Bullet.Type = PpBulletType.ppBulletNone;
+                                                                paragraph.ParagraphFormat.Bullet.Type = ppBulletType;
+                                                                paragraph.ParagraphFormat.Bullet.Character = character;
+                                                                if (ppBulletType == PpBulletType.ppBulletNumbered)
+                                                                {
+                                                                    paragraph.ParagraphFormat.Bullet.StartValue = startValue;
+                                                                    paragraph.ParagraphFormat.Bullet.Style = stype;
+                                                                }
+                                                                 // 弹窗输出ppBulletType是什么
+                                                                // MessageBox.Show($"Bullet type: {ppBulletType}, Start value: {startValue}, Character: {character}, Style: {stype}");
+                                                                
                                                                 string text = paragraph.Text.Trim();
                                                                 if (text.StartsWith("- [x]"))
                                                                 {
