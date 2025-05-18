@@ -286,5 +286,29 @@ namespace SlideSCI.Properties {
                 this["imgAddTitleExcludeText"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PNG")]
+        public string ExportFormat {
+            get {
+                return ((string)(this["ExportFormat"]));
+            }
+            set {
+                this["ExportFormat"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public int ExportDPI {
+            get {
+                return ((int)(this["ExportDPI"]));
+            }
+            set {
+                this["ExportDPI"] = value;
+            }
+        }
     }
 }

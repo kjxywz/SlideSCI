@@ -90,6 +90,7 @@ namespace SlideSCI
             labelBoldcheckBox.Click += SaveSettings;
 
             toggleBackgroundCheckBox.Click += SaveSettings;
+            // exportImageButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.exportImageButton_Click); // Already set in Designer.cs
             iniCombobox();
 
 
@@ -176,6 +177,10 @@ namespace SlideSCI
 
             // Save insertMarkdwon
             Properties.Settings.Default.ToggleBackground = toggleBackgroundCheckBox.Checked;
+
+            // 保存导出设置 (如果将来添加UI控件进行修改)
+            // Properties.Settings.Default.ExportFormat = exportFormatComboBox.Text; 
+            // Properties.Settings.Default.ExportDPI = int.Parse(exportDpiEditBox.Text);
 
             // Save all settings
             Properties.Settings.Default.Save();
@@ -2200,5 +2205,324 @@ namespace SlideSCI
         {
             System.Diagnostics.Process.Start("https://www.github.com/achuan-2");
         }
-    }
+
+        private void exportImageButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            PowerPoint.Application pptApp = Globals.ThisAddIn.Application;
+            PowerPoint.Presentation activePresentation;
+            PowerPoint.Slides slides;
+
+            try
+            {
+                activePresentation = pptApp.ActivePresentation;
+                if (activePresentation == null)
+                {
+                    MessageBox.Show("没有打开的演示文稿可供导出。", "无演示文稿", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                slides = activePresentation.Slides;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("无法访问演示文稿。请确保已打开一个演示文稿。", "访问错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (slides == null || slides.Count == 0)
+            {
+                MessageBox.Show("当前演示文稿没有幻灯片。", "无幻灯片", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Create export options dialog
+            using (Form exportDialog = new Form())
+            {
+                exportDialog.Text = "导出设置";
+                exportDialog.Width = 400;
+                exportDialog.Height = 370; // Increase height for new checkbox
+                exportDialog.FormBorderStyle = FormBorderStyle.FixedDialog;
+                exportDialog.StartPosition = FormStartPosition.CenterScreen;
+                exportDialog.MaximizeBox = false;
+                exportDialog.MinimizeBox = false;
+
+                GroupBox rangeGroup = new GroupBox { Text = "导出范围", Location = new System.Drawing.Point(20, 20), Width = 340, Height = 60 };
+                RadioButton currentSlideRadio = new RadioButton { Text = "当前页", Location = new System.Drawing.Point(20, 25), Checked = true, AutoSize = true };
+                RadioButton allSlidesRadio = new RadioButton { Text = "全部页面", Location = new System.Drawing.Point(180, 25), AutoSize = true };
+                rangeGroup.Controls.AddRange(new Control[] { currentSlideRadio, allSlidesRadio });
+
+                GroupBox formatGroup = new GroupBox { Text = "图片格式", Location = new System.Drawing.Point(20, 90), Width = 340, Height = 60 };
+                ComboBox formatCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Location = new System.Drawing.Point(20, 25), Width = 300 };
+                formatCombo.Items.AddRange(new string[] { "PNG", "JPG", "BMP" });
+                formatCombo.SelectedIndex = 0;
+                formatGroup.Controls.Add(formatCombo);
+
+                GroupBox dpiGroup = new GroupBox { Text = "导出DPI", Location = new System.Drawing.Point(20, 160), Width = 340, Height = 60 };
+                ComboBox dpiCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Location = new System.Drawing.Point(20, 25), Width = 300, BackColor = Color.White };
+                dpiCombo.Items.AddRange(new string[] { "96", "150", "300", "600" });
+                dpiCombo.SelectedIndex = 2; // Default to 300 DPI
+                dpiGroup.Controls.Add(dpiCombo);
+
+                // 添加导出后打开文件夹的复选框
+                CheckBox openFolderCheckBox = new CheckBox 
+                { 
+                    Text = "导出完成后打开文件夹",
+                    Location = new System.Drawing.Point(20, 240),
+                    AutoSize = true,
+                    Checked = true // 默认选中
+                };
+
+                Button okButton = new Button { Text = "确定", DialogResult = DialogResult.OK, Location = new System.Drawing.Point(180, 280), Width = 80 };
+                Button cancelButton = new Button { Text = "取消", DialogResult = DialogResult.Cancel, Location = new System.Drawing.Point(280, 280), Width = 80 };
+
+                exportDialog.Controls.AddRange(new Control[] { rangeGroup, formatGroup, dpiGroup, openFolderCheckBox, okButton, cancelButton });
+                exportDialog.AcceptButton = okButton;
+                exportDialog.CancelButton = cancelButton;
+
+                if (exportDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string basePresentationName = "未命名";
+                    string presentationCurrentFullPath = ""; // Best guess for the full path of the PPT file itself
+                    string saveTargetDirectory;
+
+                    try
+                    {
+                        string pptPathProperty = activePresentation.Path; // Can be URL or local directory path
+                        string pptFullNameProperty = activePresentation.FullName; // Can be URL or local full file path
+
+                        if (string.IsNullOrEmpty(pptPathProperty)) // Unsaved presentation
+                        {
+                            basePresentationName = "未命名";
+                            presentationCurrentFullPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), basePresentationName + ".pptx"); // Nominal path
+                        }
+                        else
+                        {
+                            basePresentationName = Path.GetFileNameWithoutExtension(pptFullNameProperty);
+                            if (string.IsNullOrEmpty(basePresentationName) && !string.IsNullOrEmpty(pptPathProperty)) // Handle cases where FullName might be just a path
+                            {
+                                basePresentationName = Path.GetFileNameWithoutExtension(pptPathProperty);
+                            }
+                            if (string.IsNullOrEmpty(basePresentationName)) basePresentationName = "未命名";
+
+
+                            if (pptPathProperty.StartsWith("https://d.docs.live.net/", StringComparison.OrdinalIgnoreCase))
+                            {
+                                string oneDriveRoot = GetLocalOneDrivePath();
+                                if (!string.IsNullOrEmpty(oneDriveRoot) && Directory.Exists(oneDriveRoot))
+                                {
+                                    // Example URL: https://d.docs.live.net/USERID/Documents/MyPresentation.pptx
+                                    // pathSegments: ["https:", "", "d.docs.live.net", "USERID", "Documents", "MyPresentation.pptx"] (from Split)
+                                    string[] pathSegments = pptPathProperty.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                                    if (pathSegments.Length > 3) // Check for at least "https:", "d.docs.live.net", "USERID", and one more part
+                                    {
+                                        string relativePath = string.Join(Path.DirectorySeparatorChar.ToString(), pathSegments.Skip(3));
+                                        // For OneDrive URLs, construct local path by combining OneDrive root with the relative path
+                                        // relativePath already includes the filename since we took all path segments after the user ID
+                                        presentationCurrentFullPath = Path.Combine(oneDriveRoot, relativePath);
+                                        presentationCurrentFullPath = Path.Combine(presentationCurrentFullPath, basePresentationName + ".pptx");
+                                    }
+                                    else
+                                    {
+                                        // Fallback if URL structure is unexpected, try to use OneDrive root + filename
+                                        presentationCurrentFullPath = Path.Combine(oneDriveRoot, basePresentationName + Path.GetExtension(pptFullNameProperty));
+                                    }
+                                }
+                                else
+                                {
+                                    presentationCurrentFullPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), basePresentationName + Path.GetExtension(pptFullNameProperty));
+                                }
+                            }
+                            else if (File.Exists(pptFullNameProperty)) // Local file or synced cloud file where FullName is a disk path
+                            {
+                                presentationCurrentFullPath = pptFullNameProperty;
+                            }
+                            else // Other web URLs or unresolvable local paths
+                            {
+                                string fallbackDir = GetLocalOneDrivePath();
+                                if (string.IsNullOrEmpty(fallbackDir) || !Directory.Exists(fallbackDir))
+                                {
+                                    fallbackDir = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                                }
+                                presentationCurrentFullPath = Path.Combine(fallbackDir, basePresentationName + Path.GetExtension(pptFullNameProperty));
+                            }
+                        }
+
+                        // Determine the directory for SaveFileDialog: [DirectoryOfPPT]/[BasePresentationName]/
+                        saveTargetDirectory = Path.GetDirectoryName(presentationCurrentFullPath);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error determining path information: {ex.Message}");
+                        basePresentationName = "未命名";
+                        saveTargetDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                    }
+
+                    using (var saveDialog = new SaveFileDialog())
+                    {
+                        string selectedFormat = formatCombo.SelectedItem.ToString();
+                        saveDialog.Filter = $"{selectedFormat} 文件|*.{selectedFormat.ToLower()}";
+                        saveDialog.InitialDirectory = saveTargetDirectory;
+
+                        bool exportCurrentSlide = currentSlideRadio.Checked;
+                        PowerPoint.Slide slideToExport = null;
+
+                        if (exportCurrentSlide)
+                        {
+                            try
+                            {
+                                slideToExport = pptApp.ActiveWindow.View.Slide;
+                                saveDialog.FileName = $"{basePresentationName}_页面{slideToExport.SlideIndex}";
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error getting current slide: {ex.Message}");
+                                MessageBox.Show("无法获取当前幻灯片信息。将默认文件名。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                saveDialog.FileName = $"{basePresentationName}_页面";
+                            }
+                        }
+                        else
+                        {
+                            saveDialog.FileName = $"{basePresentationName}_页面"; // Base for multiple files
+                        }
+
+                        if (saveDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            string exportDirectory = Path.GetDirectoryName(saveDialog.FileName);
+                            string outputFileNameBase = Path.GetFileNameWithoutExtension(saveDialog.FileName);
+                            int dpi = int.Parse(dpiCombo.SelectedItem.ToString());
+
+                            // Ensure the target directory exists before exporting
+                            if (!Directory.Exists(exportDirectory))
+                            {
+                                try
+                                {
+                                    Directory.CreateDirectory(exportDirectory);
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show($"无法创建导出目录 '{exportDirectory}': {ex.Message}", "目录创建错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+                            }
+
+
+                            try
+                            {
+                                if (exportCurrentSlide && slideToExport != null)
+                                {
+                                    string filename = Path.Combine(exportDirectory, $"{outputFileNameBase}.{selectedFormat.ToLower()}");
+                                    ExportSlide(slideToExport, filename, selectedFormat, dpi);
+                                }
+                                else if (!exportCurrentSlide)
+                                {
+                                    for (int i = 1; i <= slides.Count; i++)
+                                    {
+                                        PowerPoint.Slide slide = slides[i];
+                                        string filename = Path.Combine(exportDirectory, $"{outputFileNameBase}_{slide.SlideIndex}.{selectedFormat.ToLower()}");
+                                        ExportSlide(slide, filename, selectedFormat, dpi);
+                                        System.Runtime.InteropServices.Marshal.ReleaseComObject(slide); // Release COM object
+                                        slide = null;
+                                    }
+                                }
+                                else if (exportCurrentSlide && slideToExport == null)
+                                {
+                                    MessageBox.Show("无法导出当前幻灯片，因为它未被正确识别。", "导出错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+
+                                MessageBox.Show("导出完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                // 根据复选框状态决定是否打开文件夹
+                                if (openFolderCheckBox.Checked)
+                                {
+                                    System.Diagnostics.Process.Start("explorer.exe", exportDirectory);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"导出过程中发生错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            finally
+                            {
+                                if (slideToExport != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(slideToExport);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Release COM objects if they were assigned
+            if (slides != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(slides);
+            if (activePresentation != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(activePresentation);
+            // pptApp is usually managed by the add-in's lifecycle, but if it's locally instantiated, manage it too.
+        }
+
+
+        // Helper method to get the local OneDrive path
+        private string GetLocalOneDrivePath()
+        {
+            // Try environment variables first
+            string oneDrivePath = Environment.GetEnvironmentVariable("OneDrive");
+            if (!string.IsNullOrEmpty(oneDrivePath) && Directory.Exists(oneDrivePath))
+            {
+                return oneDrivePath;
+            }
+
+            // Try consumer OneDrive path
+            oneDrivePath = Environment.GetEnvironmentVariable("OneDriveConsumer");
+            if (!string.IsNullOrEmpty(oneDrivePath) && Directory.Exists(oneDrivePath))
+            {
+                return oneDrivePath;
+            }
+
+            // Try business OneDrive path
+            oneDrivePath = Environment.GetEnvironmentVariable("OneDriveCommercial");
+            if (!string.IsNullOrEmpty(oneDrivePath) && Directory.Exists(oneDrivePath))
+            {
+                return oneDrivePath;
+            }
+
+            // Fallback to registry lookup for OneDrive path
+            try
+            {
+                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\OneDrive"))
+                {
+                    if (key != null)
+                    {
+                        oneDrivePath = key.GetValue("UserFolder") as string;
+                        if (!string.IsNullOrEmpty(oneDrivePath) && Directory.Exists(oneDrivePath))
+                        {
+                            return oneDrivePath;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error accessing registry for OneDrive path: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        private void ExportSlide(PowerPoint.Slide slide, string filename, string format, int dpi)
+        {
+            if (format.ToUpper() == "SVG")
+            {
+                slide.Export(filename, "SVG");
+            }
+            else
+            {
+                float slideWidth = slide.Master.Width;
+                float slideHeight = slide.Master.Height;
+        
+                // 计算导出尺寸
+                int exportWidth = (int)((slideWidth / 72.0f) * dpi);
+                int exportHeight = (int)((slideHeight / 72.0f) * dpi);
+        
+                slide.Export(filename, format, exportWidth, exportHeight);
+            }
+        }
+
+
+        }
 }
