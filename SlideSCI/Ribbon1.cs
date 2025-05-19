@@ -2252,8 +2252,8 @@ namespace SlideSCI
 
                 GroupBox formatGroup = new GroupBox { Text = "图片格式", Location = new System.Drawing.Point(20, 90), Width = 340, Height = 60 };
                 ComboBox formatCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Location = new System.Drawing.Point(20, 25), Width = 300 };
-                formatCombo.Items.AddRange(new string[] { "PNG", "JPG", "BMP" });
-                formatCombo.SelectedIndex = 0;
+                formatCombo.Items.AddRange(new string[] { "PNG", "JPG", "BMP", "PDF" }); // Added PDF
+                formatCombo.SelectedIndex = 0; // Default to PNG
                 formatGroup.Controls.Add(formatCombo);
 
                 GroupBox dpiGroup = new GroupBox { Text = "导出DPI", Location = new System.Drawing.Point(20, 160), Width = 340, Height = 60 };
@@ -2262,11 +2262,27 @@ namespace SlideSCI
                 dpiCombo.SelectedIndex = 2; // Default to 300 DPI
                 dpiGroup.Controls.Add(dpiCombo);
 
+                // Event handler for format change to hide/show DPI group
+                formatCombo.SelectedIndexChanged += (s, args) => {
+                    if (formatCombo.SelectedItem.ToString().ToUpper() == "PDF") {
+                        dpiGroup.Visible = false;
+                    } else {
+                        dpiGroup.Visible = true;
+                    }
+                };
+                // Initial state for DPI group visibility
+                if (formatCombo.SelectedItem.ToString().ToUpper() == "PDF") {
+                    dpiGroup.Visible = false;
+                } else {
+                    dpiGroup.Visible = true;
+                }
+
+
                 // 添加导出后打开文件夹的复选框
                 CheckBox openFolderCheckBox = new CheckBox 
                 { 
                     Text = "导出完成后打开文件夹",
-                    Location = new System.Drawing.Point(20, 240),
+                    Location = new System.Drawing.Point(20, 240), // Adjusted Y position if DPI group is hidden
                     AutoSize = true,
                     Checked = true // 默认选中
                 };
@@ -2318,7 +2334,16 @@ namespace SlideSCI
                                         // For OneDrive URLs, construct local path by combining OneDrive root with the relative path
                                         // relativePath already includes the filename since we took all path segments after the user ID
                                         presentationCurrentFullPath = Path.Combine(oneDriveRoot, relativePath);
-                                        presentationCurrentFullPath = Path.Combine(presentationCurrentFullPath, basePresentationName + ".pptx");
+                                        // The line below was causing an extra folder with pptx name, pptFullNameProperty should be used for extension
+                                        // presentationCurrentFullPath = Path.Combine(presentationCurrentFullPath, basePresentationName + ".pptx");
+                                        // Corrected: pptFullNameProperty might already be the full local path if synced
+                                        if (!File.Exists(Path.Combine(oneDriveRoot, relativePath))) // If relative path isn't the full file path
+                                        {
+                                             presentationCurrentFullPath = Path.Combine(oneDriveRoot, relativePath, Path.GetFileName(pptFullNameProperty));
+                                        } else {
+                                             presentationCurrentFullPath = Path.Combine(oneDriveRoot, relativePath);
+                                        }
+
                                     }
                                     else
                                     {
@@ -2359,7 +2384,7 @@ namespace SlideSCI
 
                     using (var saveDialog = new SaveFileDialog())
                     {
-                        string selectedFormat = formatCombo.SelectedItem.ToString();
+                        string selectedFormat = formatCombo.SelectedItem.ToString().ToUpper();
                         saveDialog.Filter = $"{selectedFormat} 文件|*.{selectedFormat.ToLower()}";
                         saveDialog.InitialDirectory = saveTargetDirectory;
 
@@ -2377,20 +2402,26 @@ namespace SlideSCI
                             {
                                 System.Diagnostics.Debug.WriteLine($"Error getting current slide: {ex.Message}");
                                 MessageBox.Show("无法获取当前幻灯片信息。将默认文件名。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                saveDialog.FileName = $"{basePresentationName}_页面";
+                                saveDialog.FileName = $"{basePresentationName}_当前页面";
                             }
                         }
-                        else
+                        else // Exporting all slides
                         {
-                            saveDialog.FileName = $"{basePresentationName}_页面"; // Base for multiple files
+                            if (selectedFormat == "PDF")
+                            {
+                                saveDialog.FileName = $"{basePresentationName}"; // e.g., MyPres (extension .pdf will be added by filter)
+                            }
+                            else
+                            {
+                                saveDialog.FileName = $"{basePresentationName}_全部页面"; // Base for multiple files, e.g., MyPres_全部页面.png
+                            }
                         }
 
                         if (saveDialog.ShowDialog() == DialogResult.OK)
                         {
-                            string exportDirectory = Path.GetDirectoryName(saveDialog.FileName);
-                            string outputFileNameBase = Path.GetFileNameWithoutExtension(saveDialog.FileName);
-                            int dpi = int.Parse(dpiCombo.SelectedItem.ToString());
-
+                            string exportPath = saveDialog.FileName; // Full path from SaveFileDialog
+                            string exportDirectory = Path.GetDirectoryName(exportPath);
+                            
                             // Ensure the target directory exists before exporting
                             if (!Directory.Exists(exportDirectory))
                             {
@@ -2405,29 +2436,59 @@ namespace SlideSCI
                                 }
                             }
 
-
                             try
                             {
-                                if (exportCurrentSlide && slideToExport != null)
+                                if (selectedFormat == "PDF")
                                 {
-                                    string filename = Path.Combine(exportDirectory, $"{outputFileNameBase}.{selectedFormat.ToLower()}");
-                                    ExportSlide(slideToExport, filename, selectedFormat, dpi);
-                                }
-                                else if (!exportCurrentSlide)
-                                {
-                                    for (int i = 1; i <= slides.Count; i++)
+                                    if (exportCurrentSlide && slideToExport != null)
                                     {
-                                        PowerPoint.Slide slide = slides[i];
-                                        string filename = Path.Combine(exportDirectory, $"{outputFileNameBase}_{slide.SlideIndex}.{selectedFormat.ToLower()}");
-                                        ExportSlide(slide, filename, selectedFormat, dpi);
-                                        System.Runtime.InteropServices.Marshal.ReleaseComObject(slide); // Release COM object
-                                        slide = null;
+                                        activePresentation.Slides.Range(new int[] { slideToExport.SlideIndex }).Select();
+                                        activePresentation.ExportAsFixedFormat(
+                                            Path: exportPath,
+                                            FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
+                                            Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint,
+                                            OutputType: PpPrintOutputType.ppPrintOutputSlides,
+                                            RangeType: PpPrintRangeType.ppPrintSelection
+                                        );
+                                    }
+                                    else if (!exportCurrentSlide)
+                                    {
+                                        activePresentation.ExportAsFixedFormat(
+                                            Path: exportPath,
+                                            FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
+                                            Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint
+                                        ); // Defaults to all slides
+                                    }
+                                    else if (exportCurrentSlide && slideToExport == null)
+                                    {
+                                        MessageBox.Show("无法导出当前幻灯片为PDF，因为它未被正确识别。", "导出错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return;
                                     }
                                 }
-                                else if (exportCurrentSlide && slideToExport == null)
+                                else // Image formats
                                 {
-                                    MessageBox.Show("无法导出当前幻灯片，因为它未被正确识别。", "导出错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    return;
+                                    int dpi = int.Parse(dpiCombo.SelectedItem.ToString());
+                                    if (exportCurrentSlide && slideToExport != null)
+                                    {
+                                        ExportSlide(slideToExport, exportPath, selectedFormat, dpi);
+                                    }
+                                    else if (!exportCurrentSlide)
+                                    {
+                                        string outputFileNameBase = Path.GetFileNameWithoutExtension(exportPath); // Base name from SaveDialog
+                                        for (int i = 1; i <= slides.Count; i++)
+                                        {
+                                            PowerPoint.Slide slide = slides[i];
+                                            string filename = Path.Combine(exportDirectory, $"{outputFileNameBase}_{slide.SlideIndex}.{selectedFormat.ToLower()}");
+                                            ExportSlide(slide, filename, selectedFormat, dpi);
+                                            System.Runtime.InteropServices.Marshal.ReleaseComObject(slide); 
+                                            slide = null;
+                                        }
+                                    }
+                                    else if (exportCurrentSlide && slideToExport == null)
+                                    {
+                                        MessageBox.Show("无法导出当前幻灯片，因为它未被正确识别。", "导出错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return;
+                                    }
                                 }
 
                                 MessageBox.Show("导出完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -2449,13 +2510,27 @@ namespace SlideSCI
                     }
                 }
             }
-
-            // Release COM objects if they were assigned
-            if (slides != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(slides);
-            if (activePresentation != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(activePresentation);
-            // pptApp is usually managed by the add-in's lifecycle, but if it's locally instantiated, manage it too.
         }
 
+        private void ExportSlide(PowerPoint.Slide slide, string filename, string format, int dpi)
+        {
+            string upperFormat = format.ToUpper(); // Ensure consistent case for comparison
+            if (upperFormat == "SVG")
+            {
+                slide.Export(filename, "SVG");
+            }
+            else
+            {
+                float slideWidth = slide.Master.Width;
+                float slideHeight = slide.Master.Height;
+        
+                // 计算导出尺寸
+                int exportWidth = (int)((slideWidth / 72.0f) * dpi);
+                int exportHeight = (int)((slideHeight / 72.0f) * dpi);
+        
+                slide.Export(filename, format, exportWidth, exportHeight);
+            }
+        }
 
         // Helper method to get the local OneDrive path
         private string GetLocalOneDrivePath()
@@ -2503,26 +2578,6 @@ namespace SlideSCI
 
             return null;
         }
-
-        private void ExportSlide(PowerPoint.Slide slide, string filename, string format, int dpi)
-        {
-            if (format.ToUpper() == "SVG")
-            {
-                slide.Export(filename, "SVG");
-            }
-            else
-            {
-                float slideWidth = slide.Master.Width;
-                float slideHeight = slide.Master.Height;
-        
-                // 计算导出尺寸
-                int exportWidth = (int)((slideWidth / 72.0f) * dpi);
-                int exportHeight = (int)((slideHeight / 72.0f) * dpi);
-        
-                slide.Export(filename, format, exportWidth, exportHeight);
-            }
-        }
-
 
         }
 }
