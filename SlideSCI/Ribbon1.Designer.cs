@@ -126,7 +126,6 @@
             this.titleTextEditBox = this.Factory.CreateRibbonEditBox();
             this.autoGroupCheckBox = this.Factory.CreateRibbonCheckBox();
             this.excludeTextcheckBox2 = this.Factory.CreateRibbonCheckBox();
-            this.exportImageButton = this.Factory.CreateRibbonButton();
             this.group1 = this.Factory.CreateRibbonGroup();
             this.addLabelsButton = this.Factory.CreateRibbonButton();
             this.labelFontSizeEditBox = this.Factory.CreateRibbonComboBox();
@@ -136,6 +135,7 @@
             this.labelOffsetXEditBox = this.Factory.CreateRibbonComboBox();
             this.labelBoldcheckBox = this.Factory.CreateRibbonCheckBox();
             this.group3 = this.Factory.CreateRibbonGroup();
+            this.exportImageButton = this.Factory.CreateRibbonButton();
             this.button1 = this.Factory.CreateRibbonButton();
             this.tab1 = this.Factory.CreateRibbonTab();
             this.复制图片格式 = this.Factory.CreateRibbonGroup();
@@ -451,15 +451,6 @@
             this.excludeTextcheckBox2.ScreenTip = "排除文本框和形状";
             this.excludeTextcheckBox2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.excludeTextcheckBox2_Click);
             // 
-            // exportImageButton
-            // 
-            this.exportImageButton.Image = ((System.Drawing.Image)(resources.GetObject("exportImageButton.Image")));
-            this.exportImageButton.Label = "导出页面";
-            this.exportImageButton.Name = "exportImageButton";
-            this.exportImageButton.ScreenTip = "将选中的图片导出为文件";
-            this.exportImageButton.ShowImage = true;
-            this.exportImageButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.exportImageButton_Click);
-            // 
             // group1
             // 
             this.group1.Items.Add(this.addLabelsButton);
@@ -547,6 +538,15 @@
             this.group3.Items.Add(this.button1);
             this.group3.Label = "其他";
             this.group3.Name = "group3";
+            // 
+            // exportImageButton
+            // 
+            this.exportImageButton.Image = ((System.Drawing.Image)(resources.GetObject("exportImageButton.Image")));
+            this.exportImageButton.Label = "导出页面";
+            this.exportImageButton.Name = "exportImageButton";
+            this.exportImageButton.ScreenTip = "将选中的图片导出为文件";
+            this.exportImageButton.ShowImage = true;
+            this.exportImageButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.exportImageButton_Click);
             // 
             // button1
             // 
