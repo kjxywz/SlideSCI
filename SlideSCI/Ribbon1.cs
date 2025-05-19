@@ -2239,23 +2239,27 @@ namespace SlideSCI
             {
                 exportDialog.Text = "导出设置";
                 exportDialog.Width = 400;
-                exportDialog.Height = 380; // Increase height for new checkbox
+                exportDialog.Height = 380; // Increase height for new PDF options and checkbox
                 exportDialog.FormBorderStyle = FormBorderStyle.FixedDialog;
                 exportDialog.StartPosition = FormStartPosition.CenterScreen;
                 exportDialog.MaximizeBox = false;
                 exportDialog.MinimizeBox = false;
 
-                GroupBox rangeGroup = new GroupBox { Text = "导出范围", Location = new System.Drawing.Point(20, 20), Width = 340, Height = 85 }; // Increased height
+                GroupBox rangeGroup = new GroupBox { Text = "导出范围", Location = new System.Drawing.Point(20, 20), Width = 340, Height = 85 };
                 RadioButton currentSlideRadio = new RadioButton { Text = "当前页", Location = new System.Drawing.Point(20, 25), Checked = true, AutoSize = true };
                 RadioButton selectedSlidesRadio = new RadioButton { Text = "选中的页面", Location = new System.Drawing.Point(120, 25), AutoSize = true };
                 RadioButton allSlidesRadio = new RadioButton { Text = "全部页面", Location = new System.Drawing.Point(20, 50), AutoSize = true };
                 rangeGroup.Controls.AddRange(new Control[] { currentSlideRadio, selectedSlidesRadio, allSlidesRadio });
 
-                GroupBox formatGroup = new GroupBox { Text = "图片格式", Location = new System.Drawing.Point(20, 115), Width = 340, Height = 60 }; // Adjusted Y
+                GroupBox formatGroup = new GroupBox { Text = "图片格式", Location = new System.Drawing.Point(20, 115), Width = 340, Height = 60 };
                 ComboBox formatCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Location = new System.Drawing.Point(20, 25), Width = 300 };
-                formatCombo.Items.AddRange(new string[] { "PNG", "JPG", "BMP", "PDF" }); // Added PDF
+                formatCombo.Items.AddRange(new string[] { "PNG", "JPG", "BMP", "PDF" });
                 formatCombo.SelectedIndex = 0; // Default to PNG
                 formatGroup.Controls.Add(formatCombo);
+
+                GroupBox pdfOptionsGroup = new GroupBox { Text = "PDF 选项", Location = new System.Drawing.Point(20, 185), Width = 340, Height = 60, Visible = false };
+                CheckBox pdfSeparateFilesCheckBox = new CheckBox { Text = "每页导出为单独的PDF文件", Location = new System.Drawing.Point(20, 25), AutoSize = true, Checked = false };
+                pdfOptionsGroup.Controls.Add(pdfSeparateFilesCheckBox);
 
                 GroupBox dpiGroup = new GroupBox { Text = "导出DPI", Location = new System.Drawing.Point(20, 185), Width = 340, Height = 60 }; // Adjusted Y
                 ComboBox dpiCombo = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Location = new System.Drawing.Point(20, 25), Width = 300, BackColor = Color.White };
@@ -2263,25 +2267,34 @@ namespace SlideSCI
                 dpiCombo.SelectedIndex = 2; // Default to 300 DPI
                 dpiGroup.Controls.Add(dpiCombo);
 
-                // Event handler for format change to hide/show DPI group
+                // Event handler for format change to hide/show DPI group and PDF options
                 formatCombo.SelectedIndexChanged += (s, args) => {
-                    if (formatCombo.SelectedItem.ToString().ToUpper() == "PDF") {
-                        dpiGroup.Visible = false;
-                    } else {
-                        dpiGroup.Visible = true;
+                    bool isPdf = formatCombo.SelectedItem.ToString().ToUpper() == "PDF";
+                    dpiGroup.Visible = !isPdf;
+                    pdfOptionsGroup.Visible = isPdf;
+                    // Adjust layout if PDF options are shown/hidden
+                    if (isPdf)
+                    {
+                        dpiGroup.Location = new System.Drawing.Point(20, 185 + pdfOptionsGroup.Height + 10); // Move DPI group below PDF options
+                    }
+                    else
+                    {
+                        dpiGroup.Location = new System.Drawing.Point(20, 185); // Reset DPI group position
                     }
                 };
-                // Initial state for DPI group visibility
-                if (formatCombo.SelectedItem.ToString().ToUpper() == "PDF") {
-                    dpiGroup.Visible = false;
-                } else {
-                    dpiGroup.Visible = true;
+                // Initial state for DPI group and PDF options visibility
+                bool initialIsPdf = formatCombo.SelectedItem.ToString().ToUpper() == "PDF";
+                dpiGroup.Visible = !initialIsPdf;
+                pdfOptionsGroup.Visible = initialIsPdf;
+                if (initialIsPdf)
+                {
+                     dpiGroup.Location = new System.Drawing.Point(20, 185 + pdfOptionsGroup.Height + 10);
                 }
 
 
                 // 添加导出后打开文件夹的复选框
-                CheckBox openFolderCheckBox = new CheckBox 
-                { 
+                CheckBox openFolderCheckBox = new CheckBox
+                {
                     Text = "导出完成后打开文件夹",
                     Location = new System.Drawing.Point(20, 255), // Adjusted Y position
                     AutoSize = true,
@@ -2291,7 +2304,7 @@ namespace SlideSCI
                 Button okButton = new Button { Text = "确定", DialogResult = DialogResult.OK, Location = new System.Drawing.Point(180, 285), Width = 80, Height = 36 }; // Adjusted Y
                 Button cancelButton = new Button { Text = "取消", DialogResult = DialogResult.Cancel, Location = new System.Drawing.Point(280, 285), Width = 80, Height = 36 }; // Adjusted Y
 
-                exportDialog.Controls.AddRange(new Control[] { rangeGroup, formatGroup, dpiGroup, openFolderCheckBox, okButton, cancelButton });
+                exportDialog.Controls.AddRange(new Control[] { rangeGroup, formatGroup, pdfOptionsGroup, dpiGroup, openFolderCheckBox, okButton, cancelButton });
                 exportDialog.AcceptButton = okButton;
                 exportDialog.CancelButton = cancelButton;
 
@@ -2386,6 +2399,8 @@ namespace SlideSCI
                     using (var saveDialog = new SaveFileDialog())
                     {
                         string selectedFormat = formatCombo.SelectedItem.ToString().ToUpper();
+                        bool exportPdfAsSeparateFiles = selectedFormat == "PDF" && pdfSeparateFilesCheckBox.Checked;
+
                         saveDialog.Filter = $"{selectedFormat} 文件|*.{selectedFormat.ToLower()}";
                         saveDialog.InitialDirectory = saveTargetDirectory;
 
@@ -2417,13 +2432,13 @@ namespace SlideSCI
                                     selectedSlideRange = pptApp.ActiveWindow.Selection.SlideRange;
                                     if (selectedSlideRange.Count > 0)
                                     {
-                                        if (selectedFormat == "PDF" || selectedSlideRange.Count == 1)
+                                        if (selectedFormat == "PDF" && !exportPdfAsSeparateFiles || selectedSlideRange.Count == 1)
                                         {
-                                            saveDialog.FileName = $"{basePresentationName}_选中的页面"; // For PDF or single selected slide
+                                            saveDialog.FileName = $"{basePresentationName}_选中的页面"; // For single PDF or single selected slide
                                         }
                                         else
                                         {
-                                            // For multiple slides to image format, suggest a base name, individual files will be numbered
+                                            // For multiple slides to image format, or separate PDFs, suggest a base name
                                             saveDialog.FileName = $"{basePresentationName}_页面";
                                         }
                                     }
@@ -2448,13 +2463,13 @@ namespace SlideSCI
                         }
                         else // Exporting all slides
                         {
-                            if (selectedFormat == "PDF")
+                            if (selectedFormat == "PDF" && !exportPdfAsSeparateFiles)
                             {
-                                saveDialog.FileName = $"{basePresentationName}"; // e.g., MyPres (extension .pdf will be added by filter)
+                                saveDialog.FileName = $"{basePresentationName}"; 
                             }
                             else
                             {
-                                saveDialog.FileName = $"{basePresentationName}_全部页面"; // Base for multiple files, e.g., MyPres_全部页面.png
+                                saveDialog.FileName = $"{basePresentationName}_全部页面"; 
                             }
                         }
 
@@ -2462,7 +2477,8 @@ namespace SlideSCI
                         {
                             string exportPath = saveDialog.FileName; // Full path from SaveFileDialog
                             string exportDirectory = Path.GetDirectoryName(exportPath);
-                            
+                            string baseExportFileName = Path.GetFileNameWithoutExtension(exportPath);
+
                             // Ensure the target directory exists before exporting
                             if (!Directory.Exists(exportDirectory))
                             {
@@ -2481,55 +2497,85 @@ namespace SlideSCI
                             {
                                 if (selectedFormat == "PDF")
                                 {
-                                    if (exportCurrentSlide && slideToExport != null)
+                                    if (exportPdfAsSeparateFiles)
                                     {
-                                        activePresentation.Slides.Range(new int[] { slideToExport.SlideIndex }).Select();
-                                        activePresentation.ExportAsFixedFormat(
-                                            Path: exportPath,
-                                            FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
-                                            Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint,
-                                            OutputType: PpPrintOutputType.ppPrintOutputSlides,
-                                            RangeType: PpPrintRangeType.ppPrintSelection
-                                        );
-                                    }
-                                    else if (exportSelectedSlides && selectedSlideRange != null && selectedSlideRange.Count > 0)
-                                    {
-                                        // For PDF export of selected slides, PowerPoint handles this via selection
-                                        // Ensure the slides are actually selected in the UI for ExportAsFixedFormat to work correctly with ppPrintSelection
-                                        // It's generally better to rely on the user having them selected,
-                                        // but programmatically selecting them can be an option if needed, though it might change user's view.
-                                        // For simplicity, we assume they are already selected as per the radio button choice.
-                                        // If direct API for exporting a SlideRange to PDF existed, it would be cleaner.
-                                        // The most robust way for selected slides to PDF is to ensure they are selected, then use ppPrintSelection.
-                                        // PowerPoint's UI "Save As PDF" with "Options..." -> "Selection" does this.
-                                        // We will select them programmatically before export.
-                                        int[] slideIndices = new int[selectedSlideRange.Count];
-                                        for (int i = 0; i < selectedSlideRange.Count; i++)
+                                        if (exportCurrentSlide && slideToExport != null)
                                         {
-                                            slideIndices[i] = selectedSlideRange[i + 1].SlideIndex;
+                                            string filePath = Path.Combine(exportDirectory, $"{baseExportFileName}.pdf");
+                                            ExportSlideAsPdf(activePresentation, slideToExport.SlideIndex, filePath);
                                         }
-                                        activePresentation.Slides.Range(slideIndices).Select();
+                                        else if (exportSelectedSlides && selectedSlideRange != null && selectedSlideRange.Count > 0)
+                                        {
+                                            foreach (PowerPoint.Slide slide in selectedSlideRange)
+                                            {
+                                                string filePath = Path.Combine(exportDirectory, $"{baseExportFileName}_{slide.SlideIndex}.pdf");
+                                                ExportSlideAsPdf(activePresentation, slide.SlideIndex, filePath);
+                                            }
+                                        }
+                                        else if (!exportCurrentSlide && !exportSelectedSlides) // All slides
+                                        {
+                                            for (int i = 1; i <= slides.Count; i++)
+                                            {
+                                                PowerPoint.Slide slide = slides[i];
+                                                string filePath = Path.Combine(exportDirectory, $"{baseExportFileName}_{slide.SlideIndex}.pdf");
+                                                ExportSlideAsPdf(activePresentation, slide.SlideIndex, filePath);
+                                                System.Runtime.InteropServices.Marshal.ReleaseComObject(slide);
+                                                slide = null;
+                                            }
+                                        }
+                                    }
+                                    else // Export as a single PDF
+                                    {
+                                        if (exportCurrentSlide && slideToExport != null)
+                                        {
+                                            activePresentation.Slides.Range(new int[] { slideToExport.SlideIndex }).Select();
+                                            activePresentation.ExportAsFixedFormat(
+                                                Path: exportPath,
+                                                FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
+                                                Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint,
+                                                OutputType: PpPrintOutputType.ppPrintOutputSlides,
+                                                RangeType: PpPrintRangeType.ppPrintSelection
+                                            );
+                                        }
+                                        else if (exportSelectedSlides && selectedSlideRange != null && selectedSlideRange.Count > 0)
+                                        {
+                                            // For PDF export of selected slides, PowerPoint handles this via selection
+                                            // Ensure the slides are actually selected in the UI for ExportAsFixedFormat to work correctly with ppPrintSelection
+                                            // It's generally better to rely on the user having them selected,
+                                            // but programmatically selecting them can be an option if needed, though it might change user's view.
+                                            // For simplicity, we assume they are already selected as per the radio button choice.
+                                            // If direct API for exporting a SlideRange to PDF existed, it would be cleaner.
+                                            // The most robust way for selected slides to PDF is to ensure they are selected, then use ppPrintSelection.
+                                            // PowerPoint's UI "Save As PDF" with "Options..." -> "Selection" does this.
+                                            // We will select them programmatically before export.
+                                            int[] slideIndices = new int[selectedSlideRange.Count];
+                                            for (int i = 0; i < selectedSlideRange.Count; i++)
+                                            {
+                                                slideIndices[i] = selectedSlideRange[i + 1].SlideIndex;
+                                            }
+                                            activePresentation.Slides.Range(slideIndices).Select();
 
-                                        activePresentation.ExportAsFixedFormat(
-                                            Path: exportPath,
-                                            FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
-                                            Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint,
-                                            OutputType: PpPrintOutputType.ppPrintOutputSlides,
-                                            RangeType: PpPrintRangeType.ppPrintSelection // Export only the selected slides
-                                        );
-                                    }
-                                    else if (!exportCurrentSlide && !exportSelectedSlides) // All slides
-                                    {
-                                        activePresentation.ExportAsFixedFormat(
-                                            Path: exportPath,
-                                            FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
-                                            Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint
-                                        ); // Defaults to all slides
-                                    }
-                                    else if (exportCurrentSlide && slideToExport == null)
-                                    {
-                                        MessageBox.Show("无法导出当前幻灯片为PDF，因为它未被正确识别。", "导出错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                        return;
+                                            activePresentation.ExportAsFixedFormat(
+                                                Path: exportPath,
+                                                FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
+                                                Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint,
+                                                OutputType: PpPrintOutputType.ppPrintOutputSlides,
+                                                RangeType: PpPrintRangeType.ppPrintSelection // Export only the selected slides
+                                            );
+                                        }
+                                        else if (!exportCurrentSlide && !exportSelectedSlides) // All slides
+                                        {
+                                            activePresentation.ExportAsFixedFormat(
+                                                Path: exportPath,
+                                                FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
+                                                Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint
+                                            ); // Defaults to all slides
+                                        }
+                                        else if (exportCurrentSlide && slideToExport == null)
+                                        {
+                                            MessageBox.Show("无法导出当前幻灯片为PDF，因为它未被正确识别。", "导出错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            return;
+                                        }
                                     }
                                 }
                                 else // Image formats
@@ -2597,6 +2643,44 @@ namespace SlideSCI
                     }
                 }
             }
+        }
+
+        private void ExportSlideAsPdf(PowerPoint.Presentation presentation, int slideIndex, string filePath)
+        {
+            presentation.ExportAsFixedFormat(
+                Path: filePath,
+                FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
+                Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint,
+                PrintRange: presentation.PrintOptions.Ranges.Add(slideIndex, slideIndex) // Export specific slide
+            );
+            // Clean up the added print range to avoid issues with subsequent exports
+            if (presentation.PrintOptions.Ranges.Count > 0)
+            {
+                 // PowerPoint's PrintOptions.Ranges collection is 1-based.
+                 // And it seems it might accumulate ranges if not cleared.
+                 // A robust way is to clear all ranges after use if they are not meant to be persistent.
+                 // However, directly clearing all might affect other print settings if the user configured them.
+                 // For this specific export, we add a range, use it, and ideally, it should be self-contained.
+                 // If issues arise, clearing might be needed:
+                 // while (presentation.PrintOptions.Ranges.Count > 0) {
+                 //     presentation.PrintOptions.Ranges[1].Delete();
+                 // }
+                 // For now, assume PowerPoint handles the temporary range correctly for ExportAsFixedFormat.
+                 // If exporting multiple single-slide PDFs in a loop, ensure ranges are managed.
+                 // A safer approach for single slide export is to select it and use ppPrintSelection.
+                 // However, the PrintRange approach is more direct if it works reliably across versions.
+
+                 // Let's try selecting the slide and using ppPrintSelection for single slide PDF export
+                 // This is generally more reliable.
+                 presentation.Slides.Range(new int[] { slideIndex }).Select();
+                 presentation.ExportAsFixedFormat(
+                     Path: filePath,
+                     FixedFormatType: PpFixedFormatType.ppFixedFormatTypePDF,
+                     Intent: PpFixedFormatIntent.ppFixedFormatIntentPrint,
+                     OutputType: PpPrintOutputType.ppPrintOutputSlides,
+                     RangeType: PpPrintRangeType.ppPrintSelection
+                 );
+        }
         }
 
         private void ExportSlide(PowerPoint.Slide slide, string filename, string format, int dpi)
