@@ -2420,7 +2420,7 @@ namespace SlideSCI
                             {
                                 System.Diagnostics.Debug.WriteLine($"Error getting current slide: {ex.Message}");
                                 MessageBox.Show("无法获取当前幻灯片信息。将默认文件名。", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                saveDialog.FileName = $"{basePresentationName}_当前页面";
+                                saveDialog.FileName = $"{basePresentationName}_页面";
                             }
                         }
                         else if (exportSelectedSlides)
@@ -2434,7 +2434,7 @@ namespace SlideSCI
                                     {
                                         if (selectedFormat == "PDF" && !exportPdfAsSeparateFiles || selectedSlideRange.Count == 1)
                                         {
-                                            saveDialog.FileName = $"{basePresentationName}_选中的页面"; // For single PDF or single selected slide
+                                            saveDialog.FileName = $"{basePresentationName}_页面"; // For single PDF or single selected slide
                                         }
                                         else
                                         {
@@ -2469,7 +2469,7 @@ namespace SlideSCI
                             }
                             else
                             {
-                                saveDialog.FileName = $"{basePresentationName}_全部页面"; 
+                                saveDialog.FileName = $"{basePresentationName}_页面"; 
                             }
                         }
 
@@ -2508,7 +2508,7 @@ namespace SlideSCI
                                         {
                                             foreach (PowerPoint.Slide slide in selectedSlideRange)
                                             {
-                                                string filePath = Path.Combine(exportDirectory, $"{baseExportFileName}_{slide.SlideIndex}.pdf");
+                                                string filePath = Path.Combine(exportDirectory, $"{baseExportFileName}{slide.SlideIndex}.pdf");
                                                 ExportSlideAsPdf(activePresentation, slide.SlideIndex, filePath);
                                             }
                                         }
@@ -2517,7 +2517,7 @@ namespace SlideSCI
                                             for (int i = 1; i <= slides.Count; i++)
                                             {
                                                 PowerPoint.Slide slide = slides[i];
-                                                string filePath = Path.Combine(exportDirectory, $"{baseExportFileName}_{slide.SlideIndex}.pdf");
+                                                string filePath = Path.Combine(exportDirectory, $"{baseExportFileName}{slide.SlideIndex}.pdf");
                                                 ExportSlideAsPdf(activePresentation, slide.SlideIndex, filePath);
                                                 System.Runtime.InteropServices.Marshal.ReleaseComObject(slide);
                                                 slide = null;
@@ -2598,7 +2598,7 @@ namespace SlideSCI
                                             {
                                                 PowerPoint.Slide slide = selectedSlideRange[i];
                                                 // Use the slide's actual index for a more consistent naming if desired, or just a sequence number
-                                                string filename = Path.Combine(exportDirectory, $"{outputFileNameBase}_{slide.SlideIndex}.{selectedFormat.ToLower()}");
+                                                string filename = Path.Combine(exportDirectory, $"{outputFileNameBase}{slide.SlideIndex}.{selectedFormat.ToLower()}");
                                                 ExportSlide(slide, filename, selectedFormat, dpi);
                                                 // No need to release com object for slide from SlideRange here as it's managed by the range
                                             }
@@ -2610,7 +2610,7 @@ namespace SlideSCI
                                         for (int i = 1; i <= slides.Count; i++)
                                         {
                                             PowerPoint.Slide slide = slides[i];
-                                            string filename = Path.Combine(exportDirectory, $"{outputFileNameBase}_{slide.SlideIndex}.{selectedFormat.ToLower()}");
+                                            string filename = Path.Combine(exportDirectory, $"{outputFileNameBase}{slide.SlideIndex}.{selectedFormat.ToLower()}");
                                             ExportSlide(slide, filename, selectedFormat, dpi);
                                             System.Runtime.InteropServices.Marshal.ReleaseComObject(slide); 
                                             slide = null;
