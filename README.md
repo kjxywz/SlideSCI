@@ -81,7 +81,7 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 
   ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/20250116004856-2025-01-16.png)
 
-  * **支持代码语言高亮列表**：matlab、python、js、html、css、csharp
+  * **支持代码语言高亮列表**：matlab、python、R、js、html、css、csharp
   * **支持切换黑白背景色**：默认是黑色背景色，切换为背景色，只需要点击「代码黑色背景色」按钮取消激活状态即可
 * **支持插入latex数学公式**
 

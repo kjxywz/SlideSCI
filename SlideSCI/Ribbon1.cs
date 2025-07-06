@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Markdig; 
+using Markdig;
 using Microsoft.Office.Interop.PowerPoint;
 using Microsoft.Office.Tools.Ribbon;
-using Font = System.Drawing.Font; 
+using Font = System.Drawing.Font;
 using Office = Microsoft.Office.Core;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
@@ -52,13 +53,19 @@ namespace SlideSCI
             labelBoldcheckBox.Checked = Properties.Settings.Default.LabelBold;
 
             // Load Image Auto Align Settings
-            imgAutoAlignSortTypeDropDown.SelectedItemIndex = Properties.Settings.Default.imgAutoAlignSortType;
+            imgAutoAlignSortTypeDropDown.SelectedItemIndex = Properties
+                .Settings
+                .Default
+                .imgAutoAlignSortType;
             imgAutoAlign_colNum.Text = Properties.Settings.Default.ColNum;
             imgAutoAlign_colSpace.Text = Properties.Settings.Default.ColSpace;
             imgAutoAlign_rowSpace.Text = Properties.Settings.Default.RowSpace;
             imgWidthEditBpx.Text = Properties.Settings.Default.ImgWidth;
             imgHeightEditBox.Text = Properties.Settings.Default.ImgHeight;
-            imgAutoAlignAlignTypeDropDown.SelectedItemIndex = Properties.Settings.Default.imgAutoAlignAlignType;
+            imgAutoAlignAlignTypeDropDown.SelectedItemIndex = Properties
+                .Settings
+                .Default
+                .imgAutoAlignAlignType;
             excludeTextcheckBox.Checked = Properties.Settings.Default.imgAutoAlighExcludeText;
             excludeTextcheckBox2.Checked = Properties.Settings.Default.imgAddTitleExcludeText;
 
@@ -483,14 +490,22 @@ namespace SlideSCI
                     {
                         continue;
                     }
-                    
+
                     // 检查是否为支持的类型：图片、视频、媒体对象
-                    if (objType == Office.MsoShapeType.msoPicture 
-                        || objType == Office.MsoShapeType.msoMedia 
+                    if (
+                        objType == Office.MsoShapeType.msoPicture
+                        || objType == Office.MsoShapeType.msoMedia
                         || objType == Office.MsoShapeType.msoLinkedPicture
                         || objType == Office.MsoShapeType.msoEmbeddedOLEObject
                         || objType == Office.MsoShapeType.msoLinkedOLEObject
-                        || (!excludeTextcheckBox2.Checked && (objType == Office.MsoShapeType.msoTextBox || objType == Office.MsoShapeType.msoAutoShape)))
+                        || (
+                            !excludeTextcheckBox2.Checked
+                            && (
+                                objType == Office.MsoShapeType.msoTextBox
+                                || objType == Office.MsoShapeType.msoAutoShape
+                            )
+                        )
+                    )
                     {
                         selectedImgShape.Add(shape);
                     }
@@ -542,11 +557,13 @@ namespace SlideSCI
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"为对象 '{selectedShape.Name}' 添加标题时出错: {ex.Message}");
+                        MessageBox.Show(
+                            $"为对象 '{selectedShape.Name}' 添加标题时出错: {ex.Message}"
+                        );
                         continue; // 继续处理下一个对象
                     }
                 }
-                
+
                 if (selectedImgShape.Count == 0)
                 {
                     MessageBox.Show("没有找到支持添加标题的对象。请选择图片、视频或其他媒体对象。");
@@ -3453,6 +3470,101 @@ namespace SlideSCI
             }
         }
 
+        /// <summary>
+        /// 复制选中图片的原始数据到剪贴板，以保证最高质量。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        // 放在你的 Ribbon 类或者 ThisAddIn 类中
+        // 确保已经 using 了 System.Windows.Forms, System.IO, System.Drawing,
+        // PowerPoint = Microsoft.Office.Interop.PowerPoint, Office = Microsoft.Office.Core
+
+        private void CopyOriginalPicture_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
+        {
+            PowerPoint.Application app = Globals.ThisAddIn.Application;
+            PowerPoint.Selection sel = null;
+            PowerPoint.Shape selectedShape = null;
+
+            try
+            {
+                if (app.ActiveWindow == null || app.ActiveWindow.View == null) return;
+                sel = app.ActiveWindow.Selection;
+
+                // 1. 验证是否选择了单个图片
+                if (sel.Type != PowerPoint.PpSelectionType.ppSelectionShapes || sel.ShapeRange.Count != 1)
+                {
+                    MessageBox.Show("请选择单个图片对象。", "操作提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                selectedShape = sel.ShapeRange[1];
+
+                if (selectedShape.Type != Office.MsoShapeType.msoPicture && selectedShape.Type != Office.MsoShapeType.msoLinkedPicture)
+                {
+                    MessageBox.Show("所选对象不是图片，请重新选择。", "操作提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 2. 保存图片的原始状态（尺寸、位置和锁定设置）
+                float originalWidth = selectedShape.Width;
+                float originalHeight = selectedShape.Height;
+                float originalLeft = selectedShape.Left;
+                float originalTop = selectedShape.Top;
+                Office.MsoTriState originalLockAspectRatio = selectedShape.LockAspectRatio;
+
+                try
+                {
+                    // 3. 获取幻灯片的高度
+                    float slideHeight = app.ActivePresentation.PageSetup.SlideHeight;
+
+                    // 4. 临时修改图片尺寸
+                    // 确保锁定宽高比，以便在调整高度时宽度能按比例缩放
+                    selectedShape.LockAspectRatio = Office.MsoTriState.msoTrue;
+                    // 将图片高度设置为幻灯片的高度
+                    selectedShape.Height = slideHeight;
+
+                    // 5. 直接将当前状态的形状复制到剪贴板
+                    selectedShape.Copy();
+
+                    //MessageBox.Show("已成功将图片（按幻灯片高度缩放后）复制到剪贴板！", "复制成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"复制图片时出错: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    // 6. **关键步骤**: 无论成功或失败，都恢复图片的原始状态
+                    if (selectedShape != null)
+                    {
+                        try
+                        {
+                            // 按相反的顺序恢复，先恢复锁定状态，再恢复尺寸和位置
+                            selectedShape.LockAspectRatio = originalLockAspectRatio;
+                            selectedShape.Width = originalWidth;
+                            selectedShape.Height = originalHeight;
+                            selectedShape.Left = originalLeft;
+                            selectedShape.Top = originalTop;
+                        }
+                        catch (Exception restoreEx)
+                        {
+                            // 如果恢复失败，在调试时输出信息，通常不打扰用户
+                            System.Diagnostics.Debug.WriteLine($"恢复图片原始状态失败: {restoreEx.Message}");
+                        }
+                    }
+                }
+            }
+            catch (Exception outerEx)
+            {
+                MessageBox.Show($"发生意外错误: {outerEx.Message}", "严重错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // 7. 释放COM对象
+                if (selectedShape != null) Marshal.ReleaseComObject(selectedShape);
+                if (sel != null) Marshal.ReleaseComObject(sel);
+            }
+        }
         private void ExportSlide(PowerPoint.Slide slide, string filename, string format, int dpi)
         {
             string upperFormat = format.ToUpper(); // Ensure consistent case for comparison
