@@ -128,6 +128,19 @@ namespace SlideSCI
                         // 数字
                         (@"\b\d+\b", RegexOptions.None, "number"),
                     }
+                },
+                {"r", new List<(string, RegexOptions, string)>
+                    {
+                        // 字符串 (支持单引号和双引号)
+                        (@"(?:""[^""\n\\]*(?:\\.[^""\n\\]*)*""|'[^'\n\\]*(?:\\.[^'\n\\]*)*')", RegexOptions.None, "string"),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?L?\b", RegexOptions.None, "number"),
+                        // 注释
+                        (@"#.*?$", RegexOptions.Multiline, "comment"),
+                        
+                        // 关键字和函数
+                        (@"\b(if|else|for|in|while|function|repeat|next|break|TRUE|FALSE|NULL|Inf|NaN|NA|NA_integer_|NA_real_|NA_complex_|NA_character_|c|list|data\.frame|matrix|array|factor|length|names|dim|class|str|summary|head|tail|print|cat|paste|paste0|substr|nchar|grep|gsub|which|is\.na|is\.null|is\.numeric|is\.character|is\.logical|as\.numeric|as\.character|as\.logical|mean|median|sd|var|min|max|sum|apply|lapply|sapply|mapply|tapply|aggregate|merge|rbind|cbind|subset|sort|order|unique|duplicated|table|plot|hist|boxplot|barplot|pie|lines|points|abline|legend|title|xlabel|ylabel|par|dev\.new|dev\.off|png|pdf|jpeg|library|require|install\.packages|source|load|save|write\.csv|read\.csv|read\.table|write\.table)\b", RegexOptions.None, "keyword"),
+                    }
                 }
             };
         }
@@ -142,7 +155,8 @@ namespace SlideSCI
                 {"py", "python"},
                 {"m", "matlab"},
                 {"css", "css"},
-                {"htm", "html"}
+                {"htm", "html"},
+                {"R", "r"}
             };
         }
 

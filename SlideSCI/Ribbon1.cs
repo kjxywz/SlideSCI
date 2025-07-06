@@ -927,7 +927,7 @@ namespace SlideSCI
 
             // Add common programming languages
             languageSelect.Items.AddRange(new string[] {
-                 "python", "matlab", "javascript",  "html", "css"
+                 "python", "matlab", "javascript",  "html", "css","R"
             });
             languageSelect.SelectedIndex = 0;
 
