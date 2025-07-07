@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using DocumentFormat.OpenXml.Packaging;
 using Markdig;
 using Microsoft.Office.Interop.PowerPoint;
 using Microsoft.Office.Tools.Ribbon;
@@ -2702,7 +2704,135 @@ namespace SlideSCI
         {
             System.Diagnostics.Process.Start("https://www.github.com/achuan-2");
         }
+        public void ExportOriginalImage_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                // 1. 获取当前PowerPoint应用实例和选中的对象
+                var app = Globals.ThisAddIn.Application;
+                var activeWindow = app.ActiveWindow;
 
+                if (app.ActivePresentation == null)
+                {
+                    MessageBox.Show("请先打开一个演示文稿。", "操作失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 检查是否选中了图形
+                if (activeWindow.Selection.Type != PpSelectionType.ppSelectionShapes)
+                {
+                    MessageBox.Show("请先选择一个图片。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                // 检查是否只选中了一个图形
+                var shapeRange = activeWindow.Selection.ShapeRange;
+                if (shapeRange.Count != 1)
+                {
+                    MessageBox.Show("请只选择一个图片进行导出。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var shape = shapeRange[1];
+
+                // 检查选中的是否是图片类型
+
+
+                // 2. 获取必要信息：Shape ID, Slide Object 和演示文稿路径
+                uint shapeId = (uint)shape.Id;
+                Slide vstoSlide = shape.Parent;
+                uint slideIdValue = (uint)vstoSlide.SlideID; // 获取幻灯片的唯一ID
+
+                // 保存演示文稿以确保图片文件嵌入正确
+                app.ActivePresentation.Save();
+                string presentationPath = app.ActivePresentation.FullName;
+
+                // 确保演示文稿已保存
+                if (string.IsNullOrEmpty(presentationPath) || !File.Exists(presentationPath))
+                {
+                    MessageBox.Show("请先保存当前演示文稿再执行导出操作。", "操作失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // 3. 使用 Open XML SDK 进行操作
+                using (PresentationDocument presDoc = PresentationDocument.Open(presentationPath, false)) // false = read-only
+                {
+                    PresentationPart presPart = presDoc.PresentationPart;
+                    if (presPart == null)
+                    {
+                        MessageBox.Show("无法加载演示文稿的核心部分。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // 4. 通过 SlideID 查找对应的 SlideId 条目，从而获取其 RelationshipId
+                    var slideIdEntry = presPart.Presentation.SlideIdList.ChildElements
+                        .OfType<DocumentFormat.OpenXml.Presentation.SlideId>()
+                        .FirstOrDefault(s => s.Id != null && s.Id.Value == slideIdValue);
+
+                    if (slideIdEntry == null || slideIdEntry.RelationshipId == null)
+                    {
+                        MessageBox.Show("无法在文档结构中定位到当前幻灯片。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // 使用 RelationshipId 精确获取 SlidePart
+                    SlidePart slidePart = presPart.GetPartById(slideIdEntry.RelationshipId.Value) as SlidePart;
+                    if (slidePart == null)
+                    {
+                        MessageBox.Show("无法加载幻灯片部分，文件可能已损坏。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // 5. 在幻灯片中查找匹配的 Picture 元素并获取其关系 ID (rId)
+                    string embedId = null;
+                    var picture = slidePart.Slide
+                        .Descendants<DocumentFormat.OpenXml.Presentation.Picture>()
+                        .FirstOrDefault(p => p.NonVisualPictureProperties?.NonVisualDrawingProperties?.Id?.Value == shapeId);
+
+                    if (picture != null)
+                    {
+                        embedId = picture.BlipFill?.Blip?.Embed?.Value;
+                    }
+
+                    if (string.IsNullOrEmpty(embedId))
+                    {
+                        MessageBox.Show("无法找到选中图片的内部引用关系，导出失败。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // 6. 通过关系ID找到对应的 ImagePart
+                    ImagePart imagePart = slidePart.GetPartById(embedId) as ImagePart;
+                    if (imagePart == null)
+                    {
+                        MessageBox.Show("无法在文档包中找到图片数据，导出失败。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // 7. 准备保存文件对话框并导出
+                    using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                    {
+                        string originalFileName = Path.GetFileName(imagePart.Uri.OriginalString);
+                        saveFileDialog.FileName = originalFileName;
+                        saveFileDialog.Filter = "所有文件 (*.*)|*.*|PNG 图片 (*.png)|*.png|JPEG 图片 (*.jpg;*.jpeg)|*.jpg;*.jpeg|GIF 图片 (*.gif)|*.gif";
+                        saveFileDialog.Title = "导出原始图片";
+
+                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            using (Stream imageStream = imagePart.GetStream())
+                            using (FileStream fileStream = new FileStream(saveFileDialog.FileName, FileMode.Create))
+                            {
+                                imageStream.CopyTo(fileStream);
+                            }
+                            MessageBox.Show($"图片已成功导出到：\n{saveFileDialog.FileName}", "导出成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"导出过程中发生错误：\n{ex.Message}", "意外错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         private void exportImageButton_Click(object sender, RibbonControlEventArgs e)
         {
             PowerPoint.Application pptApp = Globals.ThisAddIn.Application;
@@ -3565,6 +3695,7 @@ namespace SlideSCI
                 if (sel != null) Marshal.ReleaseComObject(sel);
             }
         }
+
         private void ExportSlide(PowerPoint.Slide slide, string filename, string format, int dpi)
         {
             string upperFormat = format.ToUpper(); // Ensure consistent case for comparison
@@ -3584,6 +3715,7 @@ namespace SlideSCI
                 slide.Export(filename, format, exportWidth, exportHeight);
             }
         }
+
 
         // Helper method to get the local OneDrive path
         private string GetLocalOneDrivePath()

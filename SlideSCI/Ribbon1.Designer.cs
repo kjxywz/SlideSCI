@@ -144,8 +144,10 @@
             this.imgAutoAlign = this.Factory.CreateRibbonButton();
             this.AddTitleButton = this.Factory.CreateRibbonButton();
             this.addLabelsButton = this.Factory.CreateRibbonButton();
+            this.复制大图 = this.Factory.CreateRibbonButton();
             this.exportImageButton = this.Factory.CreateRibbonButton();
             this.button1 = this.Factory.CreateRibbonButton();
+            this.导出原图 = this.Factory.CreateRibbonButton();
             this.button6 = this.Factory.CreateRibbonButton();
             this.button7 = this.Factory.CreateRibbonButton();
             this.copyPosition = this.Factory.CreateRibbonButton();
@@ -164,7 +166,6 @@
             this.开发者 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
-            this.复制原始图片 = this.Factory.CreateRibbonButton();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
@@ -507,7 +508,8 @@
             // 
             // group3
             // 
-            this.group3.Items.Add(this.复制原始图片);
+            this.group3.Items.Add(this.导出原图);
+            this.group3.Items.Add(this.复制大图);
             this.group3.Items.Add(this.exportImageButton);
             this.group3.Items.Add(this.button1);
             this.group3.Label = "其他";
@@ -610,6 +612,12 @@
             this.addLabelsButton.ShowImage = true;
             this.addLabelsButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.addLabelsButton_Click);
             // 
+            // 复制大图
+            // 
+            this.复制大图.Label = "复制大图";
+            this.复制大图.Name = "复制大图";
+            this.复制大图.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.CopyOriginalPicture_Click);
+            // 
             // exportImageButton
             // 
             this.exportImageButton.Image = ((System.Drawing.Image)(resources.GetObject("exportImageButton.Image")));
@@ -625,6 +633,12 @@
             this.button1.Name = "button1";
             this.button1.ScreenTip = "组合后，调整组合形状，文字也会同步缩放";
             this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pastePictureAndText);
+            // 
+            // 导出原图
+            // 
+            this.导出原图.Label = "导出原图";
+            this.导出原图.Name = "导出原图";
+            this.导出原图.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.ExportOriginalImage_Click);
             // 
             // button6
             // 
@@ -771,12 +785,6 @@
             this.button5.ShowImage = true;
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
             // 
-            // 复制原始图片
-            // 
-            this.复制原始图片.Label = "复制原始图片";
-            this.复制原始图片.Name = "复制原始图片";
-            this.复制原始图片.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.CopyOriginalPicture_Click);
-            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -865,7 +873,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 赞赏;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 开发者;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton 复制原始图片;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 复制大图;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 导出原图;
     }
 
     partial class ThisRibbonCollection
