@@ -70,7 +70,7 @@ namespace SlideSCI
                 .imgAutoAlignAlignType;
             excludeTextcheckBox.Checked = Properties.Settings.Default.imgAutoAlighExcludeText;
             excludeTextcheckBox2.Checked = Properties.Settings.Default.imgAddTitleExcludeText;
-
+            titleCenterCheckbox.Checked = Properties.Settings.Default.imgAddTitleCenter;
             // insertMarkdown
             toggleBackgroundCheckBox.Checked = Properties.Settings.Default.ToggleBackground;
 
@@ -95,7 +95,8 @@ namespace SlideSCI
             imgHeightEditBox.TextChanged += SaveSettings;
             imgAutoAlignAlignTypeDropDown.SelectionChanged += SaveSettings;
             excludeTextcheckBox.Click += SaveSettings;
-
+            excludeTextcheckBox2.Click += SaveSettings;
+            titleCenterCheckbox.Click += SaveSettings;
             labelBoldcheckBox.Click += SaveSettings;
 
             toggleBackgroundCheckBox.Click += SaveSettings;
@@ -430,7 +431,7 @@ namespace SlideSCI
                 imgAutoAlignAlignTypeDropDown.SelectedItemIndex;
             Properties.Settings.Default.imgAutoAlighExcludeText = excludeTextcheckBox.Checked;
             Properties.Settings.Default.imgAddTitleExcludeText = excludeTextcheckBox2.Checked;
-
+            Properties.Settings.Default.imgAddTitleCenter = titleCenterCheckbox.Checked;
             // Save insertMarkdwon
             Properties.Settings.Default.ToggleBackground = toggleBackgroundCheckBox.Checked;
 
@@ -452,165 +453,194 @@ namespace SlideSCI
         /// <param name="e"></param>
         private void AddTitleToImage(object sender, RibbonControlEventArgs e)
         {
-            AddTitleFun();
+            AddTitleFun(true);
+        }
+        private void AddTopTitleToImage(object sender, RibbonControlEventArgs e)
+        {
+            AddTitleFun(false);
         }
 
-        /// <summary>
-        /// 图片加标题
-        /// </summary>
-        private void AddTitleFun()
+
+    /// <summary>
+    /// 图片加标题
+    /// </summary>
+    /// <param name="isBottomTitle">true为下标题，false为上标题</param>
+    private void AddTitleFun(bool isBottomTitle = true)
+    {
+        PowerPoint.Application app = Globals.ThisAddIn.Application;
+        Slide slide = app.ActiveWindow.View.Slide;
+        Selection sel = app.ActiveWindow.Selection;
+        bool autoGroup = autoGroupCheckBox.Checked; // 自动编组
+        List<ShapeRange> allshapesName = new List<ShapeRange>(); // 需要编组的对象集合
+        List<Shape> allshapes = new List<Shape>(); // 编组后的对象
+
+        if (sel.Type == PpSelectionType.ppSelectionShapes)
         {
-            PowerPoint.Application app = Globals.ThisAddIn.Application;
-            Slide slide = app.ActiveWindow.View.Slide;
-            Selection sel = app.ActiveWindow.Selection;
-            bool autoGroup = autoGroupCheckBox.Checked; // 自动编组
-            List<ShapeRange> allshapesName = new List<ShapeRange>(); // 需要编组的对象集合
-            List<Shape> allshapes = new List<Shape>(); // 编组后的对象
+            float fontSize = float.Parse(fontSizeEditBox.Text); // 字号
+            float distanceFromBottom = float.Parse(distanceFromBottomEditBox.Text); // 图下距离
+            string fontName = fontNameEditBox.Text; // 字体名称
+            string titleText = titleTextEditBox.Text; // 标题文本
+            int count = 1;
+            float tolerance = 10f; // 通常图片排列错位容差，10就够用
+            ShapeRange sel2 = GetSortedSelection(sel, tolerance);
+            var selectedImgShape = new List<Shape>();
 
-            if (sel.Type == PpSelectionType.ppSelectionShapes)
+            foreach (Shape shape in sel.ShapeRange)
             {
-                float fontSize = float.Parse(fontSizeEditBox.Text); // 字号
-                float distanceFromBottom = float.Parse(distanceFromBottomEditBox.Text); // 图下距离
-                string fontName = fontNameEditBox.Text; // 字体名称
-                string titleText = titleTextEditBox.Text; // 标题文本
-                int count = 1;
-                float tolerance = 10f; // 通常图片排列错位容差，10就够用
-                ShapeRange sel2 = GetSortedSelection(sel, tolerance);
-                var selectedImgShape = new List<Shape>();
-
-                foreach (Shape shape in sel.ShapeRange)
+                Office.MsoShapeType objType = shape.Type;
+                // 是否排除文本框、形状等格式。excludeTextcheckBox2.Checked，则排除
+                if (
+                    excludeTextcheckBox2.Checked
+                    && (
+                        objType is Office.MsoShapeType.msoTextBox
+                        || objType is Office.MsoShapeType.msoAutoShape
+                    )
+                )
                 {
-                    Office.MsoShapeType objType = shape.Type;
-                    // 是否排除文本框、形状等格式。excludeTextcheckBox2.Checked，则排除
-                    if (
-                        excludeTextcheckBox2.Checked
+                    continue;
+                }
+
+                // 检查是否为支持的类型：图片、视频、媒体对象
+                if (
+                    objType == Office.MsoShapeType.msoPicture
+                    || objType == Office.MsoShapeType.msoMedia
+                    || objType == Office.MsoShapeType.msoLinkedPicture
+                    || objType == Office.MsoShapeType.msoEmbeddedOLEObject
+                    || objType == Office.MsoShapeType.msoLinkedOLEObject
+                    || (
+                        !excludeTextcheckBox2.Checked
                         && (
-                            objType is Office.MsoShapeType.msoTextBox
-                            || objType is Office.MsoShapeType.msoAutoShape
+                            objType == Office.MsoShapeType.msoTextBox
+                            || objType == Office.MsoShapeType.msoAutoShape
                         )
                     )
-                    {
-                        continue;
-                    }
-
-                    // 检查是否为支持的类型：图片、视频、媒体对象
-                    if (
-                        objType == Office.MsoShapeType.msoPicture
-                        || objType == Office.MsoShapeType.msoMedia
-                        || objType == Office.MsoShapeType.msoLinkedPicture
-                        || objType == Office.MsoShapeType.msoEmbeddedOLEObject
-                        || objType == Office.MsoShapeType.msoLinkedOLEObject
-                        || (
-                            !excludeTextcheckBox2.Checked
-                            && (
-                                objType == Office.MsoShapeType.msoTextBox
-                                || objType == Office.MsoShapeType.msoAutoShape
-                            )
-                        )
-                    )
-                    {
-                        selectedImgShape.Add(shape);
-                    }
+                )
+                {
+                    selectedImgShape.Add(shape);
                 }
+            }
 
-                foreach (Shape selectedShape in selectedImgShape)
+            foreach (Shape selectedShape in selectedImgShape)
+            {
+                try
+                {
+                    // 根据参数决定标题位置
+                    float titleTop;
+                    if (isBottomTitle)
+                    {
+                        // 下标题：图片底部 + 距离
+                        titleTop = selectedShape.Top + selectedShape.Height + distanceFromBottom;
+                    }
+                    else
+                    {
+                        // 上标题：图片顶部 - 标题高度 - 距离
+                        titleTop = selectedShape.Top - (fontSize * 2) - distanceFromBottom;
+                    }
+
+                    Shape titleShape = slide.Shapes.AddTextbox(
+                        Office.MsoTextOrientation.msoTextOrientationHorizontal,
+                        selectedShape.Left,
+                        titleTop,
+                        selectedShape.Width,
+                        fontSize * 2
+                    );
+
+                    // 设置标题文本和格式
+                    titleShape.TextFrame.TextRange.Text = titleText;
+                    titleShape.TextFrame.TextRange.Font.Size = fontSize;
+                    titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
+                    titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
+                    // 标题是否居中
+                    if (titleCenterCheckbox.Checked)
+                    {
+                        titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
+                    }
+                    else{
+                        titleShape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignLeft;
+
+                    }
+
+
+                    // 形状中的文字是否自动换行
+                    titleShape.TextFrame.WordWrap = Office.MsoTriState.msoTrue;
+                    // 自动调整文本框大小
+                    titleShape.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
+
+                    // 设置文本框宽度
+                    titleShape.Width = selectedShape.Width;
+                    titleShape.Left = selectedShape.Left; // 设置文本框左对齐
+
+                    allshapesName.Add(
+                        slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name })
+                    );
+
+                    // 自动选择
+                    if (count == 1)
+                    {
+                        titleShape.Select(Office.MsoTriState.msoTrue);
+                    }
+                    else
+                    {
+                        titleShape.Select(Office.MsoTriState.msoFalse);
+                    }
+                    count++;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"为对象 '{selectedShape.Name}' 添加标题时出错: {ex.Message}"
+                    );
+                    continue; // 继续处理下一个对象
+                }
+            }
+
+            if (selectedImgShape.Count == 0)
+            {
+                MessageBox.Show("没有找到支持添加标题的对象。请选择图片、视频或其他媒体对象。");
+                return;
+            }
+        }
+        else
+        {
+            MessageBox.Show("请选择需要增加标题的图片、形状、视频对象.");
+        }
+
+        // 自动编组
+        if (autoGroup)
+        {
+            foreach (var shapeRange2 in allshapesName)
+            {
+                Shape GroupObj;
+                try
+                {
+                    GroupObj = shapeRange2.Group();
+                    allshapes.Add(GroupObj);
+                    SelectMultipleShapes(allshapes);
+                }
+                catch (Exception ex)
                 {
                     try
                     {
-                        Shape titleShape = slide.Shapes.AddTextbox(
-                            Office.MsoTextOrientation.msoTextOrientationHorizontal,
-                            selectedShape.Left,
-                            selectedShape.Top + selectedShape.Height + distanceFromBottom,
-                            selectedShape.Width,
-                            fontSize * 2
-                        );
+                        shapeRange2.Copy();
+                        shapeRange2.Delete();
 
-                        // 设置标题文本和格式
-                        titleShape.TextFrame.TextRange.Text = titleText;
-                        titleShape.TextFrame.TextRange.Font.Size = fontSize;
-                        titleShape.TextFrame.TextRange.Font.NameFarEast = fontName; // Ensure FarEast font is set
-                        titleShape.TextFrame.TextRange.Font.Name = fontName; // Ensure font is set
-                        titleShape.TextFrame.TextRange.ParagraphFormat.Alignment =
-                            PpParagraphAlignment.ppAlignCenter;
+                        ShapeRange pastedShapes = slide.Shapes.Paste();
 
-                        // 形状中的文字是否自动换行
-                        titleShape.TextFrame.WordWrap = Office.MsoTriState.msoTrue;
-                        // 自动调整文本框大小
-                        titleShape.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
-
-                        // 设置文本框宽度
-                        titleShape.Width = selectedShape.Width;
-                        titleShape.Left = selectedShape.Left; // 设置文本框左对齐
-
-                        allshapesName.Add(
-                            slide.Shapes.Range(new string[] { selectedShape.Name, titleShape.Name })
-                        );
-
-                        // 自动选择
-                        if (count == 1)
-                        {
-                            titleShape.Select(Office.MsoTriState.msoTrue);
-                        }
-                        else
-                        {
-                            titleShape.Select(Office.MsoTriState.msoFalse);
-                        }
-                        count++;
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(
-                            $"为对象 '{selectedShape.Name}' 添加标题时出错: {ex.Message}"
-                        );
-                        continue; // 继续处理下一个对象
-                    }
-                }
-
-                if (selectedImgShape.Count == 0)
-                {
-                    MessageBox.Show("没有找到支持添加标题的对象。请选择图片、视频或其他媒体对象。");
-                    return;
-                }
-            }
-            else
-            {
-                MessageBox.Show("请选择需要增加标题的图片、形状、视频对象.");
-            }
-
-            // 自动编组
-            if (autoGroup)
-            {
-                foreach (var shapeRange2 in allshapesName)
-                {
-                    Shape GroupObj;
-                    try
-                    {
-                        GroupObj = shapeRange2.Group();
+                        GroupObj = pastedShapes.Group();
                         allshapes.Add(GroupObj);
                         SelectMultipleShapes(allshapes);
                     }
-                    catch (Exception ex)
+                    catch (Exception innerEx)
                     {
-                        try
-                        {
-                            shapeRange2.Copy();
-                            shapeRange2.Delete();
-
-                            ShapeRange pastedShapes = slide.Shapes.Paste();
-
-                            GroupObj = pastedShapes.Group();
-                            allshapes.Add(GroupObj);
-                            SelectMultipleShapes(allshapes);
-                        }
-                        catch (Exception innerEx)
-                        {
-                            MessageBox.Show($"编组失败：{innerEx.Message}");
-                            continue;
-                        }
+                        MessageBox.Show($"编组失败：{innerEx.Message}");
+                        continue;
                     }
                 }
             }
         }
+    }
+
+
 
         /// <summary>
         /// 选择集排序

@@ -143,11 +143,12 @@
             this.group2 = this.Factory.CreateRibbonGroup();
             this.imgAutoAlign = this.Factory.CreateRibbonButton();
             this.AddTitleButton = this.Factory.CreateRibbonButton();
+            this.图片上标题 = this.Factory.CreateRibbonButton();
             this.addLabelsButton = this.Factory.CreateRibbonButton();
+            this.导出原图 = this.Factory.CreateRibbonButton();
             this.复制大图 = this.Factory.CreateRibbonButton();
             this.exportImageButton = this.Factory.CreateRibbonButton();
             this.button1 = this.Factory.CreateRibbonButton();
-            this.导出原图 = this.Factory.CreateRibbonButton();
             this.button6 = this.Factory.CreateRibbonButton();
             this.button7 = this.Factory.CreateRibbonButton();
             this.copyPosition = this.Factory.CreateRibbonButton();
@@ -166,6 +167,7 @@
             this.开发者 = this.Factory.CreateRibbonButton();
             this.button3 = this.Factory.CreateRibbonButton();
             this.button5 = this.Factory.CreateRibbonButton();
+            this.titleCenterCheckbox = this.Factory.CreateRibbonCheckBox();
             this.tab2.SuspendLayout();
             this.图片自动对齐.SuspendLayout();
             this.图片处理.SuspendLayout();
@@ -386,12 +388,14 @@
             // 图片处理
             // 
             this.图片处理.Items.Add(this.AddTitleButton);
+            this.图片处理.Items.Add(this.图片上标题);
             this.图片处理.Items.Add(this.fontNameEditBox);
             this.图片处理.Items.Add(this.fontSizeEditBox);
             this.图片处理.Items.Add(this.distanceFromBottomEditBox);
             this.图片处理.Items.Add(this.titleTextEditBox);
             this.图片处理.Items.Add(this.autoGroupCheckBox);
             this.图片处理.Items.Add(this.excludeTextcheckBox2);
+            this.图片处理.Items.Add(this.titleCenterCheckbox);
             this.图片处理.Label = "添加图片标题";
             this.图片处理.Name = "图片处理";
             // 
@@ -596,12 +600,21 @@
             // AddTitleButton
             // 
             this.AddTitleButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.AddTitleButton.Description = "添加图片标题";
+            this.AddTitleButton.Description = "添加图片下标题";
             this.AddTitleButton.Image = ((System.Drawing.Image)(resources.GetObject("AddTitleButton.Image")));
-            this.AddTitleButton.Label = "图片加标题";
+            this.AddTitleButton.Label = "图片下标题";
             this.AddTitleButton.Name = "AddTitleButton";
             this.AddTitleButton.ShowImage = true;
             this.AddTitleButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.AddTitleToImage);
+            // 
+            // 图片上标题
+            // 
+            this.图片上标题.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.图片上标题.Image = ((System.Drawing.Image)(resources.GetObject("图片上标题.Image")));
+            this.图片上标题.Label = "图片上标题";
+            this.图片上标题.Name = "图片上标题";
+            this.图片上标题.ShowImage = true;
+            this.图片上标题.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.AddTopTitleToImage);
             // 
             // addLabelsButton
             // 
@@ -611,6 +624,12 @@
             this.addLabelsButton.Name = "addLabelsButton";
             this.addLabelsButton.ShowImage = true;
             this.addLabelsButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.addLabelsButton_Click);
+            // 
+            // 导出原图
+            // 
+            this.导出原图.Label = "导出原图";
+            this.导出原图.Name = "导出原图";
+            this.导出原图.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.ExportOriginalImage_Click);
             // 
             // 复制大图
             // 
@@ -633,12 +652,6 @@
             this.button1.Name = "button1";
             this.button1.ScreenTip = "组合后，调整组合形状，文字也会同步缩放";
             this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.pastePictureAndText);
-            // 
-            // 导出原图
-            // 
-            this.导出原图.Label = "导出原图";
-            this.导出原图.Name = "导出原图";
-            this.导出原图.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.ExportOriginalImage_Click);
             // 
             // button6
             // 
@@ -785,6 +798,11 @@
             this.button5.ShowImage = true;
             this.button5.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.current_Version);
             // 
+            // titleCenterCheckbox
+            // 
+            this.titleCenterCheckbox.Label = "是否居中";
+            this.titleCenterCheckbox.Name = "titleCenterCheckbox";
+            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -875,6 +893,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 开发者;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 复制大图;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 导出原图;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 图片上标题;
+        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox titleCenterCheckbox;
     }
 
     partial class ThisRibbonCollection
