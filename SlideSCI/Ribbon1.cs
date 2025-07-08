@@ -500,6 +500,8 @@ namespace SlideSCI
                     continue;
                 }
 
+                // 弹窗显示objType
+                //MessageBox.Show($"对象类型: {objType}");
                 // 检查是否为支持的类型：图片、视频、媒体对象
                 if (
                     objType == Office.MsoShapeType.msoPicture
@@ -507,6 +509,7 @@ namespace SlideSCI
                     || objType == Office.MsoShapeType.msoLinkedPicture
                     || objType == Office.MsoShapeType.msoEmbeddedOLEObject
                     || objType == Office.MsoShapeType.msoLinkedOLEObject
+                    || objType == Office.MsoShapeType.msoPlaceholder
                     || (
                         !excludeTextcheckBox2.Checked
                         && (
