@@ -3662,11 +3662,11 @@ namespace SlideSCI
 
                 selectedShape = sel.ShapeRange[1];
 
-                if (selectedShape.Type != Office.MsoShapeType.msoPicture && selectedShape.Type != Office.MsoShapeType.msoLinkedPicture)
-                {
-                    MessageBox.Show("所选对象不是图片，请重新选择。", "操作提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
+                // if (selectedShape.Type != Office.MsoShapeType.msoPicture && selectedShape.Type != Office.MsoShapeType.msoLinkedPicture)
+                // {
+                //     MessageBox.Show("所选对象不是图片，请重新选择。", "操作提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                //     return;
+                // }
 
                 // 2. 保存图片的原始状态（尺寸、位置和锁定设置）
                 float originalWidth = selectedShape.Width;
