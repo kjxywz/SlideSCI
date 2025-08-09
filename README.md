@@ -7,7 +7,7 @@
 
 ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-24_19-06-38-2025-01-24.png)
 
-【友情推荐】我的Adobe illustrator插件：https://github.com/Achuan-2/illustrator_sci_plugin
+【友情推荐】我的Adobe illustrator插件：https://github.com/Achuan-2/illustrator_sci_plugin，专为科研绘图设计，支持复制粘贴相对位置、形状尺寸批量设置、图片一键自动排列，一键添加子图label
 
 ## 📄 特别说明
 
