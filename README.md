@@ -7,7 +7,7 @@
 
 ![](https://fastly.jsdelivr.net/gh/Achuan-2/PicBed/assets/PixPin_2025-01-24_19-06-38-2025-01-24.png)
 
-【其他推荐】我的Adobe illustrator插件：https://github.com/Achuan-2/illustrator_sci_plugin
+【友情推荐】我的Adobe illustrator插件：https://github.com/Achuan-2/illustrator_sci_plugin
 
 ## 📄 特别说明
 
