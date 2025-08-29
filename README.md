@@ -10,6 +10,10 @@
 
 <img alt="PixPin_2025-08-29_15-11-12" src="https://s2.loli.net/2025/08/29/3dsS9UFtWL1niZx.png" />
 
+
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Achuan-2/SlideSCI&type=Date)](https://www.star-history.com/#Achuan-2/SlideSCI&Date)
+
 ## 1 ❤️ 友情推荐
 
 我的Adobe illustrator插件：[https://github.com/Achuan-2/illustrator_sci_plugin](https://github.com/Achuan-2/illustrator_sci_plugin)，专为科研绘图设计，支持复制粘贴相对位置、形状尺寸批量设置、图片一键自动排列，一键添加子图label
@@ -165,6 +169,8 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 - 未经授权，请勿将`SlideSCI`项目的任何内容用于商业或非法目的，否则后果自负。
 - 以任何方式查看此项目的人或直接或间接使用`SlideSCI`项目的任何脚本的使用者都应仔细阅读此声明。`本人` 保留随时更改或补充此免责声明的权利。一旦使用并复制了任何相关脚本或`SlideSCI`项目，则视为您已接受此免责声明。
 - 本项目遵循`AGPL-3.0 License`协议，如果本特别声明与`AGPL-3.0 License`协议有冲突之处，以本特别声明为准。
+
+
 
 > 您使用或者复制了本仓库且本人制作的任何代码或项目，则视为`已接受`此声明，请仔细阅读  
 > 您在本声明未发出之时点使用或者复制了本仓库且本人制作的任何代码或项目且此时还在使用，则视为`已接受`此声明，请仔细阅读
