@@ -100,7 +100,7 @@ Github地址：[https://github.com/Achuan-2/SlideSCI](https://github.com/Achuan-
 
 插件在Windows11 使用[Visual Studio Tools For Office](https://www.visualstudio.com/de/vs/office-tools/) 和C#语言开发，专为Microsoft Powerpoint设计，兼容安装到WPS（注：WPS版本不支持插入latex数学公式、插入markdown笔记，强行使用会造成卡死）
 
-> 插件只支持Windows端，不支持Mac端（因为Windows端的PPT插件和Mac端不一样，市面上很多的PPT插件，Windows端和Mac端都是独立开发的界面）
+> 插件只支持Windows端，不支持Mac端（因为Windows端的PPT插件和Mac端插件开发架构不一样，市面上很多的PPT插件，Windows端和Mac端都是独立开发的界面）
 
 ## 5 🖥️ 安装方法
 
