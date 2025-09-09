@@ -1271,7 +1271,18 @@ namespace SlideSCI
                 new string[] { "python", "matlab", "javascript", "html", "css", "R",
                 "fortran" }
             );
-            languageSelect.SelectedIndex = 0;
+
+            // Load default language from settings
+            string defaultLanguage = Properties.Settings.Default.selectedCodeLanguage;
+            int defaultIndex = languageSelect.Items.IndexOf(defaultLanguage);
+            if (defaultIndex >= 0)
+            {
+                languageSelect.SelectedIndex = defaultIndex;
+            }
+            else
+            {
+                languageSelect.SelectedIndex = 0; // Default to first item if not found
+            }
 
             Button okButton = new Button()
             {
@@ -1288,6 +1299,10 @@ namespace SlideSCI
             {
                 string code = codeInput.Text.Trim();
                 string language = languageSelect.SelectedItem.ToString();
+
+                // Save selected language to settings
+                Properties.Settings.Default.selectedCodeLanguage = language;
+                Properties.Settings.Default.Save();
 
                 if (!string.IsNullOrEmpty(code))
                 {

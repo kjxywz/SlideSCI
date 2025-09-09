@@ -77,5 +77,8 @@
     <Setting Name="imgAddTitleCenter" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="selectedCodeLanguage" Type="System.String" Scope="User">
+      <Value Profile="(Default)">matlab</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

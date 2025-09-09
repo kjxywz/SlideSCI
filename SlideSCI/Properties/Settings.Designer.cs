@@ -322,5 +322,17 @@ namespace SlideSCI.Properties {
                 this["imgAddTitleCenter"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("matlab")]
+        public string selectedCodeLanguage {
+            get {
+                return ((string)(this["selectedCodeLanguage"]));
+            }
+            set {
+                this["selectedCodeLanguage"] = value;
+            }
+        }
     }
 }
