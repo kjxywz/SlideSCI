@@ -205,6 +205,50 @@ namespace SlideSCI
                         ),
                     }
                 },
+                {
+                    "fortran",
+                    new List<(string, RegexOptions, string)>
+                    {
+                        // 注释 - 最高优先级，整行匹配（支持C风格注释和!注释）
+                        (@"!.*?$", RegexOptions.Multiline | RegexOptions.IgnoreCase, "comment"),
+                        // 字符串 - 只在非注释行中匹配
+                        (
+                            @"(?:""[^""\n\\]*(?:\\.[^""\n\\]*)*""|'[^'\n\\]*(?:\\.[^'\n\\]*)*')",
+                            RegexOptions.None,
+                            "string"
+                        ),
+                        // 数字 (包括科学计数法和Fortran特有的D记号)
+                        (@"\b\d*\.?\d+([eEdD][-+]?\d+)?\b", RegexOptions.None, "number"),
+                        // Fortran特殊短语关键字 (必须完整匹配)
+                        (
+                            @"\b(?i)implicit\s+none\b",
+                            RegexOptions.IgnoreCase,
+                            "keyword"
+                        ),
+                        (
+                            @"\b(?i)double\s+precision\b",
+                            RegexOptions.IgnoreCase,
+                            "keyword"
+                        ),
+                        (
+                            @"\b(?i)end\s+(program|subroutine|function|module|type|interface|do|if|select)\b",
+                            RegexOptions.IgnoreCase,
+                            "keyword"
+                        ),
+                        // Fortran关键字 (包括现代Fortran和传统Fortran)
+                        (
+                            @"\b(?i)(program|end|subroutine|function|module|use|implicit|none|integer|real|complex|logical|character|parameter|dimension|allocatable|pointer|target|intent|in|out|inout|optional|public|private|save|data|common|equivalence|external|intrinsic|interface|contains|procedure|abstract|extends|class|type|select|case|default|where|elsewhere|forall|pure|elemental|recursive|result|only|operator|assignment|generic|sequence|bind|value|volatile|asynchronous|protected|enum|enumerator|associate|block|critical|sync|all|images|memory|lock|unlock|event|post|wait|co_broadcast|co_max|co_min|co_sum|co_reduce|atomic|define|ref|cas|fetch|add|and|or|xor|if|then|else|elseif|endif|do|while|enddo|continue|exit|cycle|stop|pause|return|call|goto|assign|to|format|open|close|read|write|print|rewind|backspace|endfile|inquire|namelist|include|import)\b",
+                            RegexOptions.IgnoreCase,
+                            "keyword"
+                        ),
+                        // 内置函数和过程
+                        (
+                            @"\b(?i)(abs|acos|aimag|aint|alog|alog10|amax0|amax1|amin0|amin1|amod|anint|asin|atan|atan2|cabs|ccos|cexp|char|clog|cmplx|conjg|cos|cosh|csin|csqrt|dabs|dacos|dasin|datan|datan2|dble|dcos|dcosh|ddim|dexp|dim|dint|dlog|dlog10|dmax1|dmin1|dmod|dnint|dprod|dsign|dsin|dsinh|dsqrt|dtan|dtanh|exp|float|iabs|ichar|idim|idint|idnint|ifix|index|int|isign|len|lge|lgt|lle|llt|log|log10|max|max0|max1|min|min0|min1|mod|nint|real|sign|sin|sinh|sngl|sqrt|tan|tanh|trim|adjustl|adjustr|all|any|count|maxval|minval|product|sum|matmul|dot_product|pack|unpack|reshape|spread|merge|eoshift|cshift|transpose|lbound|ubound|size|shape|allocated|associated|present|kind|selected_int_kind|selected_real_kind|huge|tiny|epsilon|precision|radix|range|digits|minexponent|maxexponent|fraction|exponent|spacing|rrspacing|scale|set_exponent|nearest|ceiling|floor|modulo|sign|verify|scan|null|transfer|bit_size|btest|iand|ibclr|ibits|ibset|ieor|ior|ishft|ishftc|not|mvbits|random_number|random_seed|system_clock|date_and_time|cpu_time)\b",
+                            RegexOptions.IgnoreCase,
+                            "property"
+                        ),
+                    }
+                },
             };
         }
 
@@ -220,6 +264,14 @@ namespace SlideSCI
                 { "css", "css" },
                 { "htm", "html" },
                 { "R", "r" },
+                { "Fortran", "fortran" },
+                { "f90", "fortran" },
+                { "f95", "fortran" },
+                { "f03", "fortran" },
+                { "f08", "fortran" },
+                { "f77", "fortran" },
+                { "for", "fortran" },
+                { "f", "fortran" }
             };
         }
 
@@ -255,13 +307,28 @@ namespace SlideSCI
                 var regex = new Regex(pattern, options);
                 var matches = regex.Matches(code);
 
-                // 设置优先级：注释最高优先级
-                int priority = type == "comment" ? 0 : 1;
+                // 设置优先级：注释最高优先级，然后是字符串
+                int priority = type == "comment" ? 0 : (type == "string" ? 1 : 2);
 
                 foreach (Match match in matches)
                 {
                     allMatches.Add((match, type, priority));
                 }
+            }
+
+            // 过滤掉位于字符串内部的注释（!）
+
+            // 先获取所有字符串区间
+            var stringIntervals = allMatches
+                .Where(m => m.type == "string")
+                .Select(m => (start: m.match.Index, end: m.match.Index + m.match.Length))
+                .ToList();
+
+            if (stringIntervals.Count > 0)
+            {
+                allMatches = allMatches
+                    .Where(m => !(m.type == "comment" && stringIntervals.Any(si => m.match.Index >= si.start && m.match.Index < si.end)))
+                    .ToList();
             }
 
             // 按优先级排序，优先级数字越小越优先
