@@ -1,0 +1,42 @@
+name: Build SlideSCI
+
+on:
+  push:
+    branches: [ main ]   # 如果你的默认分支叫 master，就把 main 改成 master
+  workflow_dispatch:      # 允许在 Actions 页面手动触发
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore packages
+        run: nuget restore SlideSCI.sln
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Release
+        run: msbuild SlideSCI.sln /t:Rebuild /p:Configuration=Release /m
+
+      - name: Package artifacts
+        shell: pwsh
+        run: |
+          $out = "artifacts"
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          Copy-Item -Recurse -Force "SlideSCI\bin\Release\*" $out
+          Compress-Archive -Path $out\* -DestinationPath "SlideSCI_Release.zip" -Force
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SlideSCI_Release
+          path: |
+            artifacts/**
+            SlideSCI_Release.zip
