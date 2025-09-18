@@ -1,9 +1,10 @@
-// CodeHighlighter.cs  —  Drop-in replacement (C# 7.3 compatible)
-// Provides instance method ApplyHighlighting(...) expected by Ribbon1.cs
-// and regex patterns including STATA language.
+// CodeHighlighter.cs — TextRange-only build (C# 7.3 compatible)
+// No direct reference to TextRange2/TextRange2Font: works on CI with Office15 PIA.
+// Provides instance ApplyHighlighting(...) expected by Ribbon1.cs.
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
@@ -15,7 +16,6 @@ namespace SlideSCI
         private static readonly Dictionary<string, List<(string pattern, RegexOptions options, string style)>> languagePatterns
             = new Dictionary<string, List<(string, RegexOptions, string)>>(StringComparer.OrdinalIgnoreCase);
 
-        // compiled cache
         private static readonly Dictionary<string, List<PatternEntry>> compiledCache
             = new Dictionary<string, List<PatternEntry>>(StringComparer.OrdinalIgnoreCase);
 
@@ -38,7 +38,6 @@ namespace SlideSCI
 
         private static void InitializeAliases()
         {
-            // Stata
             languageAliases["stata"] = "stata";
             languageAliases["do"] = "stata";
             languageAliases["ado"] = "stata";
@@ -66,24 +65,18 @@ namespace SlideSCI
                 // keywords (control/meta)
                 (
                     @"\b(?i:(if|else|in|using|by|bysort|quietly|noisily|qui|capture|preserve|restore|program|end|syntax|args|local|global|tempvar|tempname|tempfile|scalar|matrix|mata|return|ereturn|post|eststo|esttab|estadd|foreach|forvalues|while|continue|break|version|set|clear|cls|pause|exit|do|ado|which|graph|twoway|histogram|kdensity|scatter|line|bar|tsset|xtset|timer|assert|confirm|display|di|pwd|cd|mkdir|rmdir|save|use|import|export|outsheet|insheet|log|translate|help|view|about|update))\b",
-                    RegexOptions.IgnoreCase,
-                    "keyword"
+                    RegexOptions.IgnoreCase, "keyword"
                 ),
-
                 // keywords (data & estimation)
                 (
                     @"\b(?i:(gen|generate|egen|replace|drop|keep|order|move|rename|label|lab(?:el)?(?:\s+(?:var|val|def|values|data))?|destring|tostring|encode|decode|recast|format|contract|collapse|append|merge|joinby|cross|reshape|separate|split|expand|sample|duplicates|distinct|levelsof|tabulate|tab|summarize|sum|count|pctile|xtile|corr(?:elation)?|corrgram|areg|regress|logit|probit|tobit|poisson|nbreg|ivregress|gmm|qreg|xtreg|xtlogit|xtprobit|xtpoisson|mixed|meqrlogit|melogit|ppmlhdfe|reghdfe|hdfe|felsdvreg|teffects|mi|impute|stset|stcox|stmixed|svy|bootstrap|jackknife|permute|recode))\b",
-                    RegexOptions.IgnoreCase,
-                    "keyword"
+                    RegexOptions.IgnoreCase, "keyword"
                 ),
-
-                // functions
+                // functions -> property
                 (
                     @"\b(?i:(abs|ceil|floor|int|round|min|max|sum|mean|cond|inlist|inrange|missing|real|string|substr|subinstr|strpos|ustrpos|regexm|regexr|regexs|ustrregexm|ustrregexrf|ustrregexra|length|strlen|ustrlen|lower|upper|proper|trim|itrim|ltrim|rtrim|date|clock|mdy|dow|dofc|cofc|ofd|wofd|runiform|rnormal|invnormal|exp|log|ln|sqrt))\b",
-                    RegexOptions.IgnoreCase,
-                    "property"
+                    RegexOptions.IgnoreCase, "property"
                 ),
-
                 // macros
                 (@"`[A-Za-z_][A-Za-z0-9_]*'", RegexOptions.None, "property"),
                 (@"``[A-Za-z_][A-Za-z0-9_]*''", RegexOptions.None, "property"),
@@ -105,124 +98,113 @@ namespace SlideSCI
             }
         }
 
-        private static string NormalizeLanguage(string languageOrAlias)
-        {
-            if (string.IsNullOrWhiteSpace(languageOrAlias)) return string.Empty;
-            string mapped;
-            if (languageAliases.TryGetValue(languageOrAlias.Trim(), out mapped)) return mapped;
-            return languageOrAlias.Trim();
-        }
-
         private static IReadOnlyList<PatternEntry> GetPatterns(string languageOrAlias)
         {
-            var key = NormalizeLanguage(languageOrAlias);
+            if (string.IsNullOrWhiteSpace(languageOrAlias)) return Array.Empty<PatternEntry>();
+            string mapped;
+            if (languageAliases.TryGetValue(languageOrAlias.Trim(), out mapped)) languageOrAlias = mapped;
             List<PatternEntry> list;
-            if (compiledCache.TryGetValue(key, out list)) return list;
+            if (compiledCache.TryGetValue(languageOrAlias.Trim(), out list)) return list;
             return Array.Empty<PatternEntry>();
         }
 
-        // ======= Instance API expected by Ribbon1.cs =======
+        // ========= Public API expected by Ribbon1 =========
 
-        // 常用：ApplyHighlighting(TextRange2, "stata")
-        public void ApplyHighlighting(PowerPoint.TextRange2 range, string language)
-        {
-            if (range == null) return;
-            ApplyToTextRange2(range, language);
-        }
-
-        // 兼容参数顺序相反的写法：ApplyHighlighting("stata", TextRange2)
-        public void ApplyHighlighting(string language, PowerPoint.TextRange2 range)
-        {
-            if (range == null) return;
-            ApplyToTextRange2(range, language);
-        }
-
-        // 兜底：老的 TextRange 接口
+        // 1) 直接支持 TextRange
         public void ApplyHighlighting(PowerPoint.TextRange range, string language)
         {
             if (range == null) return;
-            // 简单转写：把 TextRange 的文本提出来，定位用 1-based 的 Characters
-            string text = range.Text ?? string.Empty;
-            var pats = GetPatterns(language);
-            foreach (var pe in pats)
-            {
-                foreach (Match m in pe.Regex.Matches(text))
-                {
-                    try
-                    {
-                        // TextRange.Characters 是 1-based
-                        var ch = range.Characters(m.Index + 1, m.Length);
-                        SetStyle(ch.Font, pe.Style);
-                    }
-                    catch { /* ignore individual highlight errors */ }
-                }
-            }
+            ApplyToTextRange(range, language);
         }
 
-        // 万能兜底（仅为通过编译；若被命中则不做任何事）
-        public void ApplyHighlighting(params object[] _)
+        // 2) 兜底：任何类型（例如 TextRange2）都会落到这里
+        public void ApplyHighlighting(object range, string language)
         {
-            // no-op
-        }
+            if (range == null) return;
 
-        // ======= 实际高亮实现（TextRange2） =======
-        private void ApplyToTextRange2(PowerPoint.TextRange2 range, string language)
-        {
-            string text = range.Text ?? string.Empty;
-            var pats = GetPatterns(language);
-            foreach (var pe in pats)
-            {
-                foreach (Match m in pe.Regex.Matches(text))
-                {
-                    try
-                    {
-                        // TextRange2.Characters 是 1-based
-                        var ch = range.Characters[m.Index + 1, m.Length];
-                        SetStyle(ch.Font, pe.Style);
-                    }
-                    catch { /* 单个片段失败不影响整体 */ }
-                }
-            }
-        }
+            // 优先处理 TextRange
+            var tr = range as PowerPoint.TextRange;
+            if (tr != null) { ApplyToTextRange(tr, language); return; }
 
-        // 简单的样式映射（可在 Ribbon 里统一颜色，这里先给一个通用方案）
-        private static void SetStyle(PowerPoint.TextRange2Font font, string style)
-        {
-            int rgb;
-            switch ((style ?? "").ToLowerInvariant())
-            {
-                case "comment":  rgb = 0x008000; break; // 绿色
-                case "string":   rgb = 0xAA5500; break; // 棕橙
-                case "number":   rgb = 0x1A73E8; break; // 蓝
-                case "keyword":  rgb = 0xB000B0; break; // 紫
-                case "property": rgb = 0x795548; break; // 棕
-                default:         rgb = 0x000000; break; // 黑
-            }
+            // 兼容 TextRange2（CI 上没有类型定义，所以用反射）
             try
             {
-                font.Fill.ForeColor.RGB = rgb;
-            }
-            catch { /* 某些主题下可能抛异常，忽略 */ }
-        }
+                var type = range.GetType();                         // e.g. TextRange2
+                var textProp = type.GetProperty("Text");
+                var charsIndexer = type.GetProperty("Characters");  // indexer-like property
+                if (textProp == null || charsIndexer == null) return;
 
-        // TextRange 版本（老接口）
-        private static void SetStyle(PowerPoint.Font font, string style)
-        {
-            int rgb;
-            switch ((style ?? "").ToLowerInvariant())
-            {
-                case "comment":  rgb = 0x008000; break;
-                case "string":   rgb = 0xAA5500; break;
-                case "number":   rgb = 0x1A73E8; break;
-                case "keyword":  rgb = 0xB000B0; break;
-                case "property": rgb = 0x795548; break;
-                default:         rgb = 0x000000; break;
-            }
-            try
-            {
-                font.Color.RGB = rgb;
+                string text = textProp.GetValue(range, null) as string ?? string.Empty;
+                var pats = GetPatterns(language);
+                foreach (var pe in pats)
+                {
+                    foreach (Match m in pe.Regex.Matches(text))
+                    {
+                        try
+                        {
+                            // TextRange2.Characters is 1-based, length as second arg
+                            var ch = charsIndexer.GetValue(range, new object[] { m.Index + 1, m.Length });
+
+                            // ch.Font 可能是 TextRange2Font，继续用反射设置 Fill.ForeColor.RGB
+                            var fontProp = ch.GetType().GetProperty("Font");
+                            if (fontProp != null)
+                            {
+                                var fontObj = fontProp.GetValue(ch, null);
+                                // font.Fill.ForeColor.RGB
+                                var fillProp = fontObj.GetType().GetProperty("Fill");
+                                if (fillProp != null)
+                                {
+                                    var fill = fillProp.GetValue(fontObj, null);
+                                    var fcProp = fill.GetType().GetProperty("ForeColor");
+                                    if (fcProp != null)
+                                    {
+                                        var fc = fcProp.GetValue(fill, null);
+                                        var rgbProp = fc.GetType().GetProperty("RGB");
+                                        if (rgbProp != null) rgbProp.SetValue(fc, StyleRgb(pe.Style), null);
+                                    }
+                                }
+                            }
+                        }
+                        catch { /* ignore single failure */ }
+                    }
+                }
             }
             catch { /* ignore */ }
+        }
+
+        // ========== Internal implementations ==========
+
+        private void ApplyToTextRange(PowerPoint.TextRange range, string language)
+        {
+            string text = range.Text ?? string.Empty;
+            var pats = GetPatterns(language);
+            foreach (var pe in pats)
+            {
+                foreach (Match m in pe.Regex.Matches(text))
+                {
+                    try
+                    {
+                        // TextRange.Characters is 1-based
+                        var ch = range.Characters(m.Index + 1, m.Length);
+                        // TextRange.Font.Color.RGB
+                        ch.Font.Color.RGB = StyleRgb(pe.Style);
+                    }
+                    catch { /* ignore */ }
+                }
+            }
+        }
+
+        private static int StyleRgb(string style)
+        {
+            switch ((style ?? "").ToLowerInvariant())
+            {
+                case "comment":  return 0x008000; // green
+                case "string":   return 0xAA5500; // brown-orange
+                case "number":   return 0x1A73E8; // blue
+                case "keyword":  return 0xB000B0; // purple
+                case "property": return 0x795548; // brown
+                default:         return 0x000000; // black
+            }
         }
     }
 }
