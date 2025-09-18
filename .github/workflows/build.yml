@@ -2,8 +2,8 @@ name: Build SlideSCI
 
 on:
   push:
-    branches: [ main ]   # 如果你的默认分支叫 master，就把 main 改成 master
-  workflow_dispatch:      # 允许在 Actions 页面手动触发
+    branches: [ main ]   # 如果你的默认分支是 master 就改成 master
+  workflow_dispatch:
 
 jobs:
   build-win:
@@ -22,8 +22,23 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      # ★ 关键：在 CI 里直接改 csproj，关闭所有签名相关设置，去掉 pfx 引用
+      - name: Disable signing in csproj (CI only)
+        shell: pwsh
+        run: |
+          $p = "SlideSCI/SlideSCI.csproj"
+          Write-Host "Patching $p to disable signing in CI..."
+          $c = Get-Content $p -Raw
+          $c = $c -replace '<SignAssembly>true</SignAssembly>','<SignAssembly>false</SignAssembly>'
+          $c = $c -replace '<SignManifests>true</SignManifests>','<SignManifests>false</SignManifests>'
+          $c = $c -replace '<AssemblyOriginatorKeyFile>.*?</AssemblyOriginatorKeyFile>',''
+          $c = $c -replace '<ManifestCertificateThumbprint>.*?</ManifestCertificateThumbprint>',''
+          $c = $c -replace '<ManifestKeyFile>.*?</ManifestKeyFile>',''
+          Set-Content $p $c
+
+      # ★ 只编译项目（不是发布），并再次用命令行参数兜底关闭签名/清单
       - name: Build Release
-        run: msbuild SlideSCI.sln /t:Rebuild /p:Configuration=Release /p:SignAssembly=false /p:SignManifests=false /m
+        run: msbuild SlideSCI/SlideSCI.csproj /t:Rebuild /p:Configuration=Release /p:SignAssembly=false /p:SignManifests=false /p:GenerateManifests=false /m
 
       - name: Package artifacts
         shell: pwsh
