@@ -23,7 +23,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build Release
-        run: msbuild SlideSCI.sln /t:Rebuild /p:Configuration=Release /m
+        run: msbuild SlideSCI.sln /t:Rebuild /p:Configuration=Release /p:SignAssembly=false /p:SignManifests=false /m
 
       - name: Package artifacts
         shell: pwsh
