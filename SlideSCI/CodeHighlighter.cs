@@ -1,209 +1,380 @@
-// CodeHighlighter.cs — TextRange-only build (C# 7.3 compatible)
-// No direct reference to TextRange2/TextRange2Font: works on CI with Office15 PIA.
-// Provides instance ApplyHighlighting(...) expected by Ribbon1.cs.
-
 using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Drawing;
+using System.Linq; // Add this line
 using System.Text.RegularExpressions;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
 namespace SlideSCI
 {
-    public sealed class CodeHighlighter
+    public class CodeHighlighter
     {
-        // language -> list of (pattern, options, styleKey)
-        private static readonly Dictionary<string, List<(string pattern, RegexOptions options, string style)>> languagePatterns
-            = new Dictionary<string, List<(string, RegexOptions, string)>>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, Color> themeColors;
+        private Dictionary<
+            string,
+            List<(string pattern, RegexOptions options, string type)>
+        > languagePatterns;
+        private Dictionary<string, string> languageAliases;
+        private HashSet<string> processedRanges;
 
-        private static readonly Dictionary<string, List<PatternEntry>> compiledCache
-            = new Dictionary<string, List<PatternEntry>>(StringComparer.OrdinalIgnoreCase);
-
-        private static readonly Dictionary<string, string> languageAliases
-            = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        public sealed class PatternEntry
+        public CodeHighlighter(bool isDarkTheme)
         {
-            public Regex Regex { get; private set; }
-            public string Style { get; private set; }
-            public PatternEntry(Regex regex, string style) { Regex = regex; Style = style; }
-        }
-
-        static CodeHighlighter()
-        {
+            processedRanges = new HashSet<string>();
+            InitializeColors(isDarkTheme);
             InitializePatterns();
             InitializeAliases();
-            CompileAll();
         }
 
-        private static void InitializeAliases()
+        private void InitializeColors(bool isDarkTheme)
         {
-            languageAliases["stata"] = "stata";
-            languageAliases["do"] = "stata";
-            languageAliases["ado"] = "stata";
-        }
-
-        private static void InitializePatterns()
-        {
-            languagePatterns.Clear();
-
-            // ===== STATA =====
-            languagePatterns["stata"] = new List<(string, RegexOptions, string)>
+            if (isDarkTheme)
             {
-                // comments
-                (@"(?s)/\*.*?\*/", RegexOptions.None, "comment"),
-                (@"(?m)^[ \t]*\*.*?$", RegexOptions.Multiline, "comment"),
-                (@"//.*?$", RegexOptions.Multiline, "comment"),
+                themeColors = new Dictionary<string, Color>
+                {
+                    { "keyword", Color.FromArgb(86, 156, 214) }, // 蓝色
+                    { "comment", Color.FromArgb(87, 166, 74) }, // 绿色
+                    { "string", Color.FromArgb(214, 157, 133) }, // 棕色
+                    { "number", Color.FromArgb(181, 206, 168) }, // 蓝绿色
+                    { "property", Color.FromArgb(156, 220, 254) }, // 浅蓝色
+                    { "selector", Color.FromArgb(215, 186, 125) }, // 金色
+                };
+            }
+            else
+            {
+                themeColors = new Dictionary<string, Color>
+                {
+                    { "keyword", Color.FromArgb(0, 0, 255) }, // 蓝色
+                    { "comment", Color.FromArgb(0, 128, 0) }, // 绿色
+                    { "string", Color.FromArgb(163, 21, 21) }, // 棕色
+                    { "number", Color.FromArgb(9, 134, 88) }, // 蓝绿色
+                    { "property", Color.FromArgb(0, 134, 209) }, // 浅蓝色
+                    { "selector", Color.FromArgb(168, 99, 0) }, // 褐色
+                };
+            }
+        }
 
-                // strings
-                (@"(?s)""([^""\\]|\\.)*""", RegexOptions.None, "string"),
-                (@"(?s)`""[\s\S]*?""'", RegexOptions.None, "string"),
-
-                // numbers
-                (@"\b\d*\.?\d+(?:[eE][-+]?\d+)?\b", RegexOptions.None, "number"),
-
-                // keywords (control/meta)
-                (
-                    @"\b(?i:(if|else|in|using|by|bysort|quietly|noisily|qui|capture|preserve|restore|program|end|syntax|args|local|global|tempvar|tempname|tempfile|scalar|matrix|mata|return|ereturn|post|eststo|esttab|estadd|foreach|forvalues|while|continue|break|version|set|clear|cls|pause|exit|do|ado|which|graph|twoway|histogram|kdensity|scatter|line|bar|tsset|xtset|timer|assert|confirm|display|di|pwd|cd|mkdir|rmdir|save|use|import|export|outsheet|insheet|log|translate|help|view|about|update))\b",
-                    RegexOptions.IgnoreCase, "keyword"
-                ),
-                // keywords (data & estimation)
-                (
-                    @"\b(?i:(gen|generate|egen|replace|drop|keep|order|move|rename|label|lab(?:el)?(?:\s+(?:var|val|def|values|data))?|destring|tostring|encode|decode|recast|format|contract|collapse|append|merge|joinby|cross|reshape|separate|split|expand|sample|duplicates|distinct|levelsof|tabulate|tab|summarize|sum|count|pctile|xtile|corr(?:elation)?|corrgram|areg|regress|logit|probit|tobit|poisson|nbreg|ivregress|gmm|qreg|xtreg|xtlogit|xtprobit|xtpoisson|mixed|meqrlogit|melogit|ppmlhdfe|reghdfe|hdfe|felsdvreg|teffects|mi|impute|stset|stcox|stmixed|svy|bootstrap|jackknife|permute|recode))\b",
-                    RegexOptions.IgnoreCase, "keyword"
-                ),
-                // functions -> property
-                (
-                    @"\b(?i:(abs|ceil|floor|int|round|min|max|sum|mean|cond|inlist|inrange|missing|real|string|substr|subinstr|strpos|ustrpos|regexm|regexr|regexs|ustrregexm|ustrregexrf|ustrregexra|length|strlen|ustrlen|lower|upper|proper|trim|itrim|ltrim|rtrim|date|clock|mdy|dow|dofc|cofc|ofd|wofd|runiform|rnormal|invnormal|exp|log|ln|sqrt))\b",
-                    RegexOptions.IgnoreCase, "property"
-                ),
-                // macros
-                (@"`[A-Za-z_][A-Za-z0-9_]*'", RegexOptions.None, "property"),
-                (@"``[A-Za-z_][A-Za-z0-9_]*''", RegexOptions.None, "property"),
+        private void InitializePatterns()
+        {
+            languagePatterns = new Dictionary<
+                string,
+                List<(string pattern, RegexOptions options, string type)>
+            >
+            {
+                {
+                    "csharp",
+                    new List<(string, RegexOptions, string)>
+                    {
+                        // 注释 - 放在最前面优先匹配
+                        (@"/\*[\s\S]*?\*/", RegexOptions.None, "comment"),
+                        (@"//[^\n]*", RegexOptions.None, "comment"),
+                        // 字符串
+                        (@"@""([^""]|"""")*""|""([^""\n\\]|\\.)*""", RegexOptions.None, "string"),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?\b", RegexOptions.None, "number"),
+                        // 关键字
+                        (
+                            @"\b(abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|true|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|virtual|void|volatile|while)\b",
+                            RegexOptions.None,
+                            "keyword"
+                        ),
+                    }
+                },
+                {
+                    "python",
+                    new List<(string, RegexOptions, string)>
+                    {
+                        // 注释 - 放在最前面优先匹配
+                        (@"#.*?$", RegexOptions.Multiline, "comment"),
+                        // 字符串
+                        (
+                            @"(?:[ruf]|rf|fr)?(?:'''[\s\S]*?'''|\""""""[\s\S]*?\""""""|\x27[^\x27\n\\]*(?:\\.[^\x27\n\\]*)*\x27|\""[^\""\n\\]*(?:\\.[^\""\n\\]*)*\"")",
+                            RegexOptions.None,
+                            "string"
+                        ),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?\b", RegexOptions.None, "number"),
+                        (
+                            @"\b(and|as|assert|async|await|break|class|continue|def|del|elif|else|except|False|finally|for|from|global|if|import|in|is|lambda|None|nonlocal|not|or|pass|raise|return|True|try|while|with|yield)\b",
+                            RegexOptions.None,
+                            "keyword"
+                        ),
+                    }
+                },
+                {
+                    "javascript",
+                    new List<(string, RegexOptions, string)>
+                    {
+                        // 注释 - 放在最前面优先匹配
+                        (@"/\*[\s\S]*?\*/|//.*?$", RegexOptions.Multiline, "comment"),
+                        // 字符串
+                        (
+                            @"`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|""(?:[^""\\]|\\.)*""",
+                            RegexOptions.None,
+                            "string"
+                        ),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?\b", RegexOptions.None, "number"),
+                        (
+                            @"\b(async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|new|return|super|switch|this|throw|try|typeof|var|void|while|with|yield|let)\b",
+                            RegexOptions.None,
+                            "keyword"
+                        ),
+                    }
+                },
+                {
+                    "matlab",
+                    new List<(string, RegexOptions, string)>
+                    {
+                        // 注释 - 放在最前面优先匹配
+                        (@"%.*?$", RegexOptions.Multiline, "comment"),
+                        // 字符串 (支持单引号和双引号)
+                        (@"(?:""[^""\n]*""|'[^'\n]*')", RegexOptions.None, "string"),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?\b", RegexOptions.None, "number"),
+                        // 关键字
+                        (
+                            @"\b(break|case|catch|classdef|continue|else|elseif|end|for|function|global|if|otherwise|parfor|persistent|return|switch|try|while|clear|close|load|save|figure|plot|xlabel|ylabel|title|grid|hold|zeros|ones|rand|eye|disp|input|fprintf|strcmp|length|size|max|min|sum|mean|std|find|sort|reshape)\b",
+                            RegexOptions.None,
+                            "keyword"
+                        ),
+                    }
+                },
+                {
+                    "css",
+                    new List<(string, RegexOptions, string)>
+                    {
+                        // 注释 - 放在最前面优先匹配
+                        (@"/\*[\s\S]*?\*/", RegexOptions.None, "comment"),
+                        // CSS选择器 - 在大括号前的任何非大括号内容
+                        (@"[^{}]+(?=\s*{)", RegexOptions.None, "selector"),
+                        // CSS属性
+                        (@"[\w-]+(?=\s*:)", RegexOptions.None, "property"),
+                        // 字符串
+                        (@"'[^']*'|""[^""]*""", RegexOptions.None, "string"),
+                        // 数字和单位
+                        (
+                            @"\b\d*\.?\d+(?:px|em|rem|vh|vw|%|s|ms|deg|rad|turn)?\b",
+                            RegexOptions.None,
+                            "number"
+                        ),
+                        // 关键字
+                        (
+                            @"\b(important|inherit|initial|unset|none|auto|hidden|visible|block|inline|flex|grid|absolute|relative|fixed|static|left|right|top|bottom|center|justify|stretch|wrap|nowrap|solid|dashed|dotted)\b",
+                            RegexOptions.None,
+                            "keyword"
+                        ),
+                    }
+                },
+                {
+                    "html",
+                    new List<(string, RegexOptions, string)>
+                    {
+                        // 注释 - 放在最前面优先匹配
+                        (@"<!--[\s\S]*?-->", RegexOptions.None, "comment"),
+                        // 字符串
+                        (@"'[^']*'|""[^""]*""", RegexOptions.None, "string"),
+                        // HTML标签
+                        (
+                            @"</?\w+(?:\s+\w+(?:\s*=\s*(?:"".*?""|'.*?'|[\^'""\s]\S+))?)*\s*/?>",
+                            RegexOptions.None,
+                            "keyword"
+                        ),
+                        // 数字
+                        (@"\b\d+\b", RegexOptions.None, "number"),
+                    }
+                },
+                {
+                    "r",
+                    new List<(string, RegexOptions, string)>
+                    {
+                        // 注释 - 放在最前面优先匹配
+                        (@"#.*?$", RegexOptions.Multiline, "comment"),
+                        // 字符串 (支持单引号和双引号)
+                        (
+                            @"(?:""[^""\n\\]*(?:\\.[^""\n\\]*)*""|'[^'\n\\]*(?:\\.[^'\n\\]*)*')",
+                            RegexOptions.None,
+                            "string"
+                        ),
+                        // 数字
+                        (@"\b\d*\.?\d+([eE][-+]?\d+)?L?\b", RegexOptions.None, "number"),
+                        // 关键字和函数
+                        (
+                            @"\b(if|else|for|in|while|function|repeat|next|break|TRUE|FALSE|NULL|Inf|NaN|NA|NA_integer_|NA_real_|NA_complex_|NA_character_|c|list|data\.frame|matrix|array|factor|length|names|dim|class|str|summary|head|tail|print|cat|paste|paste0|substr|nchar|grep|gsub|which|is\.na|is\.null|is\.numeric|is\.character|is\.logical|as\.numeric|as\.character|as\.logical|mean|median|sd|var|min|max|sum|apply|lapply|sapply|mapply|tapply|aggregate|merge|rbind|cbind|subset|sort|order|unique|duplicated|table|plot|hist|boxplot|barplot|pie|lines|points|abline|legend|title|xlabel|ylabel|par|dev\.new|dev\.off|png|pdf|jpeg|library|require|install\.packages|source|load|save|write\.csv|read\.csv|read\.table|write\.table)\b",
+                            RegexOptions.None,
+                            "keyword"
+                        ),
+                    }
+                },
+                {
+                    "fortran",
+                    new List<(string, RegexOptions, string)>
+                    {
+                        // 注释 - 最高优先级，整行匹配（支持C风格注释和!注释）
+                        (@"!.*?$", RegexOptions.Multiline | RegexOptions.IgnoreCase, "comment"),
+                        // 字符串 - 只在非注释行中匹配
+                        (
+                            @"(?:""[^""\n\\]*(?:\\.[^""\n\\]*)*""|'[^'\n\\]*(?:\\.[^'\n\\]*)*')",
+                            RegexOptions.None,
+                            "string"
+                        ),
+                        // 数字 (包括科学计数法和Fortran特有的D记号)
+                        (@"\b\d*\.?\d+([eEdD][-+]?\d+)?\b", RegexOptions.None, "number"),
+                        // Fortran特殊短语关键字 (必须完整匹配)
+                        (
+                            @"\b(?i)implicit\s+none\b",
+                            RegexOptions.IgnoreCase,
+                            "keyword"
+                        ),
+                        (
+                            @"\b(?i)double\s+precision\b",
+                            RegexOptions.IgnoreCase,
+                            "keyword"
+                        ),
+                        (
+                            @"\b(?i)end\s+(program|subroutine|function|module|type|interface|do|if|select)\b",
+                            RegexOptions.IgnoreCase,
+                            "keyword"
+                        ),
+                        // Fortran关键字 (包括现代Fortran和传统Fortran)
+                        (
+                            @"\b(?i)(program|end|subroutine|function|module|use|implicit|none|integer|real|complex|logical|character|parameter|dimension|allocatable|pointer|target|intent|in|out|inout|optional|public|private|save|data|common|equivalence|external|intrinsic|interface|contains|procedure|abstract|extends|class|type|select|case|default|where|elsewhere|forall|pure|elemental|recursive|result|only|operator|assignment|generic|sequence|bind|value|volatile|asynchronous|protected|enum|enumerator|associate|block|critical|sync|all|images|memory|lock|unlock|event|post|wait|co_broadcast|co_max|co_min|co_sum|co_reduce|atomic|define|ref|cas|fetch|add|and|or|xor|if|then|else|elseif|endif|do|while|enddo|continue|exit|cycle|stop|pause|return|call|goto|assign|to|format|open|close|read|write|print|rewind|backspace|endfile|inquire|namelist|include|import)\b",
+                            RegexOptions.IgnoreCase,
+                            "keyword"
+                        ),
+                        // 内置函数和过程
+                        (
+                            @"\b(?i)(abs|acos|aimag|aint|alog|alog10|amax0|amax1|amin0|amin1|amod|anint|asin|atan|atan2|cabs|ccos|cexp|char|clog|cmplx|conjg|cos|cosh|csin|csqrt|dabs|dacos|dasin|datan|datan2|dble|dcos|dcosh|ddim|dexp|dim|dint|dlog|dlog10|dmax1|dmin1|dmod|dnint|dprod|dsign|dsin|dsinh|dsqrt|dtan|dtanh|exp|float|iabs|ichar|idim|idint|idnint|ifix|index|int|isign|len|lge|lgt|lle|llt|log|log10|max|max0|max1|min|min0|min1|mod|nint|real|sign|sin|sinh|sngl|sqrt|tan|tanh|trim|adjustl|adjustr|all|any|count|maxval|minval|product|sum|matmul|dot_product|pack|unpack|reshape|spread|merge|eoshift|cshift|transpose|lbound|ubound|size|shape|allocated|associated|present|kind|selected_int_kind|selected_real_kind|huge|tiny|epsilon|precision|radix|range|digits|minexponent|maxexponent|fraction|exponent|spacing|rrspacing|scale|set_exponent|nearest|ceiling|floor|modulo|sign|verify|scan|null|transfer|bit_size|btest|iand|ibclr|ibits|ibset|ieor|ior|ishft|ishftc|not|mvbits|random_number|random_seed|system_clock|date_and_time|cpu_time)\b",
+                            RegexOptions.IgnoreCase,
+                            "property"
+                        ),
+                    }
+                },
             };
         }
 
-        private static void CompileAll()
+        private void InitializeAliases()
         {
-            compiledCache.Clear();
-            foreach (var kv in languagePatterns)
+            languageAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                var list = new List<PatternEntry>(kv.Value.Count);
-                foreach (var entry in kv.Value)
-                {
-                    var rx = new Regex(entry.pattern, entry.options | RegexOptions.Compiled | RegexOptions.CultureInvariant);
-                    list.Add(new PatternEntry(rx, entry.style));
-                }
-                compiledCache[kv.Key] = list;
+                { "js", "javascript" },
+                { "c#", "csharp" },
+                { "cs", "csharp" },
+                { "py", "python" },
+                { "m", "matlab" },
+                { "css", "css" },
+                { "htm", "html" },
+                { "R", "r" },
+                { "Fortran", "fortran" },
+                { "f90", "fortran" },
+                { "f95", "fortran" },
+                { "f03", "fortran" },
+                { "f08", "fortran" },
+                { "f77", "fortran" },
+                { "for", "fortran" },
+                { "f", "fortran" }
+            };
+        }
+
+        private int GetActualPosition(string text, int position)
+        {
+            // 计算到指定位置前的换行符数量
+            int newlineCount = text.Substring(0, position).Count(c => c == '\n' || c == '\r');
+            // PowerPoint中每个换行符只算一个字符，而在字符串中\r\n算两个字符
+            int adjustment = text.Substring(0, position).Count(c => c == '\r');
+            return position - adjustment;
+        }
+
+        public void ApplyHighlighting(PowerPoint.Shape textBox, string code, string language)
+        {
+            // Normalize language name
+            string normalizedLanguage = language.ToLower();
+            if (languageAliases.ContainsKey(normalizedLanguage))
+            {
+                normalizedLanguage = languageAliases[normalizedLanguage];
             }
-        }
 
-        private static IReadOnlyList<PatternEntry> GetPatterns(string languageOrAlias)
-        {
-            if (string.IsNullOrWhiteSpace(languageOrAlias)) return Array.Empty<PatternEntry>();
-            string mapped;
-            if (languageAliases.TryGetValue(languageOrAlias.Trim(), out mapped)) languageOrAlias = mapped;
-            List<PatternEntry> list;
-            if (compiledCache.TryGetValue(languageOrAlias.Trim(), out list)) return list;
-            return Array.Empty<PatternEntry>();
-        }
+            if (!languagePatterns.ContainsKey(normalizedLanguage))
+                return;
 
-        // ========= Public API expected by Ribbon1 =========
+            processedRanges.Clear();
+            var patterns = languagePatterns[normalizedLanguage];
 
-        // 1) 直接支持 TextRange
-        public void ApplyHighlighting(PowerPoint.TextRange range, string language)
-        {
-            if (range == null) return;
-            ApplyToTextRange(range, language);
-        }
+            // 收集所有匹配项
+            var allMatches = new List<(Match match, string type, int priority)>();
 
-        // 2) 兜底：任何类型（例如 TextRange2）都会落到这里
-        public void ApplyHighlighting(object range, string language)
-        {
-            if (range == null) return;
-
-            // 优先处理 TextRange
-            var tr = range as PowerPoint.TextRange;
-            if (tr != null) { ApplyToTextRange(tr, language); return; }
-
-            // 兼容 TextRange2（CI 上没有类型定义，所以用反射）
-            try
+            foreach (var (pattern, options, type) in patterns)
             {
-                var type = range.GetType();                         // e.g. TextRange2
-                var textProp = type.GetProperty("Text");
-                var charsIndexer = type.GetProperty("Characters");  // indexer-like property
-                if (textProp == null || charsIndexer == null) return;
+                var regex = new Regex(pattern, options);
+                var matches = regex.Matches(code);
 
-                string text = textProp.GetValue(range, null) as string ?? string.Empty;
-                var pats = GetPatterns(language);
-                foreach (var pe in pats)
+                // 设置优先级：注释最高优先级，然后是字符串
+                int priority = type == "comment" ? 0 : (type == "string" ? 1 : 2);
+
+                foreach (Match match in matches)
                 {
-                    foreach (Match m in pe.Regex.Matches(text))
+                    allMatches.Add((match, type, priority));
+                }
+            }
+
+            // 过滤掉位于字符串内部的注释（!）
+
+            // 先获取所有字符串区间
+            var stringIntervals = allMatches
+                .Where(m => m.type == "string")
+                .Select(m => (start: m.match.Index, end: m.match.Index + m.match.Length))
+                .ToList();
+
+            if (stringIntervals.Count > 0)
+            {
+                allMatches = allMatches
+                    .Where(m => !(m.type == "comment" && stringIntervals.Any(si => m.match.Index >= si.start && m.match.Index < si.end)))
+                    .ToList();
+            }
+
+            // 按优先级排序，优先级数字越小越优先
+            allMatches.Sort((a, b) => a.priority.CompareTo(b.priority));
+
+            // 记录已处理的字符范围
+            var processedIntervals = new List<(int start, int end)>();
+
+            foreach (var (match, type, priority) in allMatches)
+            {
+                try
+                {
+                    int matchStart = match.Index;
+                    int matchEnd = match.Index + match.Length;
+
+                    // 检查是否与已处理的区域重叠
+                    bool hasOverlap = false;
+                    foreach (var (start, end) in processedIntervals)
                     {
-                        try
+                        if (matchStart < end && matchEnd > start)
                         {
-                            // TextRange2.Characters is 1-based, length as second arg
-                            var ch = charsIndexer.GetValue(range, new object[] { m.Index + 1, m.Length });
-
-                            // ch.Font 可能是 TextRange2Font，继续用反射设置 Fill.ForeColor.RGB
-                            var fontProp = ch.GetType().GetProperty("Font");
-                            if (fontProp != null)
-                            {
-                                var fontObj = fontProp.GetValue(ch, null);
-                                // font.Fill.ForeColor.RGB
-                                var fillProp = fontObj.GetType().GetProperty("Fill");
-                                if (fillProp != null)
-                                {
-                                    var fill = fillProp.GetValue(fontObj, null);
-                                    var fcProp = fill.GetType().GetProperty("ForeColor");
-                                    if (fcProp != null)
-                                    {
-                                        var fc = fcProp.GetValue(fill, null);
-                                        var rgbProp = fc.GetType().GetProperty("RGB");
-                                        if (rgbProp != null) rgbProp.SetValue(fc, StyleRgb(pe.Style), null);
-                                    }
-                                }
-                            }
+                            hasOverlap = true;
+                            break;
                         }
-                        catch { /* ignore single failure */ }
                     }
+
+                    if (hasOverlap)
+                        continue;
+
+                    // 计算实际的开始位置和长度
+                    int actualStart = GetActualPosition(code, matchStart);
+                    int actualLength = GetActualPosition(code, matchEnd) - actualStart;
+
+                    var range = textBox.TextFrame.TextRange.Characters(
+                        actualStart + 1,
+                        actualLength
+                    );
+                    range.Font.Color.RGB = ColorTranslator.ToOle(themeColors[type]);
+
+                    // 记录已处理的区间
+                    processedIntervals.Add((matchStart, matchEnd));
                 }
-            }
-            catch { /* ignore */ }
-        }
-
-        // ========== Internal implementations ==========
-
-        private void ApplyToTextRange(PowerPoint.TextRange range, string language)
-        {
-            string text = range.Text ?? string.Empty;
-            var pats = GetPatterns(language);
-            foreach (var pe in pats)
-            {
-                foreach (Match m in pe.Regex.Matches(text))
+                catch (Exception)
                 {
-                    try
-                    {
-                        // TextRange.Characters is 1-based
-                        var ch = range.Characters(m.Index + 1, m.Length);
-                        // TextRange.Font.Color.RGB
-                        ch.Font.Color.RGB = StyleRgb(pe.Style);
-                    }
-                    catch { /* ignore */ }
+                    continue;
                 }
-            }
-        }
-
-        private static int StyleRgb(string style)
-        {
-            switch ((style ?? "").ToLowerInvariant())
-            {
-                case "comment":  return 0x008000; // green
-                case "string":   return 0xAA5500; // brown-orange
-                case "number":   return 0x1A73E8; // blue
-                case "keyword":  return 0xB000B0; // purple
-                case "property": return 0x795548; // brown
-                default:         return 0x000000; // black
             }
         }
     }
